@@ -75,4 +75,4 @@ General information about the langjam is available in the main [langjam README](
 
 ## Social media
 
-If you like, you can tag your social media posts with `#langjam2022` to help others find you3
+If you like, you can tag your social media posts with `#langjam2023` to help others find you.
