@@ -8,9 +8,23 @@ import java.io.File;
 import java.util.List;
 import java.util.Scanner;
 
+import java.util.HashMap;
+
 public class Main {
-    public static void main(String[] args) {
-        System.out.println("Hello world!");
+    public static final HashMap<Flag, String> flags = new HashMap<>();
+
+    public static void main(final String[] args) {
+        Flag currentFlag = null;
+
+        for (final String arg : args) {
+            if (arg.startsWith("--")) {
+                currentFlag = Flag.getFlag(arg.substring(2));
+                flags.put(currentFlag, null);
+            } else if (currentFlag != null && !arg.startsWith("--")) {
+                flags.put(currentFlag, arg);
+                currentFlag = null;
+            }
+        }
 
         StringBuilder source = new StringBuilder();
         File file = new File("examples/test_lex.pling");
