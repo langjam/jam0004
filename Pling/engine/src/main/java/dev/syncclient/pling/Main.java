@@ -26,8 +26,37 @@ public class Main {
             }
         }
 
+        if (flags.containsKey(Flag.HELP)) {
+            System.out.println("Usage: pling [file] [options]");
+            System.out.println("Options:");
+            System.out.println("  --help          Display this help message");
+            System.out.println("  --version       Display the version of Pling");
+            System.out.println("  --debug         Display debug information");
+            System.out.println("  --dddd          Display inner workings of the language");
+            System.out.println();
+            System.out.println("~ Pling Lang by Team Sync");
+            return;
+        }
+
+        if (flags.containsKey(Flag.VERSION)) {
+            System.out.println("Pling Lang v0.0.1");
+            return;
+        }
+
+        if (flags.containsKey(Flag.VERY_DEBUG)) {
+            Flag.veryDebug = true;
+            System.out.println("Internal Workings Debugging Enabled");
+        }
+
+        if (flags.containsKey(Flag.DEBUG)) {
+            Flag.debug = true;
+            System.out.println("Debug Mode Enabled");
+        }
+
+        String fileName = args[0];
+
         StringBuilder source = new StringBuilder();
-        File file = new File("examples/test_lex.pling");
+        File file = new File(fileName);
         if (file.exists()) {
             try {
                 Scanner scanner = new Scanner(file);
@@ -37,17 +66,23 @@ public class Main {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else {
+            System.out.println("File not found!");
+            return;
         }
 
 
         Lexer lexer = new Lexer();
         List<Token.AbstractToken> tokenList = lexer.lex(source.toString());
 
-        System.out.println("=== BEGIN Tokens ===");
-        for (Token.AbstractToken token : tokenList) {
-            System.out.println(StringUtils.ljust(token.getType().toString(), 10) + ": " + token.getValue());
+        if (flags.containsKey(Flag.VERY_DEBUG)) {
+            System.out.println("=== BEGIN Tokens ===");
+            for (Token.AbstractToken token : tokenList) {
+                System.out.println(StringUtils.ljust(token.getType().toString(), 10) + ": " + token.getValue());
+            }
+            System.out.println("=== STOP  Tokens ===");
         }
-        System.out.println("=== STOP  Tokens ===");
+
 
     }
 }

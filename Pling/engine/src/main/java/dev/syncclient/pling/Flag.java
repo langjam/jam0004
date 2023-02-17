@@ -2,6 +2,7 @@ package dev.syncclient.pling;
 
 public enum Flag {
     DEBUG("debug"),
+    VERY_DEBUG("dddd"),
     HELP("help"),
     VERSION("version");
 
@@ -24,4 +25,7 @@ public enum Flag {
 
         return null;
     }
+
+    public static boolean debug = false;
+    public static boolean veryDebug = false;
 }
