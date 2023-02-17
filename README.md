@@ -2,13 +2,12 @@
 
 Welcome to the third langjam!
 
-This jam begins at [9pm UK time](https://everytimezone.com/?t=62d9e880,4b0) on the 22nd of July and runs until [9pm UK time](https://everytimezone.com/?t=62dc8b80,4b0) on the 24th of July.
+This jam begins at [9pm UK time](https://everytimezone.com/?t=63eec380,4ec) on the 17th of Feb and runs until [9pm UK time](https://everytimezone.com/?t=63f01500,a8c) on the 19th of Feb.
 
 ## Theme
 
-The theme of jam is: Beautiful Assembly
+The theme of jam is: **NOT YET ANNOUCED**
 
-Assembly can mean a number of different things. For example, it could mean the most fundamental language a human can write to interact with a computer, the act of building something, or what has been built. Let your imagination run wild.
 
 ## Getting started
 
@@ -60,13 +59,13 @@ You can read through the helpful [hello world from GitHub](https://guides.github
 
 ## Timeline
 
-The langjam begins at [9pm UK time](https://everytimezone.com/?t=62d9e880,4b0) 22nd of July and runs until the 9pm UK time the 24th of July. At 9pm UK time on the 24th of July, we'll end submissions for the jam and begin the optional documentation period. **Make sure you have submitted your PR before this cut-off**.
+The langjam begins at [9pm UK time](https://everytimezone.com/?t=63eec380,4ec) on the 17th of Feb and runs until [9pm UK time](https://everytimezone.com/?t=63f01500,a8c) on the 19th of Feb. At 9pm UK time on the 19th of Feb, we'll end submissions for the jam and begin the optional documentation period. **Make sure you have submitted your PR before this cut-off**.
 
 After the first 48 hours, you have an optional additional 48 hours where you can spend up to 12 total hours working on a website and documentation. You're not required to use this time, but it is there to give you time to rest and write docs.
 
 ## Judging
 
-Judging will take place after the jam has ended. Once judging has concluded, we'll pick a set of winning projects that will become part of a video on the [Systems with JT](https://www.youtube.com/user/giard321) YouTube channel.
+Judging will take place after the jam has ended. Once judging has concluded, we'll pick a set of winning projects.
 
 You're welcome to try out other projects. We'll have a way to leave comments so you can share your thoughts and vote on which you liked best, too.
 
