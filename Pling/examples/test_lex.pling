@@ -3,6 +3,8 @@
 fun helloworld #var1 #var2 [
     print var1, var2;
     print var2;
+
+    ret var1;
 ]
 
 cls helloworldclass [
