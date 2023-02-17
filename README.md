@@ -6,8 +6,9 @@ This jam begins at [9pm UK time](https://everytimezone.com/?t=63eec380,4ec) on t
 
 ## Theme
 
-The theme of jam is: **NOT YET ANNOUCED**
+The theme of jam is: "The sound(ness) of one hand typing"
 
+The theme, like other jams, is meant to be taken figuratively as well, so don't be afraid to get creative with your interpretation.
 
 ## Getting started
 
