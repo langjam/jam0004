@@ -1,6 +1,6 @@
-# Jam #3
+# Jam #4
 
-Welcome to the third langjam!
+Welcome to the fourth langjam!
 
 This jam begins at [9pm UK time](https://everytimezone.com/?t=63eec380,4ec) on the 17th of Feb and runs until [9pm UK time](https://everytimezone.com/?t=63f01500,a8c) on the 19th of Feb.
 
