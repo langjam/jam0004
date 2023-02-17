@@ -1,0 +1,22 @@
+// comment
+
+fun helloworld #var1 #var2 [
+    print var1, var2;
+    print var2;
+]
+
+cls helloworldclass [
+    var var1 = `hello world`;
+    var var2 = `hello world2`;
+
+    fun helloworldfun #var1 #var2 [
+        print var1;
+        print var2;
+    ]
+]
+
+var idkvarhere = helloworldclass;
+
+#helloworld idkvarhere var1 var2;
+
+#idkvarhere.helloworldfun var1 var2;
