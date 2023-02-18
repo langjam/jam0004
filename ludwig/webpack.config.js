@@ -3,7 +3,6 @@ const path = require('path');
 
 module.exports = {
     entry: {
-        editor: "./src/editor.js",
         main: "./src/main.bs.js",
     },
     output: {
