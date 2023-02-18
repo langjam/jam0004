@@ -17,7 +17,7 @@ cls helloworldclass [
     ]
 ]
 
-var idkvarhere = helloworldclass;
+var idkvarhere = #helloworldclass;
 
 #helloworld idkvarhere var1 var2;
 

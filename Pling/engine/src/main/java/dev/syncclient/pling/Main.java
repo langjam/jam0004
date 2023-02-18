@@ -1,5 +1,7 @@
 package dev.syncclient.pling;
 
+import dev.syncclient.pling.audio.ALInfo;
+import dev.syncclient.pling.executor.StateTree;
 import dev.syncclient.pling.lexer.Lexer;
 import dev.syncclient.pling.lexer.Token;
 import dev.syncclient.pling.parser.Parser;
@@ -40,7 +42,8 @@ public class Main {
         }
 
         if (flags.containsKey(Flag.VERSION)) {
-            System.out.println("Pling Lang v0.0.1");
+            System.out.println("Pling Lang v0.0.1, OpenAL: ");
+            ALInfo.showAlInfo();
             return;
         }
 
@@ -84,6 +87,13 @@ public class Main {
             System.out.println("=== STOP  Tokens ===");
         }
 
+        StateTree stateTree = StateTree.getInstance();
+
+        if (flags.containsKey(Flag.VERY_DEBUG)) {
+            System.out.println("=== BEGIN State Tree ===");
+            System.out.println(stateTree.toString());
+            System.out.println("=== STOP  State Tree ===");
+        }
 
         Parser parser = new Parser();
 
