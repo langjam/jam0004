@@ -49,12 +49,21 @@ public class StateTree {
         reloadCurrentNode();
     }
 
-    public StateNode findName(String name) {
-        // TODO: implement
-        return currentNode.children().stream()
+    public void pushVar(String name, Object value) {
+        currentNode.children().add(new VarStateNode(name, "", value));
+    }
+
+    public VarStateNode findVar(String name) {
+        VarStateNode data = (VarStateNode) currentNode.children().stream()
                 .filter(node -> node.name().equals(name))
                 .findFirst()
                 .orElse(null);
+
+        if (data == null) {
+            throw new StateException("Variable " + name + " not found");
+        }
+
+        return data;
     }
 
     public static StateTree getInstance() {

@@ -1,6 +1,8 @@
-// These are the very basics of the language
-
+// Variables are declared with the var keyword
 var a = 1;
-a = 2;
-var b = 3;
-#print a, b;
+
+// ...and redeclared without it
+a = #add a, 2;
+
+// outputs 3
+#print a;
