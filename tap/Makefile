@@ -1,2 +1,2 @@
 run:
-	python lang.py
+	python tap.py
