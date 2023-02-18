@@ -1,0 +1,9 @@
+// If you have ever heard of a function, then you know what this is.
+
+fun test #b [
+    var a = #add 1, b;
+    #print a;
+]
+
+
+#test 1;

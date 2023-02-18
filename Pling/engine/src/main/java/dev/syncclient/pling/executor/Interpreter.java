@@ -34,10 +34,17 @@ public class Interpreter {
             return varSet(varSetNode);
         } else if (node instanceof AbstractSyntaxTree.Literal.VariableNode varNode) {
             return stateTree.findVar(varNode.getName()).getValue();
+        } else if (node instanceof AbstractSyntaxTree.FuncDefNode funcDefNode) {
+            return funcDef(funcDefNode);
         } else {
             throw new RuntimeException("Unknown node: " + node);
         }
 
+        return null;
+    }
+
+    private Object funcDef(AbstractSyntaxTree.FuncDefNode funcDefNode) {
+        stateTree.pushFunc(funcDefNode.getName(), funcDefNode);
         return null;
     }
 

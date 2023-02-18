@@ -54,7 +54,42 @@ public class AbstractSyntaxTree {
         }
     }
 
-    public static class StatementsNode extends Node {
+    public static class StatementsNode extends Node {}
+    public static class FuncDefNode extends Node {
+        private final String name;
+        private final List<Node> args;
+        private final Node body;
+
+        public FuncDefNode (String name, List<Node> args, Node body) {
+            this.name = name;
+            this.args = args;
+            this.body = body;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public List<Node> getArgs() {
+            return args;
+        }
+
+        public Node getBody() {
+            return body;
+        }
+
+        public Object run(List<Object> args) {
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            return "FuncDefNode{" +
+                    "name='" + name + '\'' +
+                    ", args=" + args +
+                    ", body=" + body +
+                    '}';
+        }
     }
 
     public static class Statement {

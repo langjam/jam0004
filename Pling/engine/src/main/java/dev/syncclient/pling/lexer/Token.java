@@ -1,5 +1,8 @@
 package dev.syncclient.pling.lexer;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public enum Token {
     COMMENT, // //Comment - skip
     STRING, // `String` (ignore \escape)
@@ -12,8 +15,7 @@ public enum Token {
     DOT, // .
     END, // ;
     IDENTIFIER, // Identifier
-    ANY, // internal use only
-    EOF; // internal use only
+    ANY, ANY_ANYNUM, EOF, BLOCK; // internal use only
 
     @Override
     public String toString() {
@@ -49,6 +51,30 @@ public enum Token {
         @Override
         public String toString() {
             return getType() + ": " + getValue();
+        }
+    }
+
+    public static class BlockData extends WithData {
+        private final LinkedList<WithData> data;
+
+        public BlockData(LinkedList<WithData> value) {
+            super("");
+            this.data = value;
+        }
+
+        public Token getType() {
+            return Token.BLOCK;
+        }
+
+        public LinkedList<WithData> getData() {
+            return data;
+        }
+
+        @Override
+        public String toString() {
+            return "BlockData{" +
+                    "data=" + data +
+                    '}';
         }
     }
 }

@@ -3,6 +3,8 @@ package dev.syncclient.pling.executor;
 import java.util.List;
 import java.util.Objects;
 
+import static dev.syncclient.pling.executor.StateTree.indent;
+
 public class StateNode {
     private final String name;
     private final String docs;
@@ -55,11 +57,18 @@ public class StateNode {
 
     @Override
     public String toString() {
-        return "StateNode[" +
-                "name=" + name + ", " +
-                "docs=" + docs + ", " +
-                "type=" + type + ", " +
-                "children=" + children + ']';
+        StringBuilder childrenStr = new StringBuilder();
+
+        for (StateNode child : this.children) {
+            childrenStr.append(child.toString()).append("\n");
+        }
+
+        return "StateNode[\n" +
+                "  name=" + name + "\n" +
+                "  docs=" + docs + "\n" +
+                "  type=" + type + "\n" +
+                "  children=[\n" + indent(1, childrenStr.toString()) + "  ]\n" +
+                "]";
     }
 
     public enum Type {

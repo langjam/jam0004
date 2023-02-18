@@ -66,16 +66,32 @@ public class StateTree {
         return data;
     }
 
+    public void pushFunc(String name, AbstractSyntaxTree.FuncDefNode func) {
+        currentNode.children().add(new FunctionStateNode(name, "Function from code", func::run));
+    }
+
     public static StateTree getInstance() {
         return instance;
     }
 
+    public static String indent(int level, String srcWithLineBreaks) {
+        String[] lines = srcWithLineBreaks.split("\r\n|\r|\n");
+
+        StringBuilder sb = new StringBuilder();
+        for (String line : lines) {
+            sb.append("    ".repeat(Math.max(0, level)));
+            sb.append(line).append("\n");
+        }
+
+        return sb.toString();
+    }
+
     @Override
     public String toString() {
-        return "StateTree{" +
-                "root=" + root +
-                ", currentContextPath=" + currentContextPath +
-                ", currentNode=" + currentNode +
+        return "StateTree{\n" +
+                "    root=\n" + indent(2, root.toString()) +
+                "    currentContextPath=" + currentContextPath +
+                "\n    currentNode=" + currentNode.name() + "(" + currentNode.type() + ")\n" +
                 '}';
     }
 

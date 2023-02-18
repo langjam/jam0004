@@ -90,12 +90,6 @@ public class Main {
 
         StateTree stateTree = StateTree.getInstance();
 
-        if (flags.containsKey(Flag.VERY_DEBUG)) {
-            System.out.println("=== BEGIN State Tree ===");
-            System.out.println(stateTree.toString());
-            System.out.println("=== STOP  State Tree ===");
-        }
-
         Parser parser = new Parser();
         AbstractSyntaxTree ast = parser.parse(tokenList);
 
@@ -105,6 +99,18 @@ public class Main {
             System.out.println("=== STOP  AST ===");
         }
 
+        if (flags.containsKey(Flag.VERY_DEBUG)) {
+            System.out.println("=== BEGIN State Tree ===");
+            System.out.println(stateTree.toString());
+            System.out.println("=== STOP  State Tree ===");
+        }
+
         stateTree.execute(ast);
+
+        if (flags.containsKey(Flag.VERY_DEBUG)) {
+            System.out.println("=== BEGIN State Tree AFTER RUN ===");
+            System.out.println(stateTree);
+            System.out.println("=== STOP  State Tree AFTER RUN ===");
+        }
     }
 }
