@@ -7,5 +7,12 @@
     <depends>com.intellij.modules.platform</depends>
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="Pling File" implementationClass="dev.syncclient.pling.PlingFileType" fieldName="INSTANCE" language="Pling" extensions="pling"/>
+        <lang.syntaxHighlighterFactory implementationClass="dev.syncclient.pling.syntax.PlingHighlighterFactory" language="Pling"/>
     </extensions>
+    <actions>
+        <action id="NEW_PLING_FILE" class="dev.syncclient.pling.actions.PlingCreateNewFile"
+                text="Pling" description="Create new Pling file">
+            <add-to-group group-id="NewGroup" anchor="before" relative-to-action="NewFromTemplate"/>
+        </action>
+    </actions>
 </idea-plugin>
