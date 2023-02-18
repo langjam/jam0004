@@ -21,18 +21,21 @@ HEADERS := \
 
 OBJECTS := $(SOURCES:$(SRC_DIRECTORY)/%.c=$(OBJ_DIRECTORY)/%.o)
 
-EXECUTABLE := $(BIN_DIRECTORY)/catch23.out
+EXECUTABLE := $(BIN_DIRECTORY)/catch23
 
 all: $(EXECUTABLE)
 
+run: all
+	$(BIN_DIRECTORY)/catch23
+
 $(EXECUTABLE): $(OBJECTS)
 	@$(CREATE_DIRS)
-	@echo "linking"
+	@echo "LD $@"
 	@$(CC) $(OBJECTS) -o $@ $(LFLAGS)
 
 $(OBJ_DIRECTORY)/%.o: $(SRC_DIRECTORY)/%.c $(HEADERS)
 	@$(CREATE_DIRS)
-	@echo "$@"
+	@echo "CC $@"
 	@$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:
