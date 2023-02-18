@@ -2,6 +2,7 @@ package dev.syncclient.pling;
 
 import dev.syncclient.pling.lexer.Lexer;
 import dev.syncclient.pling.lexer.Token;
+import dev.syncclient.pling.parser.Parser;
 import dev.syncclient.pling.utils.StringUtils;
 
 import java.io.File;
@@ -84,5 +85,10 @@ public class Main {
         }
 
 
+        Parser parser = new Parser();
+
+        System.out.println("=== BEGIN Parse ===");
+        parser.parse(tokenList);
+        System.out.println("=== STOP  Parse ===");
     }
 }

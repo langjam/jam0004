@@ -1,4 +1,4 @@
-# Sync
+# Pling
 
 ```
 fun sine #amplitude #frequency [
