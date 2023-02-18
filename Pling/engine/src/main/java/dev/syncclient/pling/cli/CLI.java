@@ -2,6 +2,8 @@ package dev.syncclient.pling.cli;
 
 import dev.syncclient.pling.Main;
 import dev.syncclient.pling.audio.ALInfo;
+import dev.syncclient.pling.docs.DocsWriter;
+import dev.syncclient.pling.docs.SingleLazyInstanceStaticDocumentationGeneratorService;
 
 import java.util.HashMap;
 
@@ -19,6 +21,11 @@ public class CLI {
                 flags.put(currentFlag, arg);
                 currentFlag = null;
             }
+        }
+
+        if (flags.containsKey(Flag.DOCS)) {
+            DocsWriter.writeDocs(SingleLazyInstanceStaticDocumentationGeneratorService.getInstance());
+            System.exit(0);
         }
 
         if (flags.containsKey(Flag.HELP)) {

@@ -26,7 +26,7 @@ public class PlingDebugger extends Thread {
         public Queue<String> messages = new PriorityQueue<>();
     }
 
-    public PlingDebugger.IPC debuggerIPC = new PlingDebugger.IPC();
+    public PlingDebugger.IPC ipc = new PlingDebugger.IPC();
     int port = -1;
     public StateTree stateTree = StateTree.getInstance();
     public Interpreter interpreter = stateTree.getInterpreter();
@@ -55,8 +55,8 @@ public class PlingDebugger extends Thread {
                 }
             }
 
-            debuggerIPC.port = port;
-            debuggerIPC.threadID = Thread.currentThread().getId();
+            ipc.port = port;
+            ipc.threadID = Thread.currentThread().getId();
 
             System.out.println("Started debug socket, address: '127.0.0.1:" + port + "', transport: 'socket'");
 
@@ -111,27 +111,27 @@ public class PlingDebugger extends Thread {
                                         StateTree st = StateTree.getInstance();
                                         st.fetchAllVariables().forEach((variable) -> shell.println("  " + variable.name() + " = " + variable.getValue()));
                                     }
-                                    case "run" -> debuggerIPC.run.release();
+                                    case "run" -> ipc.run.release();
                                     case "kill" -> System.exit(255);
                                     case "tokens" -> {
                                         shell.println("Tokens:");
 
-                                        for (Token.WithData token : debuggerIPC.tokens) {
+                                        for (Token.WithData token : ipc.tokens) {
                                             shell.println(StringUtils.ljust(token.getType().toString(), 10) + ": " + token.getValue());
                                         }
                                     }
                                     case "ast" -> {
                                         shell.println("Abstract Syntax Tree:");
-                                        debuggerIPC.ast.getRoot().print(0, (str) -> shell.print(str.replace("\n", "\r\n")));
+                                        ipc.ast.getRoot().print(0, (str) -> shell.print(str.replace("\n", "\r\n")));
                                     }
                                     case "msg" -> {
                                         shell.println("Compiler messages:");
 
-                                        for (String message : debuggerIPC.messages) {
+                                        for (String message : ipc.messages) {
                                             shell.println("  - " + message);
                                         }
 
-                                        debuggerIPC.messages.clear();
+                                        ipc.messages.clear();
                                     }
                                 }
 
