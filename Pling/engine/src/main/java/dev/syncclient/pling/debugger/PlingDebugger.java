@@ -120,7 +120,7 @@ public class PlingDebugger extends Thread {
                                     }
                                     case "ast" -> {
                                         shell.println("Abstract Syntax Tree:");
-                                        debuggerIPC.ast.getRoot().print(0, shell::print);
+                                        debuggerIPC.ast.getRoot().print(0, (str) -> shell.print(str.replace("\n", "\r\n")));
                                     }
                                     case "msg" -> {
                                         shell.println("Compiler messages:");
