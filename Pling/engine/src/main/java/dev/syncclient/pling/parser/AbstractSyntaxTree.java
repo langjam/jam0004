@@ -100,11 +100,11 @@ public class AbstractSyntaxTree {
             // Check for a return value
             if (st.hasLocalVar("__return")) {
                 Object ret = st.findVar("__return").getValue();
-                st.popContext();
+                st.popAndDestroy();
                 return ret;
             }
 
-            st.popContext();
+            st.popAndDestroy();
 
             return null;
         }
@@ -332,6 +332,25 @@ public class AbstractSyntaxTree {
         public String toString() {
             return "ReturnNode{" +
                     "value=" + value +
+                    '}';
+        }
+    }
+
+    public static class UseNode extends Node {
+        private final String name;
+
+        public UseNode(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            return "UseNode{" +
+                    "name='" + name + '\'' +
                     '}';
         }
     }

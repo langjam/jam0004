@@ -64,8 +64,6 @@ public class Lexer {
                 tokens.add(Token.CLOSE.createToken(next() + ""));
             } else if (c == ',') {
                 tokens.add(Token.COMMA.createToken(next() + ""));
-            } else if (c == '.') {
-                tokens.add(Token.DOT.createToken(next() + ""));
             } else if (c == ';') {
                 tokens.add(Token.END.createToken(next() + ""));
             } else if (c == '`') {
@@ -84,7 +82,7 @@ public class Lexer {
             } else if (Character.isDigit(c)) {
                 tokens.add(Token.NUMBER.createToken(tryEat(Character::isDigit)));
             } else if (Character.isAlphabetic(c)) {
-                tokens.add(Token.IDENTIFIER.createToken(tryEat((character) -> Character.isAlphabetic(character) || Character.isDigit(character))));
+                tokens.add(Token.IDENTIFIER.createToken(tryEat((character) -> Character.isAlphabetic(character) || Character.isDigit(character) || character == '.')));
             } else {
                 throw new LexicalException("Unexpected character: " + c);
             }

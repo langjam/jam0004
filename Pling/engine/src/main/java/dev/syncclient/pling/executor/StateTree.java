@@ -154,13 +154,13 @@ public class StateTree {
         path.addAll(currentContextPath);
 
         while (current != null) {
-            FunctionStateNode func = (FunctionStateNode) current.children().stream()
+            StateNode func = current.children().stream()
                     .filter(node -> node.name().equals(name))
                     .findFirst()
                     .orElse(null);
 
-            if (func != null) {
-                return func;
+            if (func instanceof FunctionStateNode) {
+                return (FunctionStateNode) func;
             }
 
             if (path.isEmpty()) {

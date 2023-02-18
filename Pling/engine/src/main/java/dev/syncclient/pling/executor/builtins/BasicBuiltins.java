@@ -59,5 +59,39 @@ public class BasicBuiltins implements Builtin {
 
             return ((Number) args.get(0)).doubleValue() / ((Number) args.get(1)).doubleValue();
         }));
+
+        root.children().add(new FunctionStateNode("gt", "Returns true if the first argument is greater than the second", (args) -> {
+            if (args.size() != 2)
+                throw new IllegalArgumentException("gt takes exactly 2 arguments");
+
+            if (!(args.get(0) instanceof Number) || !(args.get(1) instanceof Number))
+                throw new IllegalArgumentException("gt takes exactly 2 numbers");
+
+            return ((Number) args.get(0)).doubleValue() > ((Number) args.get(1)).doubleValue();
+        }));
+
+        root.children().add(new FunctionStateNode("lt", "Returns true if the first argument is less than the second", (args) -> {
+            if (args.size() != 2)
+                throw new IllegalArgumentException("lt takes exactly 2 arguments");
+
+            if (!(args.get(0) instanceof Number) || !(args.get(1) instanceof Number))
+                throw new IllegalArgumentException("lt takes exactly 2 numbers");
+
+            return ((Number) args.get(0)).doubleValue() < ((Number) args.get(1)).doubleValue();
+        }));
+
+        root.children().add(new FunctionStateNode("eq", "Returns true if the first argument is equal to the second", (args) -> {
+            if (args.size() != 2)
+                throw new IllegalArgumentException("eq takes exactly 2 arguments");
+
+            return args.get(0).equals(args.get(1));
+        }));
+
+        root.children().add(new FunctionStateNode("neq", "Returns true if the first argument is not equal to the second", (args) -> {
+            if (args.size() != 2)
+                throw new IllegalArgumentException("neq takes exactly 2 arguments");
+
+            return !args.get(0).equals(args.get(1));
+        }));
     }
 }

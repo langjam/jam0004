@@ -1,7 +1,6 @@
 package dev.syncclient.pling.lexer;
 
 import java.util.LinkedList;
-import java.util.List;
 
 public enum Token {
     COMMENT, // //Comment - skip
@@ -12,7 +11,6 @@ public enum Token {
     OPEN, // [
     CLOSE, // ]
     COMMA, // ,
-    DOT, // .
     END, // ;
     IDENTIFIER, // Identifier
     ANY, ANY_ANYNUM, EOF, BLOCK; // internal use only

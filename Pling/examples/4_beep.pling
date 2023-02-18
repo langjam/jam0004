@@ -1,0 +1,6 @@
+// Turn your volume down!
+
+use audio;
+
+#audio.begin;
+#audio.play `sample-1.ogg`;
