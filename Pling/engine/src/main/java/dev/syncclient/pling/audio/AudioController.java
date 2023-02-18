@@ -29,7 +29,8 @@ public class AudioController implements Builtin {
 
     @Override
     public void load(StateNode root) {
-        root.children().add(new FunctionStateNode("init", "Initializes the audio system", this::init));
+        root.children().add(new FunctionStateNode("audio.begin", "Initializes the audio system", this::init));
+        root.children().add(new FunctionStateNode("audio.initted", "Returns true if the audio system is initialized", this::isInitialized));
     }
 
     private Object init(List<Object> objects) {
@@ -44,8 +45,12 @@ public class AudioController implements Builtin {
             throw new IllegalStateException("Failed to create an OpenAL context.");
         }
 
-        alcSetThreadContext(device);
+        alcSetThreadContext(context);
         AL.createCapabilities(deviceCaps);
         return null;
+    }
+
+    private Object isInitialized(List<Object> objects) {
+        return (device != NULL && context != NULL) ? 1 : 0;
     }
 }
