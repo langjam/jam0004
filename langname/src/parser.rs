@@ -81,7 +81,7 @@ pub type Variable = usize;
 #[derive(Debug)]
 pub struct Context<'a> {
     pub input: &'a str,
-    pub names: Vec<&'a str>,
+    pub names: Vec<String>,
 }
 
 impl<'a> Context<'a> {
@@ -91,31 +91,32 @@ impl<'a> Context<'a> {
             names: vec![],
         }
     }
-}
 
-fn make_name<'a>(name: &'a str, context: &mut Context<'a>) -> usize {
-    if let Some(i) = context.names.iter().position(|n| n == &name) {
-        i
-    } else {
-        let i = context.names.len();
-        context.names.push(name);
-        i
+    fn add_name(&mut self, name: &'a str) -> usize {
+        // Every name we see goes through here.
+        if let Some(i) = self.names.iter().position(|n| n == &name) {
+            i
+        } else {
+            let i = self.names.len();
+            self.names.push(name.into());
+            i
+        }
     }
-}
 
-fn make_name_lower<'a>(name: &'a str, context: &mut Context<'a>) -> Result<usize> {
-    if name.chars().all(|c| c.is_ascii_lowercase()) {
-        Ok(make_name(name, context))
-    } else {
-        Err(SyntaxError::new("expected an uppercase name").with_span(name, context))
+    fn add_name_lower(&mut self, name: &'a str) -> Result<usize> {
+        if name.chars().all(|c| c.is_ascii_lowercase()) {
+            Ok(self.add_name(name))
+        } else {
+            Err(SyntaxError::new("expected an uppercase name").with_span(name, self))
+        }
     }
-}
 
-fn make_name_upper<'a>(name: &'a str, context: &mut Context<'a>) -> Result<usize> {
-    if name.chars().all(|c| c.is_ascii_uppercase()) {
-        Ok(make_name(name, context))
-    } else {
-        Err(SyntaxError::new("expected a lowercase name").with_span(name, context))
+    fn add_name_upper(&mut self, name: &'a str) -> Result<usize> {
+        if name.chars().all(|c| c.is_ascii_uppercase()) {
+            Ok(self.add_name(name))
+        } else {
+            Err(SyntaxError::new("expected a lowercase name").with_span(name, self))
+        }
     }
 }
 
@@ -141,7 +142,7 @@ fn parse_fact<'a>(input: &'a str, context: &mut Context<'a>) -> Result<Fact> {
         .split_once("(")
         .ok_or(SyntaxError::new("this fact is missing it's `(`").with_span(input, context))?;
 
-    let relation = make_name_lower(r.trim(), context)?;
+    let relation = context.add_name_lower(r.trim())?;
 
     let cs = cs.trim();
 
@@ -153,7 +154,7 @@ fn parse_fact<'a>(input: &'a str, context: &mut Context<'a>) -> Result<Fact> {
 
     let constants: Result<Vec<_>> = cs[..cs.len() - 1]
         .split(",")
-        .map(|c| make_name_lower(c.trim(), context))
+        .map(|c| context.add_name_lower(c.trim()))
         .collect();
 
     Ok(Fact(relation, constants?))
@@ -164,24 +165,16 @@ fn parse_rule<'a>(input: &'a str, context: &mut Context<'a>) -> Result<Rule> {
 
     let head = parse_atom(atom.trim(), context)?;
 
-    let mut atoms = atoms.trim();
-    let mut buf = vec![];
-    while let Some(i) = atoms.find(")") {
-        buf.push(parse_atom(&atoms[0..i + 1].trim(), context)?);
-        atoms = &atoms[i + 1..].trim();
-        if atoms.starts_with(",") {
-            atoms = &atoms[1..].trim();
-        }
-    }
+    let mut atoms = parse_atom_list(atoms.trim(), context)?;
 
-    Ok(Rule(head, buf))
+    Ok(Rule(head, atoms))
 }
 
 fn parse_term<'a>(input: &'a str, context: &mut Context<'a>) -> Result<Term> {
     if input.chars().all(|c| c.is_ascii_lowercase()) {
-        Ok(Term::Const(make_name(input, context)))
+        Ok(Term::Const(context.add_name(input)))
     } else {
-        Ok(Term::Var(make_name_upper(input, context)?))
+        Ok(Term::Var(context.add_name_upper(input)?))
     }
 }
 
@@ -190,7 +183,7 @@ fn parse_atom<'a>(input: &'a str, context: &mut Context<'a>) -> Result<Atom> {
         .split_once("(")
         .ok_or(SyntaxError::new("this atom missing it's `(`").with_span(input, context))?;
 
-    let relation = make_name_lower(r.trim(), context)?;
+    let relation = context.add_name_lower(r.trim())?;
 
     let terms = terms.trim();
 
@@ -204,6 +197,30 @@ fn parse_atom<'a>(input: &'a str, context: &mut Context<'a>) -> Result<Atom> {
         .collect();
 
     Ok(Atom(relation, terms?))
+}
+
+fn parse_atom_list<'a>(input: &'a str, context: &mut Context<'a>) -> Result<Vec<Atom>> {
+    let mut atoms = input.trim();
+    let mut buf = vec![];
+
+    while let Some(i) = atoms.find(")") {
+        buf.push(parse_atom(&atoms[0..i + 1].trim(), context)?);
+        atoms = &atoms[i + 1..].trim();
+        if atoms.starts_with(",") {
+            atoms = &atoms[1..].trim();
+        }
+    }
+
+    Ok(buf)
+}
+
+// Things like `parent(xerces, X), parent(xerces, Y)`
+#[derive(Debug, Clone, PartialEq)]
+pub struct Query(Vec<Atom>);
+
+pub fn parse_query<'a>(input: &'a str, context: &mut Context<'a>) -> Result<Query> {
+    let atoms = parse_atom_list(input, context)?;
+    Ok(Query(atoms))
 }
 
 #[cfg(test)]
