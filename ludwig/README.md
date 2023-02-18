@@ -1,5 +1,21 @@
-# The Ludwig Programming Language
+# ReScript Project Template
 
-## Rationale
+The only official ReScript starter template.
 
-(TODO)
+## Installation
+
+```sh
+npm install
+```
+
+## Build
+
+- Build: `npm run res:build`
+- Clean: `npm run res:clean`
+- Build & watch: `npm run res:dev`
+
+## Run
+
+```sh
+node src/Demo.bs.js
+```
