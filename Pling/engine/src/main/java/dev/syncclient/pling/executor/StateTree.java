@@ -84,10 +84,11 @@ public class StateTree {
     }
 
     public void popAndDestroy() {
-        String name = currentContextPath.peek();
+        // clear the current context
+        currentNode.children().clear();
+
         currentContextPath.pop();
         reloadCurrentNode();
-        currentNode.children().removeIf(node -> node.name().equals(name));
     }
 
     public void pushVar(String name, Object value) {
@@ -104,16 +105,29 @@ public class StateTree {
     }
 
     public VarStateNode findVar(String name) {
-        VarStateNode data = (VarStateNode) currentNode.children().stream()
-                .filter(node -> node.name().equals(name))
-                .findFirst()
-                .orElse(null);
+        StateNode current = currentNode;
+        Stack<String> path = new Stack<>();
+        path.addAll(currentContextPath);
 
-        if (data == null) {
-            throw new StateException("Variable " + name + " not found");
+        while (current != null) {
+            StateNode func = current.children().stream()
+                    .filter(node -> node.name().equals(name))
+                    .findFirst()
+                    .orElse(null);
+
+            if (func instanceof VarStateNode) {
+                return (VarStateNode) func;
+            }
+
+            if (path.isEmpty()) {
+                break;
+            }
+
+            path.pop();
+            current = nodeForPath(path);
         }
 
-        return data;
+        throw new StateException("Variable " + name + " not found");
     }
 
     public void pushFunc(String name, AbstractSyntaxTree.FuncDefNode func) {

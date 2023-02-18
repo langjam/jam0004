@@ -5,29 +5,22 @@ import dev.syncclient.pling.executor.FunctionStateNode;
 import dev.syncclient.pling.executor.StateNode;
 
 
-import org.lwjgl.*;
 import org.lwjgl.openal.*;
-import org.lwjgl.stb.*;
 
 import java.nio.*;
 import java.util.*;
 
-import static java.lang.Math.*;
-import static org.lwjgl.openal.AL10.*;
 import static org.lwjgl.openal.ALC10.*;
 import static org.lwjgl.openal.EXTThreadLocalContext.*;
-import static org.lwjgl.openal.SOFTHRTF.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 import java.util.List;
 
 public class AudioController implements Builtin {
-    protected static final int SAMPLE_RATE = 16 * 1024;
     private final HashMap<Double, Sound> sounds = new HashMap<>();
     private double nextHandle = 0;
     private long device;
     private long context;
-    private ALCCapabilities deviceCaps;
 
     @Override
     public void load(StateNode root) {
@@ -58,6 +51,20 @@ public class AudioController implements Builtin {
                 "#audio.tostring [handle] -> [info]",
                 this::showHandle
         ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.sine",
+                "Generate a sine wave",
+                "#audio.sine [handle] [frequency] [volume]",
+                this::sineWave
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.stop",
+                "Stops the sound",
+                "#audio.stop [handle]",
+                this::stop
+        ));
     }
 
     @Override
@@ -71,7 +78,7 @@ public class AudioController implements Builtin {
             throw new IllegalStateException("Failed to open the default device.");
         }
 
-        deviceCaps = ALC.createCapabilities(device);
+        ALCCapabilities deviceCaps = ALC.createCapabilities(device);
         context = alcCreateContext(device, (IntBuffer) null);
         if (context == NULL) {
             throw new IllegalStateException("Failed to create an OpenAL context.");
@@ -102,6 +109,38 @@ public class AudioController implements Builtin {
         }
 
         return sounds.get(handle).toString();
+    }
+
+    private Object sineWave(List<Object> objects) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = (Double) objects.get(0);
+        float freq = ((Double) objects.get(1)).floatValue();
+        float volume = ((Double) objects.get(2)).floatValue();
+
+        if (!sounds.containsKey(handle)) {
+            throw new IllegalStateException("Invalid handle");
+        }
+
+        sounds.get(handle).sineWave(freq, volume);
+        return null;
+    }
+
+    private Object stop(List<Object> objects) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = (Double) objects.get(0);
+
+        if (!sounds.containsKey(handle)) {
+            throw new IllegalStateException("Invalid handle");
+        }
+
+        sounds.get(handle).stop();
+        return null;
     }
 
     private Object isInitialized(List<Object> objects) {

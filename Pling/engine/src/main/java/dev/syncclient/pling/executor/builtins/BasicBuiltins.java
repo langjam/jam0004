@@ -20,6 +20,17 @@ public class BasicBuiltins implements Builtin {
             return null;
         }));
 
+        root.children().add(new FunctionStateNode("printnf", "Prints a string to the console without a newline at the end", "#printnf <...any>", (args) -> {
+            for (Object arg : args) {
+                System.out.print(arg);
+
+                if (arg != args.get(args.size() - 1))
+                    System.out.print(" ");
+            }
+
+            return null;
+        }));
+
         root.children().add(new FunctionStateNode("add", "Adds two numbers", "#add [num1] [num2] -> [result]", (args) -> {
             if (args.size() != 2)
                 throw new IllegalArgumentException("add takes exactly 2 arguments");
@@ -92,6 +103,23 @@ public class BasicBuiltins implements Builtin {
                 throw new IllegalArgumentException("neq takes exactly 2 arguments");
 
             return !args.get(0).equals(args.get(1));
+        }));
+
+
+        root.children().add(new FunctionStateNode("sleep", "Sleeps for a specified amount of time", "#sleep [time]", (args) -> {
+            if (args.size() != 1)
+                throw new IllegalArgumentException("sleep takes exactly 1 argument");
+
+            if (!(args.get(0) instanceof Number))
+                throw new IllegalArgumentException("sleep takes exactly 1 number");
+
+            try {
+                Thread.sleep(((Number) args.get(0)).longValue());
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            return null;
         }));
     }
 

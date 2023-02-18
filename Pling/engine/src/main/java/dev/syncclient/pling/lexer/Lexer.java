@@ -80,9 +80,9 @@ public class Lexer {
                     throw new LexicalException("Unexpected character: " + c);
                 }
             } else if (Character.isDigit(c)) {
-                tokens.add(Token.NUMBER.createToken(tryEat(Character::isDigit)));
+                tokens.add(Token.NUMBER.createToken(tryEat((character) -> Character.isDigit(character) || character == '.')));
             } else if (Character.isAlphabetic(c)) {
-                tokens.add(Token.IDENTIFIER.createToken(tryEat((character) -> Character.isAlphabetic(character) || Character.isDigit(character) || character == '.')));
+                tokens.add(Token.IDENTIFIER.createToken(tryEat((character) -> Character.isAlphabetic(character) || Character.isDigit(character) || character == '.' || character == '_')));
             } else {
                 throw new LexicalException("Unexpected character: " + c);
             }
