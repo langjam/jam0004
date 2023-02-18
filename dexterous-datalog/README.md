@@ -1,4 +1,6 @@
-# Lang Name
+# Dexterous Datalog
+
+A datalog implementation with no sinister secrets.
 
 ## Build and Install
 
