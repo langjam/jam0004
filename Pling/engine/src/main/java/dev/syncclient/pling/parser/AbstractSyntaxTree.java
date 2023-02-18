@@ -119,6 +119,39 @@ public class AbstractSyntaxTree {
         }
     }
 
+    public static class BranchNode extends Node {
+        private final Node condition;
+        private final Node body;
+        private final BranchNode subordiante;
+
+        public BranchNode(Node condition, Node body, BranchNode subordiante) {
+            this.condition = condition;
+            this.body = body;
+            this.subordiante = subordiante;
+        }
+
+        public Node getCondition() {
+            return condition;
+        }
+
+        public Node getBody() {
+            return body;
+        }
+
+        public BranchNode getSubordiante() {
+            return subordiante;
+        }
+
+        @Override
+        public String toString() {
+            return "BranchNode{" +
+                    "condition=" + condition +
+                    ", body=" + body +
+                    ", subordiante=" + subordiante +
+                    '}';
+        }
+    }
+
     public static class Statement {
         public static class VarDefNode extends Node {
             private final String name;

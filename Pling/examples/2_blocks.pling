@@ -1,10 +1,15 @@
 // If you have ever heard of a function, then you know what this is.
 
-fun test #a [
-    #print a;
+//fun test #a [
+//    #print a;
+//]
+
+if 0 [
+    #print 1;
+] eif 0 [
+    #print 2;
+] else [
+    #print 3;
 ]
 
-
-#test 2;
-
-var a = 2;
+//#test 2;

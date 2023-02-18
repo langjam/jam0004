@@ -70,6 +70,12 @@ public enum Token {
             return data;
         }
 
+        public BlockData withoutFirst() {
+            LinkedList<WithData> newData = new LinkedList<>(data);
+            newData.removeFirst();
+            return new BlockData(newData);
+        }
+
         @Override
         public String toString() {
             return "BlockData{" +

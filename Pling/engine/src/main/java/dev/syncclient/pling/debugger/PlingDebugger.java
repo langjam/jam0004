@@ -10,6 +10,8 @@ import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.concurrent.Semaphore;
 
 public class PlingDebugger extends Thread {
@@ -20,10 +22,18 @@ public class PlingDebugger extends Thread {
 
         public AbstractSyntaxTree ast = null;
         public List<Token.WithData> tokens = null;
+        public Queue<String> messages = new PriorityQueue<>();
     }
 
     public PlingDebugger.IPC debuggerIPC = new PlingDebugger.IPC();
     int port = -1;
+
+    public static PlingDebugger instance = null;
+
+    public PlingDebugger() {
+        super("Pling Debugger");
+        instance = this;
+    }
 
     @Override
     public void run() {
@@ -82,6 +92,7 @@ public class PlingDebugger extends Thread {
                                         shell.println("  tree    Display the state tree");
                                         shell.println("  tokens  Display the tokens");
                                         shell.println("  ast     Display the abstract syntax tree");
+                                        shell.println("  msg     Display compiler messages");
                                     }
                                     case "info" -> {
                                         shell.println("Interpreter information:");
@@ -107,10 +118,18 @@ public class PlingDebugger extends Thread {
                                             shell.println(StringUtils.ljust(token.getType().toString(), 10) + ": " + token.getValue());
                                         }
                                     }
-
                                     case "ast" -> {
                                         shell.println("Abstract Syntax Tree:");
                                         debuggerIPC.ast.getRoot().print(0, shell::print);
+                                    }
+                                    case "msg" -> {
+                                        shell.println("Compiler messages:");
+
+                                        for (String message : debuggerIPC.messages) {
+                                            shell.println("  - " + message);
+                                        }
+
+                                        debuggerIPC.messages.clear();
                                     }
                                 }
 

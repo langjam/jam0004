@@ -36,8 +36,40 @@ public class Interpreter {
             return stateTree.findVar(varNode.getName()).getValue();
         } else if (node instanceof AbstractSyntaxTree.FuncDefNode funcDefNode) {
             return funcDef(funcDefNode);
+        } else if (node instanceof AbstractSyntaxTree.BranchNode branch) {
+            return execBranch(branch);
         } else {
             throw new RuntimeException("Unknown node: " + node);
+        }
+
+        return null;
+    }
+
+    private Object execBranch(AbstractSyntaxTree.BranchNode branch) {
+        Object conditionResult = null;
+
+        if (branch.getCondition() != null)
+            conditionResult = exec(branch.getCondition());
+
+        boolean condition;
+        if (conditionResult == null) {
+            condition = true;
+        } else if (conditionResult instanceof Boolean) {
+            condition = (Boolean) conditionResult;
+        } else if (conditionResult instanceof Double) {
+            condition = (Double) conditionResult != 0;
+        } else if (conditionResult instanceof String) {
+            condition = !((String) conditionResult).isEmpty();
+        } else {
+            throw new InterpreterException("Unknown condition type: " + conditionResult.getClass());
+        }
+
+        if (condition) {
+            return exec(branch.getBody());
+        } else {
+            if (branch.getSubordiante() != null) {
+                return exec(branch.getSubordiante());
+            }
         }
 
         return null;

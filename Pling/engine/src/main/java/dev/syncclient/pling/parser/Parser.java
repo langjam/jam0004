@@ -1,10 +1,13 @@
 package dev.syncclient.pling.parser;
 
 import dev.syncclient.pling.Flag;
+import dev.syncclient.pling.debugger.PlingDebugger;
 import dev.syncclient.pling.lexer.Token;
 
+import java.security.Key;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 public class Parser {
     private LinkedList<Token.WithData> tokens;
@@ -86,7 +89,18 @@ public class Parser {
 
                 Token.WithData blockToken = new Token.BlockData(blockTokens);
                 currentStmt.add(blockToken);
-                token = Token.END.createToken(";");
+
+
+                if (
+                        tokens.isEmpty()
+                                || tokens.peek().getType() != Token.IDENTIFIER
+                                || !Objects.requireNonNull(tokens.peek()).getValue().equals(Keywords.ELSE.getKw())
+                                && !Objects.requireNonNull(tokens.peek()).getValue().equals(Keywords.ELSEIF.getKw())
+                ) {
+                    token = Token.END.createToken(";");
+                } else if (Flag.debug) {
+                    PlingDebugger.instance.debuggerIPC.messages.add("Skipped adding end token due to else of elseif token");
+                }
             }
 
             if (token.getType() == Token.END) {
@@ -120,6 +134,9 @@ public class Parser {
             } else if (first.getValue().equals(Keywords.FUNCDEF.getKw())) {
                 // This is a function definition
                 return funcdef(currentStmt);
+            } else if (first.getValue().equals(Keywords.IF.getKw())) {
+                // This is an if statement
+                return ifstmt(currentStmt);
             } else if (currentStmt.size() > 2 && currentStmt.get(1).getType() == Token.ASSIGN) {
                 // This is a variable set
                 return varset(currentStmt);
@@ -137,6 +154,51 @@ public class Parser {
             return callAny(currentStmt);
         } else {
             throw new ParserException("Unexpected token: " + first);
+        }
+    }
+
+    private AbstractSyntaxTree.BranchNode ifstmt(LinkedList<Token.WithData> currentStmt) {
+        // Check Format
+        checkFormat(currentStmt, Token.IDENTIFIER, Token.ANY_ANYNUM, Token.BLOCK);
+
+        currentStmt.pop(); // Remove "if"
+        currentStmt.removeIf(token -> token.getType() == Token.OPEN || token.getType() == Token.CLOSE); // Remove open and close tokens
+
+        LinkedList<Token.WithData> condition = new LinkedList<>();
+        // Parse until we find the block
+        while (true) {
+            if (currentStmt.isEmpty()) {
+                throw new ParserException("Unexpected end of statement");
+            }
+
+            if (currentStmt.peek().getType() == Token.BLOCK) break;
+            condition.add(currentStmt.pop());
+        }
+
+        LinkedList<Token.WithData> block = ((Token.BlockData) currentStmt.pop()).getData();
+        block.pop(); // Remove the open token
+
+        if (currentStmt.isEmpty()) {
+            // This is just an if statement
+            return new AbstractSyntaxTree.BranchNode(stmt(condition), stmts(block), null);
+        } else {
+            Token.WithData next = currentStmt.pop();
+            if (next.getType() == Token.IDENTIFIER && next.getValue().equals(Keywords.ELSE.getKw())) {
+                // This is an if-else statement
+                return new AbstractSyntaxTree.BranchNode(stmt(condition), stmts(block),
+                        new AbstractSyntaxTree.BranchNode(
+                                null,
+                                stmts(((Token.BlockData) currentStmt.pop()).withoutFirst().getData()),
+                                null
+                        )
+                );
+            } else if (next.getType() == Token.IDENTIFIER && next.getValue().equals(Keywords.ELSEIF.getKw())) {
+                // This is an if-elseif-else statement
+                currentStmt.addFirst(Token.IDENTIFIER.createToken(Keywords.IF.getKw()));
+                return new AbstractSyntaxTree.BranchNode(stmt(condition), stmts(block), ifstmt(currentStmt));
+            } else {
+                throw new ParserException("Unexpected token: " + next);
+            }
         }
     }
 
@@ -163,7 +225,7 @@ public class Parser {
 
         LinkedList<Token.WithData> block = ((Token.BlockData) token).getData();
 
-        return new AbstractSyntaxTree.FuncDefNode(funcName, args, stmts(new LinkedList<>(block.subList(1, block.size() ))));
+        return new AbstractSyntaxTree.FuncDefNode(funcName, args, stmts(new LinkedList<>(block.subList(1, block.size()))));
     }
 
     private AbstractSyntaxTree.Node vardef(LinkedList<Token.WithData> currentStmt) {
@@ -213,7 +275,11 @@ public class Parser {
 
     public enum Keywords {
         VARDEF("var"),
-        FUNCDEF("fun");
+        FUNCDEF("fun"),
+        IF("if"),
+        ELSE("else"),
+        ELSEIF("eif"),
+        ;
 
         private final String kw;
 
