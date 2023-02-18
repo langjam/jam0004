@@ -4,6 +4,8 @@ import dev.syncclient.pling.executor.builtins.BasicBuiltins;
 import dev.syncclient.pling.parser.AbstractSyntaxTree;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Stack;
 
 public class StateTree {
@@ -42,6 +44,11 @@ public class StateTree {
 
     private StateNode nodeForPath(Stack<String> path) {
         StateNode node = root;
+
+        if (path.isEmpty()) {
+            return node;
+        }
+
         for (String context : path) {
             assert node != null;
             node = node.children().stream()
@@ -164,5 +171,34 @@ public class StateTree {
 
     public boolean hasLocalVar(String var) {
         return currentNode.children().stream().anyMatch(node -> node.name().equals(var));
+    }
+
+    public LinkedList<VarStateNode> locals(StateNode source) {
+        LinkedList<VarStateNode> vars = new LinkedList<>();
+        for (StateNode node : source.children()) {
+            if (node instanceof VarStateNode) {
+                vars.add((VarStateNode) node);
+            }
+        }
+        return vars;
+    }
+
+    public LinkedList<VarStateNode> fetchAllVariables() {
+        LinkedList<VarStateNode> vars = new LinkedList<>();
+        Stack<String> stack = new Stack<>();
+        stack.addAll(currentContextPath);
+
+        do {
+            StateNode node = nodeForPath(stack);
+            vars.addAll(locals(node));
+
+            if (stack.isEmpty()) {
+                break;
+            }
+
+            stack.pop();
+        } while (!stack.isEmpty());
+
+        return vars;
     }
 }

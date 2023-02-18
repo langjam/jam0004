@@ -57,8 +57,6 @@ public class Main {
 
         if (flags.containsKey(Flag.DEBUG)) {
             Flag.debug = true;
-            System.out.println("Debug Mode Enabled");
-
             debugger.start();
         }
 
@@ -92,6 +90,8 @@ public class Main {
             System.out.println("=== STOP  Tokens ===");
         }
 
+        debugger.debuggerIPC.tokens = tokenList;
+
         StateTree stateTree = StateTree.getInstance();
 
         Parser parser = new Parser();
@@ -100,7 +100,7 @@ public class Main {
 
         if (flags.containsKey(Flag.VERY_DEBUG)) {
             System.out.println("=== BEGIN AST ===");
-            ast.getRoot().print(0);
+            ast.getRoot().print(0, System.out::print);
             System.out.println("=== STOP  AST ===");
         }
 
@@ -108,6 +108,12 @@ public class Main {
             System.out.println("=== BEGIN State Tree ===");
             System.out.println(stateTree.toString());
             System.out.println("=== STOP  State Tree ===");
+        }
+
+        if (Flag.debug) {
+            try {
+                debugger.debuggerIPC.run.acquire();
+            } catch (InterruptedException e) { e.printStackTrace(); }
         }
 
         stateTree.execute(ast);

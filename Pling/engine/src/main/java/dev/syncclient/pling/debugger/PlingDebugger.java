@@ -1,19 +1,25 @@
 package dev.syncclient.pling.debugger;
 
 import dev.syncclient.pling.executor.StateTree;
+import dev.syncclient.pling.lexer.Token;
 import dev.syncclient.pling.parser.AbstractSyntaxTree;
+import dev.syncclient.pling.utils.StringUtils;
 
 import java.io.*;
 import java.net.BindException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
+import java.util.concurrent.Semaphore;
 
 public class PlingDebugger extends Thread {
     public static class IPC {
         long threadID = -1;
         int port = -1;
+        public Semaphore run = new Semaphore(0);
 
         public AbstractSyntaxTree ast = null;
+        public List<Token.WithData> tokens = null;
     }
 
     public PlingDebugger.IPC debuggerIPC = new PlingDebugger.IPC();
@@ -40,11 +46,13 @@ public class PlingDebugger extends Thread {
             debuggerIPC.port = port;
             debuggerIPC.threadID = Thread.currentThread().getId();
 
-            System.out.println("Connected to interpreter, address: '127.0.0.1:" + port + "', transport: 'socket'");
+            System.out.println("Started debug socket, address: '127.0.0.1:" + port + "', transport: 'socket'");
 
             while (true) {
                 Socket s = socket.accept();
                 new Thread(() -> {
+                    System.out.println("Debugger connected, address: '" + s.getInetAddress().getHostAddress() + ":" + s.getPort() + "'");
+
                     try {
                         OutputStream output = s.getOutputStream();
                         PrintStream shell = new PrintStream(output);
@@ -58,28 +66,19 @@ public class PlingDebugger extends Thread {
                                 switch (line.split(" ")[0]) {
                                     case "exit" -> {
                                         shell.println("Exiting debugger...");
-                                        System.exit(255);
+                                        s.close();
+                                        return;
                                     }
-                                    case "clear", "cls" -> {
-                                        shell.print("\033[H\033[2J");
-                                    }
+                                    case "clear", "cls" -> shell.print("\033[H\033[2J");
                                     case "help", "h" -> {
                                         shell.println("Available commands:");
                                         shell.println("  run     Run the program");
-                                        shell.println("  stop    Stop the program");
-                                        shell.println("  pause   Pause the program");
-                                        shell.println("  resume  Resume the program");
                                         shell.println("  kill    Kill the program");
-                                        shell.println("  restart Restart the program");
-                                        shell.println("  reload  Reload the program");
-                                        shell.println("  reset   Reset the program");
-                                        shell.println("  quit    Quit the program");
                                         shell.println("  exit    Exit the debugger");
                                         shell.println("  clear   Clear the screen");
                                         shell.println("  help    Display this help message");
                                         shell.println("  info    Display information about the interpreter");
                                         shell.println("  vars    Display all variables");
-                                        shell.println("  stack   Display the stack");
                                         shell.println("  tree    Display the state tree");
                                         shell.println("  tokens  Display the tokens");
                                         shell.println("  ast     Display the abstract syntax tree");
@@ -93,9 +92,25 @@ public class PlingDebugger extends Thread {
                                     }
                                     case "tree" -> shell.println(StateTree.getInstance().toString().replace("\n", "\r\n"));
                                     case "vars" -> {
-                                        shell.println("Variables{\r\n" +
-                                                "    root=\r\n" + StateTree.indent(2, debuggerIPC.ast.getRoot().getChildren().toString()) +
-                                                '}');
+                                        // Get all variables
+                                        shell.println("Variables:");
+
+                                        StateTree st = StateTree.getInstance();
+                                        st.fetchAllVariables().forEach((variable) -> shell.println("  " + variable.name() + " = " + variable.getValue()));
+                                    }
+                                    case "run" -> debuggerIPC.run.release();
+                                    case "kill" -> System.exit(255);
+                                    case "tokens" -> {
+                                        shell.println("Tokens:");
+
+                                        for (Token.WithData token : debuggerIPC.tokens) {
+                                            shell.println(StringUtils.ljust(token.getType().toString(), 10) + ": " + token.getValue());
+                                        }
+                                    }
+
+                                    case "ast" -> {
+                                        shell.println("Abstract Syntax Tree:");
+                                        debuggerIPC.ast.getRoot().print(0, shell::print);
                                     }
                                 }
 

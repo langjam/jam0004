@@ -6,3 +6,5 @@ fun test #a [
 
 
 #test 2;
+
+var a = 2;

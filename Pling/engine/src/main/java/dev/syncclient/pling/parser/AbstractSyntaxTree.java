@@ -4,6 +4,7 @@ import dev.syncclient.pling.executor.StateTree;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class AbstractSyntaxTree {
 
@@ -40,13 +41,14 @@ public class AbstractSyntaxTree {
             this.children.addAll(children);
         }
 
-        public void print(int indent) {
+        public void print(int indent, Consumer<String> func) {
             for (int i = 0; i < indent; i++) {
-                System.out.print(" ");
+                func.accept(" ");
             }
-            System.out.println(this);
+            func.accept(this.toString());
+            func.accept("\n");
             for (Node child : children) {
-                child.print(indent + 2);
+                child.print(indent + 2, func);
             }
         }
 
