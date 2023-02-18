@@ -1,11 +1,12 @@
 [package]
-name = "langname"
+name = "dexterous-datalog"
 description = "An entry for langjam/jam0004"
 authors = ["isaac azuelos <isaac@azuelos.ca>"]
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+chumsky = "0.9.0"
 datafrog = "2.0.1"
 miette = { version = "5.5.0", features = ["fancy"] }
 rustyline = "10.1.1"
