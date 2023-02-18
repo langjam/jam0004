@@ -19,12 +19,15 @@ Just like in a modal editor in tap you enter modes to do certain things.
 
 
 ## Thumb
-### Thumb Hard
-Thumb hard is used to define variables
+The thumb is used to interact with variables
 
-```
-thumb hard:
-	"variable"
-```
+## Index
+Index is used to print and retrieve data from user
 
-This piece of code initializes a variable named variable
+## Middle
+Middle finger is used to indicate error (as a middle finger to the programmer the louder the tap the worse the error is)
+middle soft is equal to info
+middle medium is equal to warning
+middle hard is equal to error
+
+## Ring
