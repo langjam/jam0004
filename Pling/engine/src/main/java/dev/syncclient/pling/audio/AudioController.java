@@ -33,7 +33,7 @@ public class AudioController implements Builtin {
         root.children().add(new FunctionStateNode("audio.initted", "Returns true if the audio system is initialized", this::isInitialized));
     }
 
-    private Object init(List<Object> objects) {
+    public Object init(List<Object> objects) {
         device = alcOpenDevice((ByteBuffer) null);
         if (device == NULL) {
             throw new IllegalStateException("Failed to open the default device.");
@@ -46,6 +46,7 @@ public class AudioController implements Builtin {
         }
 
         alcSetThreadContext(context);
+        ALC10.alcMakeContextCurrent(context);
         AL.createCapabilities(deviceCaps);
         return null;
     }
