@@ -223,4 +223,12 @@ public class StateTree {
 
         modules.get(name).load(currentNode);
     }
+
+    public StateNode getNode() {
+        return currentNode;
+    }
+
+    public HashMap<String, Builtin> getModules() {
+        return modules;
+    }
 }

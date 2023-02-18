@@ -31,10 +31,38 @@ public class AudioController implements Builtin {
 
     @Override
     public void load(StateNode root) {
-        root.children().add(new FunctionStateNode("audio.begin", "Initializes the audio system", this::init));
-        root.children().add(new FunctionStateNode("audio.initted", "Returns true if the audio system is initialized", this::isInitialized));
-        root.children().add(new FunctionStateNode("audio.new", "Creates a new sound handle", this::createSound));
-        root.children().add(new FunctionStateNode("audio.tostring", "Get printable information about this handle", this::showHandle));
+        root.children().add(new FunctionStateNode(
+                "audio.begin",
+                "Initializes the audio system",
+                "#audio.begin",
+                this::init
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.initted",
+                "Returns 1 if the audio system is initialized",
+                "#audio.initted -> [result]",
+                this::isInitialized
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.new",
+                "Creates a new sound handle (number)",
+                "#audio.new -> [handle]",
+                this::createSound
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.tostring",
+                "Get printable information about this handle",
+                "#audio.tostring [handle] -> [info]",
+                this::showHandle
+        ));
+    }
+
+    @Override
+    public String description() {
+        return "This module provides access to the audio output system. Import it with `use audio;`";
     }
 
     public Object init(List<Object> objects) {
