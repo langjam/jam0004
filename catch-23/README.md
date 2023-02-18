@@ -132,6 +132,7 @@ A Never, written as `::`, is a loop that is never executed. However, if it is be
 ## Functions
 Functions use don't use inverted brackets.
 Functions have the same two-character name limit as variables.
+Return, for returning values and which is written as `=>`, breaks from functions.
 `fn : <return type> (<args>) { *\ code here \* }`
 ```
 mn : ? (as : #[])
