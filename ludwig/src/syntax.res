@@ -21,13 +21,17 @@ type note =
 
 type rec expr =
   // x
-  | Var(string, Unique.t)
+  // The associated unique is Some iff the variable has been associated with a let binding or lambda at runtime
+  | Var(string, option<Unique.t>)
   // \x. e
   | Lambda(string, expr)
+  // These can only be created during evaluation. 
+  // Lambda expressions always evaluate to closures
+  | Closure(env, string, expr)
   // let x in e
-  | Let(string, Unique.t, expr)
-  // e1 = e2
-  | Unify(expr, expr)
+  | Let(string, expr)
+  // e1 = e2 in e
+  | Unify(expr, expr, expr)
   // e1 e2
   | App(expr, expr)
   // e1 | e2
@@ -44,3 +48,17 @@ type rec expr =
   | Note(note)
   // n8 e
   | Duration(duration, expr)
+
+// This needs to be defined here thanks to closures :/
+and env = {
+  // Variable values can change independent of their scope. This hashmap captures the
+  // values stored inside variable identites.
+  // We need to keep a list of scopes since each branch of a choice should get its own (mutable!)
+  // scope.
+  variableValueScopes: list<Belt.HashMap.t<Unique.t, expr, Unique.Hashable.identity>>,
+  
+  // This maps variables to their identities, making it possible to look up the value stored in variableValues.
+  // Unlike variableValues, this is an *immutable* map which respects lexical scope
+  variableIdentities: Belt.Map.String.t<Unique.t>,
+}
+

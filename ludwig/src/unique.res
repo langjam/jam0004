@@ -3,11 +3,24 @@ type t = int
 let last = ref(0)
 
 let fresh = () => {
-  let unique = !last
-  last := !last + 1
+  let unique = last.contents
+  last := last.contents + 1
   unique
 }
 
-let compare = Int.compare
+let compare = compare
 
-let display = Int.toString
+let eq = (x, y) => x == y
+
+let display = Belt.Int.toString
+
+module Comparable = Belt.Id.MakeComparable({
+  type t = t
+  let cmp = compare
+})
+
+module Hashable = Belt.Id.MakeHashable({
+  type t = t
+  let eq = eq
+  let hash = x => x
+})
