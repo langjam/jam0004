@@ -11,15 +11,15 @@ typedef enum {
     // operators
     INT_ADD,
     INT_MINUS,
-    INT_MULT,
-    INT_DIV,
-    INT_MOD,
-    INT_BOR, // bitwise or
-    INT_BAND, // bitwise and
-    INT_RSHIFT,
-    INT_LSHIFT,
-    INT_COMP, // complement 1
-    INT_NEG,
+    INT_MULT,   // integer multiplication
+    INT_DIV,    // integer division
+    INT_MOD,    // modulo
+    INT_BOR,    // bitwise or
+    INT_BAND,   // bitwise and
+    INT_RSHIFT, // right shift
+    INT_LSHIFT, // left shift
+    INT_COMP,   // complement 1
+    INT_NEG,    // integer unary minus
     INT_LOWER,
     INT_GREATER,
     INT_EQUAL,
@@ -28,9 +28,9 @@ typedef enum {
     CAST_INT,
     FLOAT_ADD,
     FLOAT_MINUS,
-    FLOAT_MULT,
-    FLOAT_DIV,
-    FLOAT_NEG,
+    FLOAT_MULT,  // float multiplication
+    FLOAT_DIV,   // float division
+    FLOAT_NEG,   // float unary minus
     FLOAT_LOWER,
     FLOAT_GREATER,
     FLOAT_EQUAL,
@@ -71,4 +71,42 @@ typedef enum {
     DOT
 }
 token_type;
+
+typedef struct {
+    
+    token_type type;
+    
+    union {
+        
+        int i32_value;
+        long i64_value;
+        float f32_value;
+        double f64_value;
+        
+        struct {
+          
+            int i32_length;
+            int i32_values[];
+        };
+        
+        struct {
+          
+            float f32_length;
+            float f32_values[];
+        };
+        
+        struct {
+          
+            long i64_length;
+            long i64_values[];
+        };
+        
+        struct {
+          
+            double f64_length;
+            double f64_values[];
+        };
+    };
+}
+token;
 #endif
