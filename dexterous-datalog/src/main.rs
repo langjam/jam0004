@@ -11,24 +11,27 @@ mod parser;
 
 use data_set::DataSet;
 use error::Error;
-use parser::{program, repl};
+use parser::{program, repl, Repl};
 
 fn main() -> Result<()> {
     let args: Vec<_> = std::env::args().collect();
 
-    if args.len() != 2 {
-        return Err(miette!("expected exactly one argument for input file"));
+    if args.len() >= 3 {
+        return Err(miette!("expected zero or one argument for input file"));
     }
 
-    let filename = &args[1];
-    let input = fs::read_to_string(filename).into_diagnostic()?;
+    let mut data = DataSet::default();
 
-    let _program = program().parse(input.as_str()).map_err(|errors| {
-        Report::from(Error::from(errors)).with_source_code(NamedSource::new(&filename, input))
-    })?;
+    if args.len() == 2 {
+        let filename = &args[1];
+        let input = fs::read_to_string(filename).into_diagnostic()?;
 
-    let mut _data = DataSet::default();
-    // add program to data here
+        let program = program().parse(input.as_str()).map_err(|errors| {
+            Report::from(Error::from(errors)).with_source_code(NamedSource::new(&filename, input))
+        })?;
+
+        data.add_program(&program)?;
+    }
 
     let mut rl = Editor::<()>::new().into_diagnostic()?;
     let mut line_count = 1;
@@ -39,7 +42,7 @@ fn main() -> Result<()> {
 
         match line {
             Ok(line) => {
-                if let Err(error) = repl_step(&line) {
+                if let Err(error) = repl_step(&line, &mut data) {
                     if line == "quit" || line == "exit" {
                         println!("hint: use control-d to leave");
                     }
@@ -73,14 +76,15 @@ fn main() -> Result<()> {
     }
 }
 
-fn repl_step(input: &str) -> Result<(), Error> {
+fn repl_step(input: &str, data: &mut DataSet) -> Result<(), Error> {
     let syntax = repl()
         .parse(input)
         .map_err(|errors| (Error::from(errors)))?;
 
-    println!("{:#?}", syntax);
-
-    Ok(())
+    match syntax {
+        Repl::Program(p) => data.add_program(&p),
+        Repl::Query(q) => data.run_query(&q),
+    }
 }
 
 pub fn is_sinister(c: char) -> bool {

@@ -18,19 +18,19 @@ pub enum Repl {
 
 // Things like `parent(padme, luke).`
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Fact(Relation, Vec<Constant>);
+pub struct Fact(pub Relation, pub Vec<Constant>);
 
 // ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Rule(Atom, Vec<Atom>);
+pub struct Rule(pub Atom, pub Vec<Atom>);
 
 // ancestor(X, Y)
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Atom(Relation, Vec<Term>);
+pub struct Atom(pub Relation, pub Vec<Term>);
 
 // Things like `?- father(X, luke)`
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Query(Vec<Atom>);
+pub struct Query(pub Vec<Atom>);
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Term {
@@ -39,13 +39,13 @@ pub enum Term {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Relation(String);
+pub struct Relation(pub String);
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Constant(String);
+pub struct Constant(pub String);
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Variable(String);
+pub struct Variable(pub String);
 
 pub fn repl() -> impl Parser<char, Repl, Error = Simple<char>> {
     program()
