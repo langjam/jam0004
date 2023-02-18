@@ -1,6 +1,7 @@
 package dev.syncclient.pling;
 
 import dev.syncclient.pling.audio.ALInfo;
+import dev.syncclient.pling.debugger.PlingDebugger;
 import dev.syncclient.pling.executor.StateTree;
 import dev.syncclient.pling.lexer.Lexer;
 import dev.syncclient.pling.lexer.Token;
@@ -16,6 +17,7 @@ import java.util.HashMap;
 
 public class Main {
     public static final HashMap<Flag, String> flags = new HashMap<>();
+    public static final PlingDebugger debugger = new PlingDebugger();
 
     public static void main(final String[] args) {
         Flag currentFlag = null;
@@ -56,6 +58,8 @@ public class Main {
         if (flags.containsKey(Flag.DEBUG)) {
             Flag.debug = true;
             System.out.println("Debug Mode Enabled");
+
+            debugger.start();
         }
 
         String fileName = args[0];
@@ -92,6 +96,7 @@ public class Main {
 
         Parser parser = new Parser();
         AbstractSyntaxTree ast = parser.parse(tokenList);
+        debugger.debuggerIPC.ast = ast;
 
         if (flags.containsKey(Flag.VERY_DEBUG)) {
             System.out.println("=== BEGIN AST ===");
