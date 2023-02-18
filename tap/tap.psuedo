@@ -1,0 +1,54 @@
+// Variables are availabel everywhere in the function and sub functions
+// | default:None means that the default value is None and that that value is not mandetory to give
+
+Enum TokenType:
+	INT
+	FLOAT
+	STR
+	ADD
+
+struct Token:
+	type: TokenType
+	value: Any | default:None
+
+func tokenizer(program):
+	cursor = -1
+	line_number = 0
+
+	tokens = []
+	
+	while cursor < len(program):
+		if program[cursor].isdigit():
+			tokens.append(tokenizer.create_number())
+		elif program[cursor] == "+":
+			tokens.append(Token(TokenType.ADD))
+			// Repeat for minus, multiply, divide, lparen and rparen
+
+	return tokens
+
+
+	func create_number():
+		number_str = ""
+		dot_found = False
+
+		while True:
+			if program[cursor] == ".":
+				match dot_found:
+					case True:
+						return InvalidCharacterError
+					case False:
+						dot_found = True
+						number_str += "."
+			elif program[cursor].isdigit():
+				number_str += program[cursor]
+			elif program[cursor] == " \t":
+				break
+			else:
+				return InvalidCharacterError
+
+			cursor += 1
+
+		if dot_found:
+			return Token(TokenType.FLOAT, float(number_str))
+
+		return Token(TokenType.INT, int(number_str))
