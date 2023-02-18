@@ -2,5 +2,9 @@
 
 use audio;
 
+#print #audio.initted;
 #audio.begin;
-#audio.play `sample-1.ogg`;
+
+#print #audio.initted;
+
+// #audio.play `sample-1.ogg`;

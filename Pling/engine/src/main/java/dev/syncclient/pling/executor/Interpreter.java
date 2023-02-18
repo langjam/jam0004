@@ -44,10 +44,17 @@ public class Interpreter {
             return execForLoop(forLoop);
         } else if (node instanceof AbstractSyntaxTree.ReturnNode returnNode) {
             return execReturn(returnNode);
-
+        } else if (node instanceof AbstractSyntaxTree.UseNode useNode) {
+            return execUse(useNode);
         } else {
             throw new RuntimeException("Unknown node: " + node);
         }
+
+        return null;
+    }
+
+    private Object execUse(AbstractSyntaxTree.UseNode useNode) {
+        stateTree.include(useNode.getName());
 
         return null;
     }

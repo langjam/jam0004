@@ -1,11 +1,12 @@
 package dev.syncclient.pling.executor;
 
+import dev.syncclient.pling.audio.AudioController;
 import dev.syncclient.pling.executor.builtins.BasicBuiltins;
 import dev.syncclient.pling.parser.AbstractSyntaxTree;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Stack;
 
 public class StateTree {
@@ -18,12 +19,16 @@ public class StateTree {
             new ArrayList<>()
     );
 
+    private final HashMap<String, Builtin> modules = new HashMap<>();
+
     private final Stack<String> currentContextPath = new Stack<>();
     private StateNode currentNode = root;
     private Interpreter interpreter;
 
     private StateTree() {
         new BasicBuiltins().load(root);
+
+        modules.put("audio", new AudioController());
     }
 
     private void reloadCurrentNode() {
@@ -209,5 +214,21 @@ public class StateTree {
         } while (!stack.isEmpty());
 
         return vars;
+    }
+
+    public void include(String name) {
+        if (!modules.containsKey(name)) {
+            throw new StateException("Module " + name + " not found");
+        }
+
+        modules.get(name).load(currentNode);
+    }
+
+    public StateNode getNode() {
+        return currentNode;
+    }
+
+    public HashMap<String, Builtin> getModules() {
+        return modules;
     }
 }

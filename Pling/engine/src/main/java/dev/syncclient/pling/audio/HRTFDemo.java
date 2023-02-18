@@ -45,7 +45,6 @@ public final class HRTFDemo {
 
         alcSetThreadContext(context);
         AL.createCapabilities(deviceCaps);
-
         String soundname;
         String hrtfname;
 

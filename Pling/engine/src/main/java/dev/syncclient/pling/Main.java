@@ -3,6 +3,8 @@ package dev.syncclient.pling;
 import dev.syncclient.pling.cli.CLI;
 import dev.syncclient.pling.cli.Flag;
 import dev.syncclient.pling.debugger.PlingDebugger;
+import dev.syncclient.pling.docs.DocsWriter;
+import dev.syncclient.pling.docs.SingleLazyInstanceStaticDocumentationGeneratorService;
 import dev.syncclient.pling.executor.StateTree;
 import dev.syncclient.pling.lexer.Lexer;
 import dev.syncclient.pling.lexer.Token;
@@ -18,6 +20,11 @@ public class Main {
 
     public static void main(final String[] args) {
         CLI.handle(args);
+
+        if (CLI.flags.containsKey(Flag.DOCS)) {
+            DocsWriter.writeDocs(SingleLazyInstanceStaticDocumentationGeneratorService.getInstance());
+            System.exit(0);
+        }
 
         StringBuilder source = new StringBuilder();
         File file = new File(args[0]);
