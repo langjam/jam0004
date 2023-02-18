@@ -29,7 +29,7 @@ $db[7.235436345665]
 $sr[100, 150, 154, 154, 157, 40, 127, 157, 162, 154, 144]
 $bo[!(!)]
 ```
-There is one exception here and it is that variables can't be directly assigned a value of 1. Instead, one must use the bitwise complement operator ~ to invert a 0.
+There is one exception here and it is that variables can't be directly assigned a value of 1. Instead, one must use the bitwise complement operator ~ to invert a 0.
 In the case of a boolean, the only way to obtain a true is to invert a false by inverting the result with the not operator using the invertion notation of !(\<boolean expression\>) as shown above.
 
 ## Comments
