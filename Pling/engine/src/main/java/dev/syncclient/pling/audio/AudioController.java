@@ -23,6 +23,8 @@ import java.util.List;
 
 public class AudioController implements Builtin {
     protected static final int SAMPLE_RATE = 16 * 1024;
+    private final HashMap<Double, Sound> sounds = new HashMap<>();
+    private double nextHandle = 0;
     private long device;
     private long context;
     private ALCCapabilities deviceCaps;
@@ -31,6 +33,8 @@ public class AudioController implements Builtin {
     public void load(StateNode root) {
         root.children().add(new FunctionStateNode("audio.begin", "Initializes the audio system", this::init));
         root.children().add(new FunctionStateNode("audio.initted", "Returns true if the audio system is initialized", this::isInitialized));
+        root.children().add(new FunctionStateNode("audio.new", "Creates a new sound handle", this::createSound));
+        root.children().add(new FunctionStateNode("audio.tostring", "Get printable information about this handle", this::showHandle));
     }
 
     private Object init(List<Object> objects) {
@@ -48,6 +52,27 @@ public class AudioController implements Builtin {
         alcSetThreadContext(context);
         AL.createCapabilities(deviceCaps);
         return null;
+    }
+
+    private Object createSound(List<Object> objects) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = nextHandle++;
+        sounds.put(handle, new Sound());
+
+        return handle;
+    }
+
+    private Object showHandle(List<Object> objects) {
+        Double handle = (Double) objects.get(0);
+
+        if (!sounds.containsKey(handle)) {
+            throw new IllegalStateException("Invalid handle");
+        }
+
+        return sounds.get(handle).toString();
     }
 
     private Object isInitialized(List<Object> objects) {
