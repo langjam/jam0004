@@ -17,7 +17,7 @@ public class Interpreter {
         exec(ast.getRoot());
     }
 
-    private Object exec(AbstractSyntaxTree.Node node) {
+    public Object exec(AbstractSyntaxTree.Node node) {
         if (node instanceof AbstractSyntaxTree.StatementsNode) {
             for (AbstractSyntaxTree.Node child : node.getChildren()) {
                 exec(child);
@@ -55,7 +55,11 @@ public class Interpreter {
             args.add(exec(arg));
         }
 
-        return stateTree.findFunc(callNode.getName()).getFunction().apply(args);
+        try {
+            return stateTree.findFunc(callNode.getName()).getFunction().apply(args);
+        } catch (NullPointerException e) {
+            throw new RuntimeException("Function " + callNode.getName() + " not found in current scope");
+        }
     }
 
 

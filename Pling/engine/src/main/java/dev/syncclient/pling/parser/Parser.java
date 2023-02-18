@@ -88,6 +88,7 @@ public class Parser {
                 currentStmt.add(blockToken);
                 token = Token.END.createToken(";");
             }
+
             if (token.getType() == Token.END) {
                 AbstractSyntaxTree.Node node = stmt(currentStmt);
                 if (node != null) {
@@ -162,7 +163,7 @@ public class Parser {
 
         LinkedList<Token.WithData> block = ((Token.BlockData) token).getData();
 
-        return new AbstractSyntaxTree.FuncDefNode(funcName, args, stmts(new LinkedList<>(block.subList(1, block.size() - 1))));
+        return new AbstractSyntaxTree.FuncDefNode(funcName, args, stmts(new LinkedList<>(block.subList(1, block.size() ))));
     }
 
     private AbstractSyntaxTree.Node vardef(LinkedList<Token.WithData> currentStmt) {

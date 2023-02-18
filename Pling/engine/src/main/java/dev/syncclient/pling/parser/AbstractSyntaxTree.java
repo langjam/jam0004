@@ -1,5 +1,7 @@
 package dev.syncclient.pling.parser;
 
+import dev.syncclient.pling.executor.StateTree;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,6 +81,29 @@ public class AbstractSyntaxTree {
         }
 
         public Object run(List<Object> args) {
+            StateTree st = StateTree.getInstance();
+
+            if (!st.contextExists(getName())) {
+                st.createContextForFunc(getName());
+            }
+
+            st.pushContext(getName());
+
+            for (int i = 0; i < getArgs().size(); i++) {
+                st.pushVar(((Literal.VariableNode) getArgs().get(i)).getName(), args.get(i));
+            }
+
+            st.getInterpreter().exec(getBody());
+
+            // Check for a return value
+            if (st.hasLocalVar("__return")) {
+                Object ret = st.findVar("__return").getValue();
+                st.popContext();
+                return ret;
+            }
+
+            st.popContext();
+
             return null;
         }
 
