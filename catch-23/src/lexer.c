@@ -20,9 +20,9 @@ char* scan(const char* source_code) {
         
         if (result) 
             fread(result, 1, size, file);
-        
-        fclose(file);
     }
+    
+    fclose(file);
     
     return result;
 }
