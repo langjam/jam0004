@@ -178,6 +178,39 @@ public class AbstractSyntaxTree {
         }
     }
 
+    public static class ForLoopNode extends Node {
+        private final Node condition;
+        private final Node action;
+        private final Node body;
+
+        public ForLoopNode(Node condition, Node action, Node body) {
+            this.action = action;
+            this.condition = condition;
+            this.body = body;
+        }
+
+        public Node getCondition() {
+            return condition;
+        }
+
+        public Node getAction() {
+            return action;
+        }
+
+        public Node getBody() {
+            return body;
+        }
+
+        @Override
+        public String toString() {
+            return "ForLoopNode{" +
+                    "condition=" + condition +
+                    "action=" + action +
+                    ", body=" + body +
+                    '}';
+        }
+    }
+
     public static class Statement {
         public static class VarDefNode extends Node {
             private final String name;

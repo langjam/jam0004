@@ -142,6 +142,8 @@ public class Parser {
                 return returnstmt(currentStmt);
             } else if (first.getValue().equals(Keywords.USE.getKw())) {
                 return usestmt(currentStmt);
+            } else if (first.getValue().equals(Keywords.FOR.getKw())) {
+                return forstmt(currentStmt);
             } else if (currentStmt.size() > 2 && currentStmt.get(1).getType() == Token.ASSIGN) {
                 // This is a variable set
                 return varset(currentStmt);
@@ -199,6 +201,46 @@ public class Parser {
             throw new ParserException("Unexpected token: " + currentStmt.peek());
         }
     }
+
+    private AbstractSyntaxTree.Node forstmt(LinkedList<Token.WithData> currentStmt) {
+
+        checkFormat(currentStmt, Token.IDENTIFIER, Token.ANY_ANYNUM, Token.BLOCK);
+
+        currentStmt.pop(); // Remove "for"
+
+        LinkedList<Token.WithData> condition = new LinkedList<>();
+
+        while (true) {
+            if (currentStmt.isEmpty()) {
+                throw new ParserException("Unexpected end of statement");
+            }
+
+            if (currentStmt.peek().getType() == Token.REFERENCE) break;
+            condition.add(currentStmt.pop());
+        }
+
+        LinkedList<Token.WithData> action = new LinkedList<>();
+        // Parse until we find the block
+        while (true) {
+            if (currentStmt.isEmpty()) {
+                throw new ParserException("Unexpected end of statement");
+            }
+
+            if (currentStmt.peek().getType() == Token.BLOCK) break;
+            action.add(currentStmt.pop());
+        }
+
+        LinkedList<Token.WithData> block = ((Token.BlockData) currentStmt.pop()).getData();
+        block.pop(); // Remove the open token
+
+        if (currentStmt.isEmpty()) {
+            // This is a valid while statement
+            return new AbstractSyntaxTree.ForLoopNode(stmt(condition), stmt(action), stmts(block));
+        } else {
+            throw new ParserException("Unexpected token: " + currentStmt.peek());
+        }
+    }
+
 
     private AbstractSyntaxTree.BranchNode ifstmt(LinkedList<Token.WithData> currentStmt) {
         // Check Format
@@ -324,8 +366,9 @@ public class Parser {
         ELSEIF("eif"),
         WHILE("while"),
         RETURN("ret"),
-        USE("use")
-        ;
+        USE("use"),
+        FOR("for");
+
 
         private final String kw;
 

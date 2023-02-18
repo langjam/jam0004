@@ -40,9 +40,11 @@ public class Interpreter {
             return execBranch(branch);
         } else if (node instanceof AbstractSyntaxTree.LoopNode loop) {
             return execLoop(loop);
+        } else if (node instanceof AbstractSyntaxTree.ForLoopNode forLoop) {
+            return execForLoop(forLoop);
         } else if (node instanceof AbstractSyntaxTree.ReturnNode returnNode) {
             return execReturn(returnNode);
-            
+
         } else {
             throw new RuntimeException("Unknown node: " + node);
         }
@@ -55,7 +57,7 @@ public class Interpreter {
             return null;
         }
 
-        Object val =  exec(returnNode.getValue());
+        Object val = exec(returnNode.getValue());
         stateTree.pushReturn(val);
 
         return val;
@@ -69,7 +71,7 @@ public class Interpreter {
         } else if (conditionResult instanceof Double) {
             return (Double) conditionResult != 0;
         } else if (conditionResult instanceof String) {
-            return  !((String) conditionResult).isEmpty();
+            return !((String) conditionResult).isEmpty();
         } else {
             throw new InterpreterException("Unknown condition type: " + conditionResult.getClass());
         }
@@ -100,10 +102,36 @@ public class Interpreter {
         if (loop.getCondition() != null)
             conditionResult = exec(loop.getCondition());
 
+
         boolean condition = evalCondition(conditionResult);
 
         while (condition) {
             exec(loop.getBody());
+
+            if (loop.getCondition() != null)
+                conditionResult = exec(loop.getCondition());
+            condition = evalCondition(conditionResult);
+        }
+
+        return null;
+    }
+
+    private Object execForLoop(AbstractSyntaxTree.ForLoopNode loop) {
+        Object conditionResult = exec(loop.getCondition());
+
+        String conditionName = ((AbstractSyntaxTree.Literal.VariableNode) loop.getCondition()).getName();
+
+        // executes the action
+        Object result = exec(loop.getAction());
+        stateTree.findVar(conditionName).setValue(result);
+
+        boolean condition = evalCondition(conditionResult);
+
+        while (condition) {
+            exec(loop.getBody());
+
+            result = exec(loop.getAction());
+            stateTree.findVar(conditionName).setValue(result);
 
             if (loop.getCondition() != null)
                 conditionResult = exec(loop.getCondition());
