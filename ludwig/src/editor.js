@@ -7,13 +7,22 @@ const registerInterpreter = interpreter => {
     textArea.addEventListener('input', () => interpreter(textArea.value), false)
 }
 
+const runButton = document.createElement("button")
+runButton.textContent = "RUN"
+document.body.appendChild(runButton)
+const registerRunClick = cont => {
+    runButton.addEventListener("click", () => cont())
+}
+
 // Create the note display
 const noteDisplay = document.createElement('p')
 document.body.appendChild(noteDisplay)
 
 const displayNote = msg => noteDisplay.textContent = msg
 
+
 module.exports = {
     registerInterpreter,
-    displayNote
+    displayNote,
+    registerRunClick
 }

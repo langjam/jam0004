@@ -23,7 +23,7 @@ type rec expr =
   // x
   // The associated unique is Some iff the variable has been associated with a let binding or lambda at runtime
   | Var(string, option<Unique.t>)
-  // \x. e
+  // \x -> e
   | Lambda(string, expr)
   // These can only be created during evaluation. 
   // Lambda expressions always evaluate to closures

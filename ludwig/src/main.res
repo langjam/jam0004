@@ -1,3 +1,23 @@
-@module("./editor") external getEditorContent: unit => string = "getEditorContent"
+@module("./editor") external registerInterpreter : (string => unit) => unit = "registerInterpreter"
+@module("./editor") external registerRunClick : (unit => unit) => unit = "registerRunClick"
+@module("./editor") external displayNote : string => unit = "displayNote"
 
-Js.log(getEditorContent())
+let editorText = ref("")
+
+registerInterpreter(text => editorText := text)
+
+registerRunClick(() => {
+    let text = editorText.contents
+
+    let lexbuf = Lexing.from_string(text)
+
+    let expr = Parser.expr (Lexer.token, lexbuf)
+
+    let stringified = switch Js.Json.stringifyAny(expr) {
+        | None => "Error stringifying expression"
+        | Some(str) => str
+    }
+
+    displayNote(stringified)
+})
+
