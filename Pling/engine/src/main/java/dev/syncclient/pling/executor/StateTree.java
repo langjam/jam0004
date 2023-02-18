@@ -5,7 +5,6 @@ import dev.syncclient.pling.parser.AbstractSyntaxTree;
 
 import java.util.ArrayList;
 import java.util.Stack;
-import java.util.function.Function;
 
 public class StateTree {
     private static final StateTree instance = new StateTree();
@@ -19,6 +18,7 @@ public class StateTree {
 
     private final Stack<String> currentContextPath = new Stack<>();
     private StateNode currentNode = root;
+    private Interpreter interpreter;
 
     private StateTree() {
         new BasicBuiltins().load(root);
@@ -32,11 +32,33 @@ public class StateTree {
 
         currentNode = root;
         for (String context : currentContextPath) {
+            assert currentNode != null;
             currentNode = currentNode.children().stream()
                     .filter(node -> node.name().equals(context))
                     .findFirst()
-                    .orElseThrow();
+                    .orElse(null);
         }
+    }
+
+    private StateNode nodeForPath(Stack<String> path) {
+        StateNode node = root;
+        for (String context : path) {
+            assert node != null;
+            node = node.children().stream()
+                    .filter(n -> n.name().equals(context))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        return node;
+    }
+
+    public void createContextForFunc(String name) {
+        currentNode.children().add(new StateNode(name, "Function Context", StateNode.Type.FUNCTION, new ArrayList<>()));
+    }
+
+    public boolean contextExists(String name) {
+        return currentNode.children().stream().anyMatch(node -> node.name().equals(name));
     }
 
     public void pushContext(String name) {
@@ -47,6 +69,13 @@ public class StateTree {
     public void popContext() {
         currentContextPath.pop();
         reloadCurrentNode();
+    }
+
+    public void popAndDestroy() {
+        String name = currentContextPath.peek();
+        currentContextPath.pop();
+        reloadCurrentNode();
+        currentNode.children().removeIf(node -> node.name().equals(name));
     }
 
     public void pushVar(String name, Object value) {
@@ -96,14 +125,44 @@ public class StateTree {
     }
 
     public void execute(AbstractSyntaxTree ast) {
-        Interpreter interpreter = new Interpreter(ast, this);
+        interpreter = new Interpreter(ast, this);
         interpreter.start();
     }
 
     public FunctionStateNode findFunc(String name) {
-        return (FunctionStateNode) currentNode.children().stream()
-                .filter(node -> node.name().equals(name))
-                .findFirst()
-                .orElse(null);
+        // Try to find a function in the current context. If it doesn't exist, go one level up and try again.
+        // If it still doesn't exist, go one level up and try again. Repeat until we reach the root.
+        // If we reach the root and still don't find the function, throw an exception.
+        StateNode current = currentNode;
+        Stack<String> path = new Stack<>();
+        path.addAll(currentContextPath);
+
+        while (current != null) {
+            FunctionStateNode func = (FunctionStateNode) current.children().stream()
+                    .filter(node -> node.name().equals(name))
+                    .findFirst()
+                    .orElse(null);
+
+            if (func != null) {
+                return func;
+            }
+
+            if (path.isEmpty()) {
+                break;
+            }
+
+            path.pop();
+            current = nodeForPath(path);
+        }
+
+        throw new StateException("Function " + name + " not found");
+    }
+
+    public Interpreter getInterpreter() {
+        return interpreter;
+    }
+
+    public boolean hasLocalVar(String var) {
+        return currentNode.children().stream().anyMatch(node -> node.name().equals(var));
     }
 }
