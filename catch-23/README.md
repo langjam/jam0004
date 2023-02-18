@@ -8,16 +8,16 @@ The language is contradiction-oriented.
 ## Variables and Types
 
 The language doesn't come with traditional types, instead it comes in three types:
-+ Thing32, written as `#` and a Thing32 pointer/array by extension:  `#*` and `#][`
-+ Thing64, written as `##` and a Thing64 pointer/array by extension: `##*` and `##][`
-+ Boolean, written as `#?` and a Boolan pointer/array by extension: `#?*` and `#?][`
++ Thing32, written as `#` and a Thing32 pointer/array by extension:  `#*` and `#[]`
++ Thing64, written as `##` and a Thing64 pointer/array by extension: `##*` and `##[]`
++ Boolean, written as `#?` and a Boolan pointer/array by extension: `#?*` and `#?[]`
 
 Those types can represent anything that is a floating point number, an integer number and a character.
 To declare a variable, type the variable name then the type following a colon. A variable name can only contain 2 characters which are alphanumeric.
 ```
 @in : #
 @db : ##
-@sr : #][
+@sr : #[]
 @bo : #?
 ```
 Respectively: int, double, string and boolean variables.
@@ -26,7 +26,7 @@ To assign it a value, you need to reference it first by using the `$` and then y
 ```
 $in[5]
 $db[7.235436345665]
-$sr]100, 150, 154, 154, 157, 40, 127, 157, 162, 154, 144[
+$sr[100, 150, 154, 154, 157, 40, 127, 157, 162, 154, 144]
 $bo[!(!)]
 ```
 There is one exception here and it is that variables can't be directly assigned a value of 1. Instead, one must use the bitwise complement operator ~ to invert a 0.
@@ -94,9 +94,9 @@ catch-23 is contradiction-oriented because it Donts and Never are basically if (
 Unless, written as `?)<boolean expression>(` is the same as an inverted if statement in C: `if (!(<boolean expression>))`. Unless can only be used directly inside Dont or another Unless/Else Unless/Else. It cannot be used in a block of code that isn't any of those cases even if that block of code is inside one of those.
 ```
 ?)!($vr > 0)(
-}
-  \\ code here 
 {
+  \\ code here 
+}
 ```
 
 ### Until
@@ -111,10 +111,10 @@ A Dont, written as `:;`, is a block of code that isn't executed. However, if it 
 ```
 ~> my_dont
 :;
-}
+{
   |> my_dont
   \\ code here
-{
+}
 ```
 
 ### Never
@@ -123,20 +123,21 @@ A Never, written as `::`, is a loop that is never executed. However, if it is be
 ```
 ~> my_never
 ::
-}
+{
   |> my_never
   \\ code here
-{
+}
 ```
 
 ## Functions
 Functions use don't use inverted brackets.
-`my_function_name : <return type> (<args>) { *\ code here \* }`
+Functions have the same two-character name limit as variables.
+`fn : <return type> (<args>) { *\ code here \* }`
 ```
-main : ? (args : #][)
+mn : ? (as : #[])
 {
-  @hw : #]12[
-  $hw]100, 150, 154, 154, 157, 40, 127, 157, 162, 154, 144[
+  @hw : #[12]
+  $hw[100, 150, 154, 154, 157, 40, 127, 157, 162, 154, 144]
   \\ prints hello world
   print($hw)
 }
