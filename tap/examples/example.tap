@@ -1,0 +1,16 @@
+// This is a comment
+
+// Variable decleration
+thumb hard:
+	"number"
+
+// Set value of number
+thumb soft:
+	"number"
+	32
+
+// Print value of number
+index soft:
+	// Retrieve the value of number
+	thumb medium:
+		"number"

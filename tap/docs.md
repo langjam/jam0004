@@ -31,3 +31,10 @@ middle medium is equal to warning
 middle hard is equal to error
 
 ## Ring
+Ring is used for functions like mariage
+
+## Pinky
+Pinky is used for if statements like pinky promise
+
+
+Q: How to do loops? maybe a keyword like all referencing that all fingers are used. So all soft, all medium or all loud
