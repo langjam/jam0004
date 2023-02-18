@@ -1,7 +1,5 @@
----
-title: The Ludwig Programming Language
----
+# The Ludwig Programming Language
 
-# Rationale
+## Rationale
 
 (TODO)
