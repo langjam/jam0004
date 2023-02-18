@@ -1,6 +1,5 @@
 package dev.syncclient.pling.parser;
 
-import dev.syncclient.pling.Flag;
 import dev.syncclient.pling.lexer.Token;
 
 import java.util.LinkedList;

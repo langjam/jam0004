@@ -1,8 +1,7 @@
-package dev.syncclient.pling;
+package dev.syncclient.pling.cli;
 
 public enum Flag {
     DEBUG("debug"),
-    VERY_DEBUG("dddd"),
     HELP("help"),
     VERSION("version");
 
