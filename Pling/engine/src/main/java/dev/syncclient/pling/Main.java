@@ -4,6 +4,7 @@ import dev.syncclient.pling.audio.ALInfo;
 import dev.syncclient.pling.executor.StateTree;
 import dev.syncclient.pling.lexer.Lexer;
 import dev.syncclient.pling.lexer.Token;
+import dev.syncclient.pling.parser.AbstractSyntaxTree;
 import dev.syncclient.pling.parser.Parser;
 import dev.syncclient.pling.utils.StringUtils;
 
@@ -77,11 +78,11 @@ public class Main {
 
 
         Lexer lexer = new Lexer();
-        List<Token.AbstractToken> tokenList = lexer.lex(source.toString());
+        List<Token.WithData> tokenList = lexer.lex(source.toString());
 
         if (flags.containsKey(Flag.VERY_DEBUG)) {
             System.out.println("=== BEGIN Tokens ===");
-            for (Token.AbstractToken token : tokenList) {
+            for (Token.WithData token : tokenList) {
                 System.out.println(StringUtils.ljust(token.getType().toString(), 10) + ": " + token.getValue());
             }
             System.out.println("=== STOP  Tokens ===");
@@ -96,9 +97,14 @@ public class Main {
         }
 
         Parser parser = new Parser();
+        AbstractSyntaxTree ast = parser.parse(tokenList);
 
-        System.out.println("=== BEGIN Parse ===");
-        parser.parse(tokenList);
-        System.out.println("=== STOP  Parse ===");
+        if (flags.containsKey(Flag.VERY_DEBUG)) {
+            System.out.println("=== BEGIN AST ===");
+            ast.getRoot().print(0);
+            System.out.println("=== STOP  AST ===");
+        }
+
+        stateTree.execute(ast);
     }
 }

@@ -1,9 +1,11 @@
 package dev.syncclient.pling.executor;
 
 import dev.syncclient.pling.executor.builtins.BasicBuiltins;
+import dev.syncclient.pling.parser.AbstractSyntaxTree;
 
 import java.util.ArrayList;
 import java.util.Stack;
+import java.util.function.Function;
 
 public class StateTree {
     private static final StateTree instance = new StateTree();
@@ -66,5 +68,17 @@ public class StateTree {
                 ", currentContextPath=" + currentContextPath +
                 ", currentNode=" + currentNode +
                 '}';
+    }
+
+    public void execute(AbstractSyntaxTree ast) {
+        Interpreter interpreter = new Interpreter(ast, this);
+        interpreter.start();
+    }
+
+    public FunctionStateNode findFunc(String name) {
+        return (FunctionStateNode) currentNode.children().stream()
+                .filter(node -> node.name().equals(name))
+                .findFirst()
+                .orElse(null);
     }
 }

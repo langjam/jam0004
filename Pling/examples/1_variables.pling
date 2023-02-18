@@ -1,0 +1,6 @@
+// These are the very basics of the language
+
+var a = 1;
+a = 2;
+var b = 3;
+#print a, b;

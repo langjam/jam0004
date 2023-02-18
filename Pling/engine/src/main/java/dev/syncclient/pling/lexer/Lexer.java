@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 public class Lexer {
     private String source;
-    private final List<Token.AbstractToken> tokens = new ArrayList<>();
+    private final List<Token.WithData> tokens = new ArrayList<>();
     private int current = 0;
 
     private char next() {
@@ -45,7 +45,7 @@ public class Lexer {
         return tryEat(predicate, false);
     }
 
-    public List<Token.AbstractToken> lex(String source) {
+    public List<Token.WithData> lex(String source) {
         this.source = source;
         tokens.clear();
 

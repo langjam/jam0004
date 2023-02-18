@@ -11,17 +11,17 @@ public enum Token {
     COMMA, // ,
     DOT, // .
     END, // ;
-    IDENTIFIER; // Identifier
+    IDENTIFIER, // Identifier
+    ANY, // internal use only
+    EOF; // internal use only
 
     @Override
     public String toString() {
         return name().toLowerCase();
     }
 
-    public AbstractToken createToken(String value) {
-        // TODO
-
-        return new AbstractToken(value) {
+    public WithData createToken(String value) {
+        return new WithData(value) {
             @Override
             public Token getType() {
                 return Token.this;
@@ -29,10 +29,10 @@ public enum Token {
         };
     }
 
-    public static abstract class AbstractToken {
+    public static abstract class WithData {
         private String value;
 
-        public AbstractToken(String value) {
+        public WithData(String value) {
             this.value = value;
         }
 
@@ -44,6 +44,11 @@ public enum Token {
 
         public void setValue(String value) {
             this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return getType() + ": " + getValue();
         }
     }
 }
