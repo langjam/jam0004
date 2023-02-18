@@ -1,7 +1,10 @@
-from hands import FindHands
+#!/usr/bin/env python3
+
+import random
 import cv2
 import math
-import random
+import numpy as np
+from hands import FindHands
 
 def lerp(a, b, t):
     return (1 - t) * a + t * b
@@ -47,12 +50,20 @@ class Node:
         self.list = []
         self.root = False
 
+    def __str__(self):
+        return '\n'.join(str(i) for i in self.list)
+
+    def on_removed(self):
+        pass
+
     def remove(self, pos):
         next = []
         for i in self.list:
             if not i.has(pos):
                 i.remove(pos)
                 next.append(i)
+            else:
+                i.on_removed()
         self.list = next
 
     def has(self, pos):
@@ -99,7 +110,7 @@ class Node:
             l.draw(img)
 
     def body(self, img):
-        if hasattr(self, "text"):
+        if hasattr(self, 'text'):
             size = cv2.getTextSize(self.text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
             cv2.putText(
                 img,
@@ -120,14 +131,26 @@ class Selector(Node):
     def __init__(self, *init):
         self.text = init[-2]
         self.opts = init[-1]
+        self.into = None
         Node.__init__(self, *init[:-2])
+    
+    def __str__(self):
+        names = [self.text]
+        names.extend(str(i) for i in self.list)
+        return '(' + ' '.join(names) + ')'
 
-    def make_cb(self, k):
+    def make_cb(self, n, k):
         def ret(pos):
+            next = []
+            for l in self.list:
+                if not isinstance(l, SelectorOption):
+                    next.append(l)
+            self.list = next
             return k({
-                "pos": pos,
-                "angle": self.angle,
-                "self": self,
+                'name': n,
+                'pos': pos,
+                'angle': self.angle,
+                'self': self,
             })
         return ret
 
@@ -136,12 +159,14 @@ class Selector(Node):
         self.color = tuple((i + 255) / 2 for i in self.color)
         angle = math.atan2(*v2sub(pos, self.pos))
         self.angle = angle + math.pi
-        for (v, c, k) in self.opts:
+        for (v, c, n, k) in self.opts:
             x = math.sin(angle + math.pi * v) * self.size + self.pos[0]
             y = math.cos(angle + math.pi * v) * self.size + self.pos[1]
-            case = SelectorOption([x, y], self.size / 2, self.make_cb(k))
+            case = SelectorOption([x, y], self.size / 2, n, self.make_cb(n, k))
             case.color = c
             self.add(case)
+        if isinstance(self.into, list):
+            self.into.append(self)
 
     def exit(self, pos):
         self.color = self.oldcolor
@@ -149,13 +174,20 @@ class Selector(Node):
         for l in self.list:
             if not isinstance(l, SelectorOption):
                 next.append(l)
+        if isinstance(self.into, list):
+            self.into[:] = [i for i in self.into if i is not self]
         self.list = next
+
+    def on_removed(self):
+        if isinstance(self.into, list):
+            self.into[:] = [i for i in self.into if i is not self]
 
 
 class SelectorOption(Node):
     def __init__(self, *args):
+        self.text = args[-2]
         self.cb = args[-1]
-        Node.__init__(self, *args[:-1])
+        Node.__init__(self, *args[:-2])
         self.color = (255, 0, 0)
 
     def enter(self, pos):
@@ -163,42 +195,57 @@ class SelectorOption(Node):
 
 
 class Handler:
-    def __init__(self):
-        self.cap = cv2.VideoCapture(0)
-        self.hands = FindHands()
+    def __init__(self, one_hand=True):
+        def mouse_cb(who_cares, x, y, *who_cares_two_electic_boogaloo):
+            self.mouse_xy = [x, y]
+        self.window_name = cv2.namedWindow('Graphica')
+        cv2.setMouseCallback('Graphica', mouse_cb)
+        self.one_hand = one_hand
         self.img = None
         self.node = Node()
         self.node.root = True
         self.pt = [0, 0]
-        self.mode = 'empty'
+        self.src = []
+        self.selected = []
+        self.mouse_xy = [0, 0]
+        if one_hand:
+            self.cap = cv2.VideoCapture(0)
+            self.hands = FindHands()
 
-    def make_node(self, pos, size):
+    def make_node(self, pos, size, name):
         options = [
-                (0.75, (64, 255, 64), self.node_add),
-                (1.25, (255, 64, 64), self.node_remove),
+                (0.7, (64, 255, 64), 'new', self.node_on_add),
+                (1.3, (255, 64, 64), 'del', self.node_remove),
         ]
-        if self.mode == 'empty':
-            return Selector(pos, size, 'do', options)
-        elif self.mode == 'add':
-            Selector(pos, size, 'add', options)
-        else:
-            return Selector(pos, size, '?', options)
+        ret = Selector(pos, size, name, options)
+        ret.into = self.selected
+        return ret
 
-    def node_add(self, data):
+    def node_on_add(self, data):
         size = 50
-        x = math.sin(data["angle"]) * size * 2.5
-        y = math.cos(data["angle"]) * size * 2.5
+        x = math.sin(data['angle']) * size * 2.5
+        y = math.cos(data['angle']) * size * 2.5
         xy = [x, y]
-        dpos = data["pos"]
+        dpos = data['pos']
         res = v2add(xy, dpos)
-        data["self"].add(self.make_node(res, size))
+        src = ''.join(self.src)
+        self.src = []
+        if src == 'root':
+            self.node.add(self.make_node(res, 50, 'root'))
+        elif src == '':
+            data['self'].add(self.make_node(res, 50, 'do'))
+        else:
+            data['self'].add(self.make_node(res, 50, src))
 
     def node_remove(self, data):
-        self.node.remove(data["pos"])
+        self.node.remove(data['pos'])
         
     def get(self, *n):
-        return self.hands.getPosition(self.img, n)
-
+        if self.one_hand:
+            return self.hands.getPosition(self.img, n)
+        else:
+            return [self.mouse_xy]
+            
     def handle1(self, pt):
         self.node.each(pt)
 
@@ -209,26 +256,59 @@ class Handler:
         self.pt = pt
         self.node.draw(self.img)
 
+    def on_key(self, key):
+        if key != -1:
+            if len(self.selected) == 1:
+                if chr(key) == '\r':
+                    self.selected[0].text = ''.join(self.src)
+                    self.src = []
+                elif chr(key).isprintable():
+                    self.selected[0].text += chr(key)
+                elif key == 127:
+                    if len(self.selected[0].text) != 0:
+                        self.selected[0].text = self.selected[0].text[:-1]
+                else:
+                    print('key', key)
+            else:
+                if chr(key).isprintable():
+                    self.src.append(chr(key))
+                elif key == 127:
+                    if len(self.src) != 0:
+                        self.src.pop(-1)
+                else:
+                    print('key', key)
+
     def loop(self):
         n = 0
         while True:
-            succeed, ximg = self.cap.read()
+            if self.one_hand:
+                succeed, ximg = self.cap.read()
+            else:
+                ximg = np.zeros((720, 1280, 4), dtype=np.uint8)
+                ximg.fill(255)
             self.img = cv2.flip(ximg, 1)
             pt = self.get(8)
             if len(self.node.list) == 0:
                 size = self.img.shape[:2]
-                print(size)
-                self.mode = 'empty'
-                self.node.add(self.make_node([size[1]//2, size[0]//2], 50))
+                self.node.add(self.make_node([150, size[0]//2], 50, 'root'))
             if len(pt) == 1:
                 self.handle(pt[0])
             else:
                 self.handle(self.pt)
             if self.pt is not None:
                 cv2.circle(self.img, self.pt, 5, (0,255,0), cv2.FILLED)
-            cv2.imshow("Graphica", self.img)
-            if cv2.waitKey(1) == ord("q"):
-                break
+            cv2.putText(
+                self.img,
+                ''.join(self.src),
+                [10, 30],
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (0, 0, 0),
+                2,
+                cv2.LINE_AA
+            )
+            cv2.imshow('Graphica', self.img)
+            self.on_key(cv2.waitKey(1))
             n += 1
 
     def dist(self, a, b):
@@ -241,7 +321,8 @@ class Handler:
         return math.nan
 
 def main():
-    h = Handler()
+    h = Handler(one_hand=False)
+    # h = Handler(one_hand=True)
     h.loop()
 
 if __name__ == '__main__':
