@@ -52,9 +52,7 @@ typedef enum {
     
     // literals
     NUMBER,
-    NUMBER_GROUP,
     BOOLEAN_VAL,
-    BOOLEAN_GROUP,
     IDENTIFIER,
     
     // other glyphs
@@ -68,7 +66,9 @@ typedef enum {
     RIGHT_BRACE,
     LEFT_BRACE,
     COMMA,
-    DOT
+    DOT,
+    
+    EOF // end of file
 }
 token_type;
 
@@ -82,30 +82,6 @@ typedef struct {
         long i64_value;
         float f32_value;
         double f64_value;
-        
-        struct {
-          
-            int i32_length;
-            int i32_values[];
-        };
-        
-        struct {
-          
-            float f32_length;
-            float f32_values[];
-        };
-        
-        struct {
-          
-            long i64_length;
-            long i64_values[];
-        };
-        
-        struct {
-          
-            double f64_length;
-            double f64_values[];
-        };
     };
 }
 token;
