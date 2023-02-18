@@ -1,7 +1,8 @@
-package dev.syncclient.pling;
+package dev.syncclient.pling.syntax;
 
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.TokenSet;
+import dev.syncclient.pling.PlingPlugin;
 
 public class PlingTokenType extends IElementType {
     public enum Type {
@@ -39,7 +40,7 @@ public class PlingTokenType extends IElementType {
     public final Type type;
 
     private PlingTokenType(Type type) {
-        super(type.toString(),PlingPlugin.INSTANCE);
+        super(type.toString(), PlingPlugin.INSTANCE);
 
         this.type = type;
     }

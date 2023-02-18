@@ -1,4 +1,4 @@
-package dev.syncclient.pling;
+package dev.syncclient.pling.syntax;
 
 import com.intellij.lexer.LexerBase;
 import com.intellij.psi.tree.IElementType;
