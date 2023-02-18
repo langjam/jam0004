@@ -27,12 +27,12 @@ all: $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
 	@$(CREATE_DIRS)
-	@echo "linking"
+	@echo "LD $@"
 	@$(CC) $(OBJECTS) -o $@ $(LFLAGS)
 
 $(OBJ_DIRECTORY)/%.o: $(SRC_DIRECTORY)/%.c $(HEADERS)
 	@$(CREATE_DIRS)
-	@echo "$@"
+	@echo "CC $@"
 	@$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:
