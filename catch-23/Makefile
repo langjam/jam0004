@@ -1,4 +1,3 @@
-CXX := g++
 CC := gcc
 
 SRC_DIRECTORY = src
@@ -6,10 +5,6 @@ OBJ_DIRECTORY = obj
 BIN_DIRECTORY = bin
 
 CREATE_DIRS = mkdir -p $(@D)
-
-CXXFLAGS := \
-		-I $(SRC_DIRECTORY) \
-		-std=c++17
 
 CFLAGS := \
 		-I $(SRC_DIRECTORY) \
