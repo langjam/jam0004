@@ -152,6 +152,32 @@ public class AbstractSyntaxTree {
         }
     }
 
+    public static class LoopNode extends Node {
+        private final Node condition;
+        private final Node body;
+
+        public LoopNode(Node condition, Node body) {
+            this.condition = condition;
+            this.body = body;
+        }
+
+        public Node getCondition() {
+            return condition;
+        }
+
+        public Node getBody() {
+            return body;
+        }
+
+        @Override
+        public String toString() {
+            return "LoopNode{" +
+                    "condition=" + condition +
+                    ", body=" + body +
+                    '}';
+        }
+    }
+
     public static class Statement {
         public static class VarDefNode extends Node {
             private final String name;

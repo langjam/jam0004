@@ -38,11 +38,27 @@ public class Interpreter {
             return funcDef(funcDefNode);
         } else if (node instanceof AbstractSyntaxTree.BranchNode branch) {
             return execBranch(branch);
+        } else if (node instanceof AbstractSyntaxTree.LoopNode loop) {
+            return execLoop(loop);
         } else {
             throw new RuntimeException("Unknown node: " + node);
         }
 
         return null;
+    }
+
+    private boolean evalCondition(Object conditionResult) {
+        if (conditionResult == null) {
+            return true;
+        } else if (conditionResult instanceof Boolean) {
+            return (Boolean) conditionResult;
+        } else if (conditionResult instanceof Double) {
+            return (Double) conditionResult != 0;
+        } else if (conditionResult instanceof String) {
+            return  !((String) conditionResult).isEmpty();
+        } else {
+            throw new InterpreterException("Unknown condition type: " + conditionResult.getClass());
+        }
     }
 
     private Object execBranch(AbstractSyntaxTree.BranchNode branch) {
@@ -51,18 +67,7 @@ public class Interpreter {
         if (branch.getCondition() != null)
             conditionResult = exec(branch.getCondition());
 
-        boolean condition;
-        if (conditionResult == null) {
-            condition = true;
-        } else if (conditionResult instanceof Boolean) {
-            condition = (Boolean) conditionResult;
-        } else if (conditionResult instanceof Double) {
-            condition = (Double) conditionResult != 0;
-        } else if (conditionResult instanceof String) {
-            condition = !((String) conditionResult).isEmpty();
-        } else {
-            throw new InterpreterException("Unknown condition type: " + conditionResult.getClass());
-        }
+        boolean condition = evalCondition(conditionResult);
 
         if (condition) {
             return exec(branch.getBody());
@@ -70,6 +75,25 @@ public class Interpreter {
             if (branch.getSubordiante() != null) {
                 return exec(branch.getSubordiante());
             }
+        }
+
+        return null;
+    }
+
+    private Object execLoop(AbstractSyntaxTree.LoopNode loop) {
+        Object conditionResult = null;
+
+        if (loop.getCondition() != null)
+            conditionResult = exec(loop.getCondition());
+
+        boolean condition = evalCondition(conditionResult);
+
+        while (condition) {
+            exec(loop.getBody());
+
+            if (loop.getCondition() != null)
+                conditionResult = exec(loop.getCondition());
+            condition = evalCondition(conditionResult);
         }
 
         return null;

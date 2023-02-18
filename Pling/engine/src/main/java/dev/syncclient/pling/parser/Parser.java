@@ -1,6 +1,6 @@
 package dev.syncclient.pling.parser;
 
-import dev.syncclient.pling.Flag;
+import dev.syncclient.pling.cli.Flag;
 import dev.syncclient.pling.debugger.PlingDebugger;
 import dev.syncclient.pling.lexer.Token;
 
@@ -136,6 +136,8 @@ public class Parser {
             } else if (first.getValue().equals(Keywords.IF.getKw())) {
                 // This is an if statement
                 return ifstmt(currentStmt);
+            } else if (first.getValue().equals(Keywords.WHILE.getKw())) {
+                return whilestmt(currentStmt);
             } else if (currentStmt.size() > 2 && currentStmt.get(1).getType() == Token.ASSIGN) {
                 // This is a variable set
                 return varset(currentStmt);
@@ -153,6 +155,34 @@ public class Parser {
             return callAny(currentStmt);
         } else {
             throw new ParserException("Unexpected token: " + first);
+        }
+    }
+
+    private AbstractSyntaxTree.Node whilestmt(LinkedList<Token.WithData> currentStmt) {
+
+        checkFormat(currentStmt, Token.IDENTIFIER, Token.ANY_ANYNUM, Token.BLOCK);
+
+        currentStmt.pop(); // Remove "while"
+
+        LinkedList<Token.WithData> condition = new LinkedList<>();
+        // Parse until we find the block
+        while (true) {
+            if (currentStmt.isEmpty()) {
+                throw new ParserException("Unexpected end of statement");
+            }
+
+            if (currentStmt.peek().getType() == Token.BLOCK) break;
+            condition.add(currentStmt.pop());
+        }
+
+        LinkedList<Token.WithData> block = ((Token.BlockData) currentStmt.pop()).getData();
+        block.pop(); // Remove the open token
+
+        if (currentStmt.isEmpty()) {
+            // This is a valid while statement
+            return new AbstractSyntaxTree.LoopNode(stmt(condition), stmts(block));
+        } else {
+            throw new ParserException("Unexpected token: " + currentStmt.peek());
         }
     }
 
@@ -278,7 +308,7 @@ public class Parser {
         IF("if"),
         ELSE("else"),
         ELSEIF("eif"),
-        ;
+        WHILE("while");
 
         private final String kw;
 
