@@ -17,6 +17,7 @@ type token =
   | IDENT of (string)
   | FAIL
   | EQUALS
+  | EOF
   | DURATION of (Syntax.duration)
   | COMMA
   | COLON
@@ -28,4 +29,4 @@ exception Error
 
 (* The monolithic API. *)
 
-val expr: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> (Syntax.expr)
+val main: (Lexing.lexbuf -> token) -> Lexing.lexbuf -> (Syntax.expr)

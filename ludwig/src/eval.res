@@ -63,7 +63,13 @@ let rec eval = (env, expr) =>
     | Choice(leftChoice, rightChoice) => {
       let leftValue = eval(newEvalScope(env), App(leftChoice, argExpr))
       let rightValue = eval(newEvalScope(env), App(rightChoice, argExpr))
-      Choice(leftValue, rightValue)
+      switch leftValue {
+        | Fail => rightValue
+        | _ => switch rightValue {
+          | Fail => leftValue
+          | _ => Choice(leftValue, rightValue)
+        }
+      }
     }
     | (Cons(_) | EmptyList | Sequentialize(_) | Note(_) | Duration(_)) as nonFunctionValue => 
       raise(EvalError(TryingToCallNonFunction(nonFunctionValue)))

@@ -21,11 +21,13 @@ open Syntax
 %token LIST
 %token FAIL
 %token COMMA ","
+%token EOF
 
 
 
-%start <Syntax.expr> expr
+%start <Syntax.expr> main
 
+%type <Syntax.expr> expr
 %type <Syntax.expr> expr1
 %type <Syntax.expr> expr2
 %type <Syntax.expr> expr3
@@ -34,6 +36,9 @@ open Syntax
 
 %type <Syntax.expr list> sep_by_trailing(COMMA, expr)
 %%
+
+main:
+    | expr EOF { $1 }
 
 expr:
     | "\\" IDENT "->" expr1 { Lambda($2, $4) }

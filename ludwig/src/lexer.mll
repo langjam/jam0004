@@ -38,4 +38,5 @@ rule token = parse
 | "G"  { NOTE(G) }
 | "G#" { NOTE(GSharp) }
 | "Ab" { NOTE(AFlat) }
+| eof  { EOF }
 

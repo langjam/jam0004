@@ -11,7 +11,7 @@ registerRunClick(() => {
 
     let lexbuf = Lexing.from_string(text)
 
-    let expr = Parser.expr (Lexer.token, lexbuf)
+    let expr = Parser.main (Lexer.token, lexbuf)
 
     let stringified = switch Js.Json.stringifyAny(expr) {
         | None => "Error stringifying expression"
