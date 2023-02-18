@@ -1,0 +1,11 @@
+<!-- PlingPlugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <id>dev.syncclient.pling</id>
+    <name>Pling</name>
+    <vendor>Sync Development</vendor>
+    <description><![CDATA[Pling language made for the langjam 2023]]></description>
+    <depends>com.intellij.modules.platform</depends>
+    <extensions defaultExtensionNs="com.intellij">
+        <fileType name="Pling File" implementationClass="dev.syncclient.pling.PlingFileType" fieldName="INSTANCE" language="Pling" extensions="pling"/>
+    </extensions>
+</idea-plugin>
