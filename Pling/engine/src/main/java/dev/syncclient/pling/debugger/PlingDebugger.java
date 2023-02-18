@@ -1,5 +1,6 @@
 package dev.syncclient.pling.debugger;
 
+import dev.syncclient.pling.executor.Interpreter;
 import dev.syncclient.pling.executor.StateTree;
 import dev.syncclient.pling.lexer.Token;
 import dev.syncclient.pling.parser.AbstractSyntaxTree;
@@ -27,7 +28,8 @@ public class PlingDebugger extends Thread {
 
     public PlingDebugger.IPC debuggerIPC = new PlingDebugger.IPC();
     int port = -1;
-
+    public StateTree stateTree = StateTree.getInstance();
+    public Interpreter interpreter = stateTree.getInterpreter();
     public static PlingDebugger instance = null;
 
     public PlingDebugger() {
