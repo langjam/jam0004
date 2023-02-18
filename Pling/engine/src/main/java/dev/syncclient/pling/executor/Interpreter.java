@@ -40,11 +40,25 @@ public class Interpreter {
             return execBranch(branch);
         } else if (node instanceof AbstractSyntaxTree.LoopNode loop) {
             return execLoop(loop);
+        } else if (node instanceof AbstractSyntaxTree.ReturnNode returnNode) {
+            return execReturn(returnNode);
+            
         } else {
             throw new RuntimeException("Unknown node: " + node);
         }
 
         return null;
+    }
+
+    private Object execReturn(AbstractSyntaxTree.ReturnNode returnNode) {
+        if (returnNode.getValue() == null) {
+            return null;
+        }
+
+        Object val =  exec(returnNode.getValue());
+        stateTree.pushReturn(val);
+
+        return val;
     }
 
     private boolean evalCondition(Object conditionResult) {

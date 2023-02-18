@@ -89,6 +89,15 @@ public class StateTree {
         currentNode.children().add(new VarStateNode(name, "", value));
     }
 
+    public void pushReturn(Object value) {
+        if (currentNode.children().stream().noneMatch(node -> node.name().equals("__return"))) {
+            pushVar("__return", value);
+        } else {
+            VarStateNode data = findVar("__return");
+            data.setValue(value);
+        }
+    }
+
     public VarStateNode findVar(String name) {
         VarStateNode data = (VarStateNode) currentNode.children().stream()
                 .filter(node -> node.name().equals(name))

@@ -1,10 +1,17 @@
 // If you have ever heard of a function, then you know what this is.
 
-//fun test #a [
-//    #print a;
-//]
+fun test #a [
+    ret a;
+]
 
-if 0 [
+// Try playing with the values in the if statement. The Rules are:
+//  - 0 is false
+//  - other numbers are true
+//  - `` is false
+//  - other strings are true
+#print `If-Output`;
+
+if 1 [
     #print 1;
 ] eif 0 [
     #print 2;
@@ -12,4 +19,8 @@ if 0 [
     #print 3;
 ]
 
-//#test 2;
+#print `Function-Output`;
+
+// This prints the return value of the function. (so 2)
+#print #test 2;
+

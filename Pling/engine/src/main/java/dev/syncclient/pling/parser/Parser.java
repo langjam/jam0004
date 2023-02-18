@@ -138,6 +138,8 @@ public class Parser {
                 return ifstmt(currentStmt);
             } else if (first.getValue().equals(Keywords.WHILE.getKw())) {
                 return whilestmt(currentStmt);
+            } else if (first.getValue().equals(Keywords.RETURN.getKw())) {
+                return returnstmt(currentStmt);
             } else if (currentStmt.size() > 2 && currentStmt.get(1).getType() == Token.ASSIGN) {
                 // This is a variable set
                 return varset(currentStmt);
@@ -156,6 +158,11 @@ public class Parser {
         } else {
             throw new ParserException("Unexpected token: " + first);
         }
+    }
+
+    private AbstractSyntaxTree.Node returnstmt(LinkedList<Token.WithData> currentStmt) {
+        currentStmt.pop(); // Remove "return"
+        return new AbstractSyntaxTree.ReturnNode(stmt(currentStmt));
     }
 
     private AbstractSyntaxTree.Node whilestmt(LinkedList<Token.WithData> currentStmt) {
@@ -308,7 +315,9 @@ public class Parser {
         IF("if"),
         ELSE("else"),
         ELSEIF("eif"),
-        WHILE("while");
+        WHILE("while"),
+        RETURN("ret")
+        ;
 
         private final String kw;
 
