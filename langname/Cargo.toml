@@ -1,0 +1,10 @@
+[package]
+name = "langname"
+description = "An entry for langjam/jam0004"
+authors = ["isaac azuelos <isaac@azuelos.ca>"]
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+miette = { version = "5.5.0", features = ["fancy"] }
+thiserror = "1.0.38"
