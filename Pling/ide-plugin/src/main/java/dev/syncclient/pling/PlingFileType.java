@@ -23,7 +23,7 @@ public class PlingFileType extends LanguageFileType {
     @NotNull
     @Override
     public String getDescription() {
-        return "";
+        return "Pling file";
     }
 
     @NotNull

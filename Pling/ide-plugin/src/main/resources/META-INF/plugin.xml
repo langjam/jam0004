@@ -7,5 +7,6 @@
     <depends>com.intellij.modules.platform</depends>
     <extensions defaultExtensionNs="com.intellij">
         <fileType name="Pling File" implementationClass="dev.syncclient.pling.PlingFileType" fieldName="INSTANCE" language="Pling" extensions="pling"/>
+        <lang.syntaxHighlighterFactory implementationClass="dev.syncclient.pling.PlingHighlighterFactory" language="Pling"/>
     </extensions>
 </idea-plugin>
