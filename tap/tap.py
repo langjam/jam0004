@@ -1,28 +1,47 @@
 from enum import Enum
 
 
+class Error:
+    def __init__(self, error_type, message):
+        self.error_type = error_type
+        self.message = message
+
+
+class SomeError(Error):
+    pass
+
+
 class TokenType(Enum):
-    STR = "STR"
+    # STR = "STR"
     INT = "INT"
     FLOAT = "FLOAT"
-    THUMB = "THUMB"
-    INDEX = "INDEX"
-    MIDDLE = "MIDDLE"
-    RING = "RING"
-    PINKY = "PINKY"
-    SOFT = "SOFT"
-    MEDIUM = "MEDIUM"
-    LOUD = "LOUD"
-    COLON = "COLON"
+    # THUMB = "THUMB"
+    # INDEX = "INDEX"
+    # MIDDLE = "MIDDLE"
+    # RING = "RING"
+    # PINKY = "PINKY"
+    # SOFT = "SOFT"
+    # MEDIUM = "MEDIUM"
+    # LOUD = "LOUD"
+    # COLON = "COLON"
+    PLUS = "PLUS"
+    MINUS = "MINUS"
+    MULTIPLY = "MULTIPLY"
+    DIVIDE = "DIVIDE"
+    LPAREN = "LPAREN"
+    RPAREN = "RPAREN"
 
 
 class Token:
-    def __init__(self, type_: TokenType, value):
+    def __init__(self, type_: TokenType, value=None):
         self.type = type_
         self.value = value
 
     def __repr__(self) -> str:
-        return f"{self.type}:{self.value}"
+        if self.value:
+            return f"{self.type.value}:{self.value}"
+        else:
+            return f"{self.type.value}"
 
 
 class Lexer:
@@ -50,8 +69,27 @@ class Lexer:
         while self.current_char is not None:
             if self.current_char.isdigit():
                 tokens.append(self.number())
-
-            self.advance()
+            elif self.current_char == "+":
+                tokens.append(Token(TokenType.PLUS))
+                self.advance()
+            elif self.current_char == "-":
+                tokens.append(Token(TokenType.MINUS))
+                self.advance()
+            elif self.current_char == "*":
+                tokens.append(Token(TokenType.MULTIPLY))
+                self.advance()
+            elif self.current_char == "/":
+                tokens.append(Token(TokenType.DIVIDE))
+                self.advance()
+            elif self.current_char == "(":
+                tokens.append(Token(TokenType.LPAREN))
+                self.advance()
+            elif self.current_char == ")":
+                tokens.append(Token(TokenType.RPAREN))
+                self.advance()
+            else:
+                print("Illegal character")
+                self.advance()
 
         return tokens, None
 
@@ -74,8 +112,7 @@ class Lexer:
             elif self.current_char in " \t":
                 break
             elif not self.current_char.isdigit() and self.current_char != "_":
-                print("Error: unkown character")
-                return "Loud Middlefinger tap: Error msg"
+                break
             else:
                 number_str += self.current_char
 
@@ -86,7 +123,68 @@ class Lexer:
         else:
             return Token(TokenType.INT, int(number_str))
 
+    def loudness(self):
+        loudness_str = ""
+        space_found = False
 
-simple_program = "\n123456789 \n9.87"
+        print(self.current_char)
+        while True:
+            if self.current_char is None:
+                break
+
+            # if self.current_char
+            self.advance()
+
+
+class NumberNode:
+    def __init__(self, token):
+        self.token = token
+
+    def __repr__(self):
+        return f"{self.token}"
+
+
+class BinaryOperatorNode:
+    def __init__(self, left_node, operator_token, right_node):
+        self.left_node = left_node
+        self.operator_token = operator_token
+        self.right_node = right_node
+
+    def __repr__(self):
+        return f"({self.left_node}, {self.operator_token}, {self.right_node})"
+
+
+class Parser:
+    def __init__(self, tokens):
+        self.tokens = tokens
+        self.token_index = -1
+        self.current_token = None
+
+        self.advance()
+
+    def advance(self):
+        self.token_index += 1
+        if self.token_index < len(self.tokens):
+            self.current_token = self.tokens[self.token_index]
+
+        return self.current_token
+
+    def parse(self):
+        result = self.expr()
+        return result
+
+    def factor(self):
+        token = self.current_token
+
+        if token.type == TokenType.INT or \
+           token.type == TokenType.FLOAT:
+            self.advance()
+            return NumberNode()
+
+    def term(self):
+        return self.binary
+
+
+simple_program = "7+9*2/(9+2)"
 lexer = Lexer("none", simple_program)
 print(lexer.tokenize())
