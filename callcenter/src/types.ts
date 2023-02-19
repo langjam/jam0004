@@ -19,7 +19,8 @@ export enum BaseType {
   None = TypeKind.None
 }
 
-export type CCType = BaseType | ListType | TupleType | OptionType | FunctionType
+type NonOptionType = BaseType | ListType | TupleType | FunctionType
+export type CCType =  NonOptionType | OptionType
 
 interface TypeLike {
   kind: TypeKind
@@ -55,12 +56,36 @@ export class OptionType implements TypeLike {
   kind: TypeKind.Option
   typelabel: string
   typename: string
+  sumTypes: NonOptionType[]
 
-  constructor(public sumTypes: CCType[]) {
+  constructor(sumTypes: CCType[]) {
     this.kind = TypeKind.Option;
+    this.sumTypes = [];
+
+    // flatten OptionType
+    for (let type of sumTypes) {
+      if (isOptionType(type)) {
+        for (let otherType of type.sumTypes) {
+          if (!typeExists(otherType, this.sumTypes)) {
+            this.sumTypes.push(otherType);
+          }
+        }
+      } else if (!typeExists(type, this.sumTypes)) {
+        this.sumTypes.push(type);
+      }
+    }
+
     this.typelabel = this.kind.toString() + padZero(sumTypes.length.toString(), 2) + sumTypes.map(typelabel);
     this.typename = sumTypes.map(typename).join(" | ");
   }
+}
+
+function typeExists(type: CCType, types: CCType[]) : boolean {
+  for (let t of types) {
+    if (isTypeEqual(t, type)) return true;
+  }
+
+  return false;
 }
 
 export class FunctionType implements TypeLike {
