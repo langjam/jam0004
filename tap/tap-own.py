@@ -457,7 +457,7 @@ class Interpreter:
                                                   "Invalid number of args for index hard")
             operator = value[1]
             new_values = value[2:]
-            print(new_values)
+            # print(new_values)
             nums = []
             for v in new_values:
                 if isinstance(v, list):
@@ -468,6 +468,13 @@ class Interpreter:
             match operator:
                 case "add":
                     return sum(nums)
+                case "sub":
+                    
+                    answer = nums[0]
+                    rest = nums[1:]
+                    for i in rest:
+                        answer = answer-i
+                    return answer
                 case "mul":
                     return numpy.prod(nums)
                 case "div":
@@ -586,12 +593,13 @@ if not isinstance(tokens, Error):
     # print("#########PARSING###########")
     ast = parser.parse()
     if not isinstance(parser, Error):
-        print(ast)
-        print("\n\n\n")
+        # print(ast)
+        # print("\n\n\n")
         interpreter = Interpreter(file_name, ast)
         result = interpreter.parse()
         if not isinstance(result, Error):
-            print(interpreter.variables)
+            # print(interpreter.variables)
+            pass
         else:
             print(result.show())
     else:
