@@ -11,8 +11,6 @@ export class OptionVal {
   }
 }
 
-
-
 export class FunctionObj {
   constructor(public name: number, public type: FunctionType, public body: Expr) {}
   toString() : string {
@@ -106,7 +104,7 @@ export enum Token {
 export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit |
                    Expr.TypeConversion | Expr.Unary | Expr.ListCons | Expr.Append | Expr.Get |
                    Expr.Set | Expr.Len | Expr.Chrs | Expr.Tuple | Expr.IfExpr | Expr.FunCall |
-                   Expr.GetVar | Expr.Let | Expr.OptTransform;
+                   Expr.GetVar | Expr.Let | Expr.OptTransform | Expr.IfLet;
 
 export namespace Expr {
   export class NumberExpr implements ExprLike {
@@ -206,5 +204,10 @@ export namespace Expr {
   export class OptTransform implements ExprLike {
     kind: Token.TRANSFORM_OPT = Token.TRANSFORM_OPT
     constructor(public type: OptionType, public originalType: NonOptionType, public value: Expr){}
+  }
+
+  export class IfLet implements ExprLike {
+    kind: Token.IFL = Token.IFL
+    constructor(public type: CCType, public id: number, public convertType: CCType, public value: Expr, public trueVal: Expr, public falseVal: Expr) {}
   }
 }

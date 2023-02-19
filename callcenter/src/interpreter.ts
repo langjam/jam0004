@@ -1,5 +1,5 @@
-import { BaseType, CCType, coversType, FunctionType, isBaseType, isFunctionType, isListType, isOptionType, isTupleType, isTypeEqual, ListType, OptionType, TupleType, TypeKind, typename } from "./types";
-import {Expr, FunctionObj, JSValue, OptionVal, stringify, Token} from "./expression";
+import { BaseType, CCType, coversType, FunctionType, isBaseType, isFunctionType, isListType, isOptionType, isTupleType, isTypeEqual, ListType, NonOptionType, OptionType, TupleType, TypeKind, typename } from "./types";
+import {Expr, FunctionObj, JSNonOption, JSValue, OptionVal, stringify, Token} from "./expression";
 
 export interface Stream {
   next () : Promise<string | null>;
@@ -455,6 +455,43 @@ class Interpreter {
           this.env = parentEnv;
         }
       }
+
+      case Token.TRANSFORM_OPT: {
+        let value = await this.visitExpr(expr.value) as JSNonOption;
+        return new OptionVal(expr.type, expr.originalType, value);
+      }
+
+      case Token.IFL: {
+        let value = await this.visitExpr(expr.value);
+
+        if (!(value instanceof OptionVal)) {
+          // should not be possible
+          await this.runtimeError("option value corrupted");
+          throw unreachable();
+        }
+
+        if (!coversType(expr.convertType, value.originalType)) {
+          return await this.visitExpr(expr.falseVal);
+        }
+
+        if (isOptionType(expr.convertType)) {
+          value = new OptionVal(expr.convertType, value.originalType, value.value);
+        } else {
+          value = value.value;
+        }
+
+        let parentEnv = this.env;
+        let ifletEnv = new Environment(parentEnv);
+
+        ifletEnv.setVar(expr.id, expr.convertType, value);
+
+        try{
+          this.env = ifletEnv;
+          return await this.visitExpr(expr.trueVal);
+        } finally {
+          this.env = parentEnv;
+        }
+      }
     }
 
     throw unreachable();
@@ -850,6 +887,9 @@ class Parser{
 
       case Token.LET:
         return this.parseLet();
+
+      case Token.IFL:
+        return this.parseIfLet();
     }
 
     await this.parseError(`unknown instruction ${instrTok}`);
@@ -959,6 +999,50 @@ class Parser{
     } finally {
       this.env = parentEnv;
     }
+  }
+
+  async parseIfLet() : Promise<Expr> {
+    // ifl * nn * ty * e * et * ef
+    await this.consumeStar();
+    let id = parseInt(await this.consumeNumber(), 10);
+
+    await this.consumeStar();
+    let convertType = await this.parseType();
+
+    await this.consumeStar();
+    let startpos = this.cursor;
+    let value = await this.parseExpression();
+
+    if (!isOptionType(value.type)) {
+      await this.parseError(`invalid use of iflet from value of type ${typename(value.type)} instead of an option type.`, startpos);
+    } else if (!coversType(value.type, convertType)) { // the reverse of the usual
+      await this.parseError(`unable to derive type ${typename(convertType)} from ${typename(value.type)}.`, startpos);
+    }
+
+    let parentEnv = this.env;
+    let tempEnv = new Environment(parentEnv);
+
+    tempEnv.setVar(id, convertType, null); // dummy variable
+
+    let trueVal: Expr;
+
+    try {
+      this.env = tempEnv;
+      await this.consumeStar();
+      trueVal = await this.parseExpression();
+    } finally {
+      this.env = parentEnv;
+    }
+
+    await this.consumeStar();
+    let falseVal = await this.parseExpression();
+
+    let type = trueVal.type;
+    if (!isTypeEqual(trueVal.type, falseVal.type)) {
+      type = new OptionType([trueVal.type, falseVal.type]);
+    }
+
+    return new Expr.IfLet(type, id, convertType, value, trueVal, falseVal);
   }
 
   // tuple
