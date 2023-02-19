@@ -41,6 +41,8 @@ public class Sound extends Thread {
         int availBuffers;
         int myBuff;
 
+        descriptor.applyEffects(helloSource[0]);
+
         while (running) {
             availBuffers = alGetSourcei(helloSource[0], AL_BUFFERS_PROCESSED);
 

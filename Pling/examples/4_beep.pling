@@ -98,16 +98,16 @@ var NOTE_DS8 = 4978;
 
 
 // Time of a quarter note in ms (represented with a 4)
-var TIME4 = 500;
+var TIME4 = 300;
 
 // Time of a dotted quarter note in ms (represented with a -4)
-var TIME4DOT = 750;
+var TIME4DOT = 450;
 
 // Time of an eighth note in ms (represented with an 8)
 var TIME8 = 250;
 
 // Time of a dotted eighth note in ms (represented with a -8)
-var TIME8DOT = 375;
+var TIME8DOT = 175;
 
 // Time of a sixteenth note in ms (represented with a 16)
 var TIME16 = 125;
@@ -116,7 +116,7 @@ var TIME16 = 125;
 var TIME16DOT = 187;
 
 // Time of a half note in ms (represented with a 2)
-var TIME2 = 1000;
+var TIME2 = 700;
 
 
 fun playnote #note #duration [
@@ -133,7 +133,7 @@ fun playnote #note #duration [
     #audio.start handle;
     #sleep duration;
     #audio.stop handle;
-    #sleep 10;
+    #sleep 400;
 ]
 
 

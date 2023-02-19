@@ -1,5 +1,6 @@
 package dev.syncclient.pling.audio;
 
+import dev.syncclient.pling.audio.pipeline.efx.Effect;
 import dev.syncclient.pling.audio.source.MicrophoneSource;
 import dev.syncclient.pling.audio.source.SilenceSource;
 import dev.syncclient.pling.audio.source.SineSource;
@@ -119,6 +120,13 @@ public class AudioController implements Builtin {
                 "Sets the volume of the sine wave",
                 "#audio.sine.volume [handle] [volume]",
                 this::setSineVolume
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.efx.pitch",
+                "Applies a pitch effect to the sound",
+                "#audio.efx.pitch [handle] [pitch]",
+                this::applyPitch
         ));
     }
 
@@ -303,6 +311,24 @@ public class AudioController implements Builtin {
         }
 
         sineSources.get(handle).setVolume(amplitude.floatValue());
+        return null;
+    }
+
+    private Object applyPitch(List<Object> objects) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = (Double) objects.get(0);
+        Double pitch = (Double) objects.get(1);
+
+        if (!sounds.containsKey(handle)) {
+            throw new IllegalStateException("Invalid handle");
+        }
+
+        sounds.get(handle).getDescriptor().addApplyEffect((src) -> {
+            Effect.setPitch(src, pitch.floatValue());
+        });
         return null;
     }
 

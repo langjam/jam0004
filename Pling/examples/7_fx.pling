@@ -1,0 +1,17 @@
+// Circle around the user's head
+
+use audio;
+use math;
+
+#audio.begin;
+
+#printnf `Audio initialized: `;
+#print #audio.initted;
+
+var handle = #audio.new;
+var source = #audio.microphone.new;
+
+#audio.bindsource handle, source;
+#audio.efx.pitch handle, 1.2;
+#audio.start handle;
+

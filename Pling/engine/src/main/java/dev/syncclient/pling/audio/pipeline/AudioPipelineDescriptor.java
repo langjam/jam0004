@@ -9,10 +9,12 @@ import dev.syncclient.pling.utils.fvec.FVec;
 import dev.syncclient.pling.utils.fvec.FVecArrayListImpl;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 
 public final class AudioPipelineDescriptor {
     private AudioSource source;
     private FVec<Fx> directEffects;
+    private FVec<Consumer<Integer>> applyEffects = new FVecArrayListImpl<>();
     private Location location;
 
     public AudioPipelineDescriptor(
@@ -41,6 +43,16 @@ public final class AudioPipelineDescriptor {
         for (int i = 0; i < directEffects.size(); i++) {
             directEffects.drop(i);
         }
+    }
+
+    public void applyEffects(int buffer) {
+        for (int i = 0; i < applyEffects.size(); i++) {
+            applyEffects.get(i).accept(buffer);
+        }
+    }
+
+    public void addApplyEffect(Consumer<Integer> effect) {
+        applyEffects.add(effect);
     }
 
 
