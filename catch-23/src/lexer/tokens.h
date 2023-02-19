@@ -28,8 +28,9 @@
     X(TokenIntToFloat, "''", NULL) \
     X(TokenNotEqual, "<>", NULL) \
     X(TokenFloatNotEqual, "><", NULL) \
-    X(TokenArrowLeft, "<~", NULL) \
-    X(TokenArrowRight, "~>", NULL) \
+    X(TokenBreak, "<~", NULL) \
+    X(TokenGoto, "~>", NULL) \
+    X(TokenLabel, "|>", NULL) \
     X(TokenAgainst, ";;", NULL) \
     X(TokenDont, ":;", NULL) \
     X(TokenNever, "::", NULL) \

@@ -271,6 +271,22 @@ bool parser_decide_toplevel(Parser *p, Ast *dest)
             return parse_definition(p, dest);
         case TokenDollar: 
             return parse_assignment(p, dest);
+        case TokenBreak:
+            next_token(p);
+            dest->type = AST_BREAK;
+            return true;
+        case TokenGoto:
+            next_token(p);
+            dest->type = AST_GOTO;
+            checkout(expect_token_type_and_get(p, TokenIdentifier, &dest->tok));
+            next_token(p);
+            return true;
+        case TokenLabel:
+            next_token(p);
+            dest->type = AST_LABEL;
+            checkout(expect_token_type_and_get(p, TokenIdentifier, &dest->tok));
+            next_token(p);
+            return true;
         case TokenDont: 
             next_token(p);
             checkout(expect_token_type(p, TokenCurlyBrLeft));
