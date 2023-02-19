@@ -5,6 +5,7 @@ use std::io::{Bytes, Read};
 use std::iter::Peekable;
 use std::ops::AddAssign;
 use std::{fmt, io, mem};
+use colored::Colorize;
 use unicode_reader::CodePoints;
 
 pub struct Lexer<I>
@@ -138,8 +139,8 @@ impl Display for TokenType {
 
 #[derive(Clone, Ord, PartialOrd, Eq, PartialEq, Debug)]
 pub struct Span {
-    start: SrcLoc,
-    end: SrcLoc,
+    pub start: SrcLoc,
+    pub end: SrcLoc,
 }
 
 impl<'a> From<&'a Expr> for Span {
@@ -177,6 +178,7 @@ pub struct SrcLoc {
     // in code points
     pub line: u32,
     pub column: u32,
+    // in bytes
     pub pos: usize,
 }
 
@@ -205,9 +207,9 @@ impl SrcLoc {
 impl<S: AsRef<str>> AddAssign<S> for SrcLoc {
     fn add_assign(&mut self, rhs: S) {
         for c in rhs.as_ref().chars() {
-            self.pos += 1;
+            self.pos += c.len_utf8();
             if c == '\n' {
-                self.column = 0;
+                self.column = 1;
                 self.line += 1;
             } else {
                 self.column += 1;
@@ -337,7 +339,7 @@ where
         P: Fn(&Token) -> bool,
     {
         self.get(p)
-            .map(|it| it.ok_or_else(|| self.pos().span("").err(format!("{}", args))))
+            .map(|it| it.ok_or_else(|| self.pos().span("a").err(format!("{}", args))))
     }
 
     fn maybe_tok(&mut self, p: impl TokenPred) -> io::Result<Option<Token>> {
@@ -630,8 +632,8 @@ pub struct SourcedError {
 
 #[derive(Debug)]
 pub struct Note {
-    kind: NoteKind,
-    msg: String,
+    pub kind: NoteKind,
+    pub msg: String,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -646,8 +648,8 @@ impl Display for NoteKind {
             f,
             "{}",
             match self {
-                NoteKind::Note => "note",
-                NoteKind::Hint => "hint",
+                NoteKind::Note => "note".blue().bold(),
+                NoteKind::Hint => "hint".green().bold(),
             }
         )
     }

@@ -2,6 +2,7 @@ use anyhow::{anyhow, bail};
 use inkwell::context::Context;
 use std::borrow::Cow;
 use std::fs::File;
+use std::io::{BufRead, BufReader, Read, Seek, SeekFrom};
 use std::path::{Path, PathBuf};
 use std::process::exit;
 
@@ -9,12 +10,14 @@ pub mod compile;
 pub mod parser;
 pub mod yihmstd;
 
+use crate::compile::llvm::LLVMCompiler;
+use crate::parser::SourcedError;
+use crate::yihmstd::{add_symbols, SoundRecv, SAMPLE_RATE};
 use clap::{Parser, ValueEnum};
+use colored::Colorize;
 use hound::WavSpec;
 use inkwell::execution_engine::JitFunction;
 use inkwell::OptimizationLevel;
-use crate::compile::llvm::LLVMCompiler;
-use crate::yihmstd::{add_symbols, SAMPLE_RATE, SoundRecv};
 
 #[derive(Parser, Debug)]
 struct Args {
@@ -35,7 +38,131 @@ enum Emit {
 
 fn report_error(file: &Path, err: impl Into<anyhow::Error>) {
     let err = err.into();
-    eprintln!("{}: {}", file.to_string_lossy(), err);
+    match err.downcast::<SourcedError>() {
+        Ok(err) => {
+            eprintln!("{}: {}", "error".red().bold(), err.msg.bold());
+            eprintln!(
+                "   {} {}:{}",
+                "-->".bright_blue().bold(),
+                file.to_string_lossy(),
+                err.span.start
+            );
+
+            let _ = (|| -> anyhow::Result<()> {
+                let mut file = BufReader::new(File::open(file)?);
+                let mut pos = file.seek(SeekFrom::Start(err.span.start.pos as u64))?;
+                let buf = &mut [0; 16];
+                loop {
+                    let by = 16.min(pos as i64);
+                    pos = file.seek(SeekFrom::Current(-by))?;
+                    let truncated = &mut buf[..by as usize];
+                    file.read(truncated)?;
+                    file.seek(SeekFrom::Current(-by))?;
+                    if let Some(i) = buf.iter().rposition(|it| *it == '\n' as u8) {
+                        file.seek(SeekFrom::Current(i as i64 + 1))?;
+                        break;
+                    }
+                    if pos == 0 {
+                        break;
+                    }
+                }
+                let line_range = err.span.end.line..=err.span.start.line;
+                let lines = file
+                    .lines()
+                    .take((err.span.end.line - err.span.start.line + 1) as usize)
+                    .collect::<Result<Vec<_>, _>>()?;
+                for (line, l_no) in lines.into_iter().zip(line_range.clone().into_iter()) {
+                    let at_start = l_no == *line_range.start();
+                    let at_end = l_no == *line_range.end();
+                    match (at_start, at_end) {
+                        (true, true) => {
+                            let codepoints = line.chars().collect::<Vec<char>>();
+                            eprintln!(
+                                "{} {} {}{}{}",
+                                format!("{: >4}", l_no).bright_blue(),
+                                "|".bright_blue(),
+                                codepoints.get(0..err.span.start.column as usize - 1)
+                                    .ok_or_else(|| anyhow!(""))?
+                                    .iter()
+                                    .collect::<String>(),
+                                codepoints.get(err.span.start.column as usize - 1
+                                    ..err.span.end.column as usize - 1)
+                                    .ok_or_else(|| anyhow!(""))?
+                                    .iter()
+                                    .collect::<String>()
+                                    .underline()
+                                    .red(),
+                                codepoints.get(err.span.end.column as usize - 1..)
+                                    .ok_or_else(|| anyhow!(""))?
+                                    .iter()
+                                    .collect::<String>()
+                            );
+                        }
+                        (false, false) => {
+                            eprintln!("     {} {}", "|".bright_blue(), line.red());
+                        }
+                        (_, _) => {
+                            let codepoints = line.chars().collect::<Vec<char>>();
+                            let loc = if at_start {
+                                &err.span.start
+                            } else {
+                                &err.span.end
+                            };
+                            let (lhs, rhs) = if at_start {
+                                (
+                                    codepoints.get(..loc.column as usize - 1)
+                                        .ok_or_else(|| anyhow!(""))?
+                                        .iter()
+                                        .collect::<String>()
+                                        .normal(),
+                                    codepoints.get(loc.column as usize - 1..)
+                                        .ok_or_else(|| anyhow!(""))?
+                                        .iter()
+                                        .collect::<String>()
+                                        .underline()
+                                        .red(),
+                                )
+                            } else {
+                                (
+                                    codepoints.get(..loc.column as usize - 2)
+                                        .ok_or_else(|| anyhow!(""))?
+                                        .iter()
+                                        .collect::<String>()
+                                        .underline()
+                                        .red(),
+                                    codepoints.get(loc.column as usize - 1..)
+                                        .ok_or_else(|| anyhow!(""))?
+                                        .iter()
+                                        .collect::<String>()
+                                        .normal(),
+                                )
+                            };
+                            eprintln!(
+                                "{} {} {}{}",
+                                format!("{: >4}", l_no).bright_blue(),
+                                "|".bright_blue(),
+                                lhs,
+                                rhs
+                            );
+                        }
+                    }
+                }
+                Ok(())
+            })();
+
+            for note in err.notes {
+                eprintln!("        {}: {}", note.kind, note.msg);
+            }
+        }
+        Err(err) => {
+            eprintln!(
+                "{}: {}: {}",
+                "error".red().bold(),
+                file.to_string_lossy(),
+                err
+            );
+        }
+    }
 }
 
 fn report_any_errors<T>(file: &Path, f: impl FnOnce() -> anyhow::Result<T>) -> Option<T> {
@@ -51,7 +178,7 @@ fn report_any_errors<T>(file: &Path, f: impl FnOnce() -> anyhow::Result<T>) -> O
 fn main() {
     let args: Args = Args::parse();
     if args.files.is_empty() {
-        eprintln!("fatal error: no input files");
+        eprintln!("{}: no input files", "fatal error".red().bold());
         exit(1);
     }
 
@@ -59,7 +186,7 @@ fn main() {
     macro_rules! bail_if_errors {
         () => {
             if has_error {
-                eprintln!("errors occurred, exiting");
+                eprintln!("{}", "errors occurred, exiting".red());
                 exit(1);
             }
         };
@@ -117,7 +244,11 @@ fn main() {
                 module
                     .print_to_file(&buf)
                     .map_err(|err| anyhow!("{}", err))?;
-                eprintln!("wrote to file: {}", buf.to_string_lossy());
+                println!(
+                    "{}: {}",
+                    "output to file".green().bold(),
+                    buf.to_string_lossy()
+                );
                 Ok(())
             });
         }
@@ -140,18 +271,25 @@ fn main() {
                     recv.into_buf()
                 };
 
-                let mut writer = hound::WavWriter::create(&file, WavSpec {
-                    channels: 2,
-                    sample_rate: SAMPLE_RATE,
-                    bits_per_sample: 32,
-                    sample_format: hound::SampleFormat::Float,
-                })?;
+                let mut writer = hound::WavWriter::create(
+                    &file,
+                    WavSpec {
+                        channels: 2,
+                        sample_rate: SAMPLE_RATE,
+                        bits_per_sample: 32,
+                        sample_format: hound::SampleFormat::Float,
+                    },
+                )?;
                 for s in buf {
                     writer.write_sample(s.0 as f32)?;
                     writer.write_sample(s.1 as f32)?;
                 }
                 writer.finalize()?;
-                eprintln!("wrote to file: {}", file.to_string_lossy());
+                println!(
+                    "{}: {}",
+                    "output to file".green().bold(),
+                    file.to_string_lossy()
+                );
                 Ok(())
             });
         }

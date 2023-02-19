@@ -173,6 +173,7 @@ enum BinOp {
     Sub,
     Mul,
     Div,
+    Mod,
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -598,11 +599,6 @@ impl Compiler {
 
                     ib.set_block(pred_block);
                     ib.block().insns.push(Insn::Call {
-                        out: loop_var,
-                        callee: Callee::Builtin(Builtin::Inc),
-                        args: vec![],
-                    });
-                    ib.block().insns.push(Insn::Call {
                         out: cond,
                         callee: Callee::Builtin(Builtin::Cmp(Comparison::Lt)),
                         args: vec![loop_var, array_len],
@@ -620,6 +616,11 @@ impl Compiler {
                         args: vec![iter_reg, loop_var],
                     });
                     self.compile_block(ib, block)?;
+                    ib.block().insns.push(Insn::Call {
+                        out: loop_var,
+                        callee: Callee::Builtin(Builtin::Inc),
+                        args: vec![],
+                    });
                     ib.block().jump = JumpInsn::Br(pred_block);
 
                     ib.set_block(cont_block);
@@ -796,18 +797,27 @@ impl Compiler {
                         ce.args.len()
                     )))?;
                 }
-                return Ok((Type::Number, Callee::Builtin(Builtin::Phase), false))
+                return Ok((Type::Number, Callee::Builtin(Builtin::Phase), false));
             }
             _ => {}
         }
         builtins!(
             fn time_phase(f64, f64) -> f64,
+
             fn sin(f64) -> f64,
             fn cos(f64) -> f64,
-            fn pan(SampleTy) -> SampleTy,
+            fn exp(f64) -> f64,
+            fn sqrt(f64) -> f64,
+            fn ln(f64) -> f64,
+            fn log(f64, f64) -> f64,
+            fn pow(f64, f64) -> f64,
+
+            fn pan(SampleTy, f64) -> SampleTy,
+            fn semitones(f64) -> f64,
 
             fn (SoundRecvTy) mix(SampleTy) -> (),
-            fn (SoundRecvTy) next() -> ()
+            fn (SoundRecvTy) next() -> (),
+            fn (SoundRecvTy) skip(f64) -> (),
         );
         if let Some(f) = self.funcs.get(name) {
             if args.len() != f.params.len() {
@@ -884,6 +894,7 @@ impl Compiler {
                             "-" => (Op2(Sub), 1),
                             "*" => (Op2(Mul), 2),
                             "/" => (Op2(Div), 2),
+                            "%" => (Op2(Mod), 2),
                             "<" => (Cmp(Lt), 0),
                             "<=" => (Cmp(Le), 0),
                             ">" => (Cmp(Gt), 0),
@@ -1036,9 +1047,13 @@ impl Compiler {
                     out
                 }
                 Expr::Variable { name } => {
+                    use std::f64::consts::*;
                     if let Some(value) = match name.value.as_str() {
                         "SAMPLE_RATE" => Some(DynamicValue::Number(SAMPLE_RATE as f64)),
                         "SAMPLE_PERIOD" => Some(DynamicValue::Number(1. / SAMPLE_RATE as f64)),
+                        "E" => Some(DynamicValue::Number(E)),
+                        "PI" => Some(DynamicValue::Number(PI)),
+                        "TAU" => Some(DynamicValue::Number(TAU)),
                         _ => None,
                     } {
                         let out = ib.func.new_register(Type::Number);
@@ -1080,12 +1095,14 @@ impl Compiler {
 }
 
 pub mod llvm {
-    use crate::compile::{BinOp, Callee, Comparison, DynamicValue, Func, FuncType, Insn, JumpInsn, Type, UnOp};
+    use crate::compile::{
+        BinOp, Callee, Comparison, DynamicValue, Func, FuncType, Insn, JumpInsn, Type, UnOp,
+    };
     use anyhow::anyhow;
 
     use inkwell::builder::Builder;
     use inkwell::types::{AnyType, VoidType};
-    use inkwell::values::{FloatValue, IntValue, VectorValue};
+    use inkwell::values::{FloatValue, IntValue};
     use inkwell::{
         context::ContextRef,
         module::{Linkage::External, Module},
@@ -1472,7 +1489,7 @@ pub mod llvm {
                                                                 .array
                                                                 .get_basic(self.ctx())
                                                                 .into_struct_type(),
-                                                            arg_vec[0].into_pointer_value(),
+                                                            ll_registers[args[0].0],
                                                             0,
                                                             "len_ptr"
                                                         ),
@@ -1486,7 +1503,7 @@ pub mod llvm {
                                                         .array
                                                         .get_basic(self.ctx())
                                                         .into_struct_type(),
-                                                    arg_vec[0].into_pointer_value(),
+                                                    ll_registers[args[0].0],
                                                     1,
                                                     "buf_ptr"
                                                 );
@@ -1517,11 +1534,11 @@ pub mod llvm {
                                                             "yhim_newarray",
                                                             get_llvm_ty::<
                                                                 extern "C" fn(
+                                                                    *mut ArrayTy,
                                                                     i64,
                                                                     i64,
                                                                     i64,
-                                                                )
-                                                                    -> ArrayTy,
+                                                                ),
                                                             >(
                                                             )(
                                                                 &self.ctx()
@@ -1532,10 +1549,12 @@ pub mod llvm {
                                                     });
                                                 let c_ll_ty = self.llvm_type(c_ty);
                                                 let i64 = self.ctx().i64_type();
-                                                let arr = ib
+                                                let arr_reg = ll_registers[out.0];
+                                                ib
                                                     .build_call(
                                                         fv,
                                                         &[
+                                                            arr_reg.into(),
                                                             i64.const_int(
                                                                 arg_vec.len() as u64,
                                                                 false,
@@ -1550,17 +1569,14 @@ pub mod llvm {
                                                         ],
                                                         "arr",
                                                     )
-                                                    .try_as_basic_value()
-                                                    .unwrap_left();
-                                                let arr_reg = ll_registers[out.0];
-                                                ib.build_store(arr_reg, arr);
+                                                    .try_as_basic_value();
 
                                                 let ptr_to_buf = gep!(
                                                     self.c
                                                         .array
                                                         .get_basic(self.ctx())
                                                         .into_struct_type(),
-                                                    arg_vec[0].into_pointer_value(),
+                                                    arr_reg,
                                                     1,
                                                     "buf_ptr"
                                                 );
@@ -1664,72 +1680,65 @@ pub mod llvm {
                                                 let arg_ty = &func[args[0]];
                                                 let is_float = arg_ty.is_float().unwrap();
                                                 if is_float {
+                                                    let f: fn(_, _, _) -> _ = match op {
+                                                        BinOp::Add => {
+                                                            |ib: &Builder, l: FloatValue, r| {
+                                                                ib.build_float_add(l, r, "r")
+                                                            }
+                                                        }
+                                                        BinOp::Sub => {
+                                                            |ib: &Builder, l: FloatValue, r| {
+                                                                ib.build_float_sub(l, r, "r")
+                                                            }
+                                                        }
+                                                        BinOp::Mul => {
+                                                            |ib: &Builder, l: FloatValue, r| {
+                                                                ib.build_float_mul(l, r, "r")
+                                                            }
+                                                        }
+                                                        BinOp::Div => {
+                                                            |ib: &Builder, l: FloatValue, r| {
+                                                                ib.build_float_div(l, r, "r")
+                                                            }
+                                                        }
+                                                        BinOp::Mod => {
+                                                            |ib: &Builder, l: FloatValue, r| {
+                                                                ib.build_float_rem(l, r, "r")
+                                                            }
+                                                        }
+                                                    };
+
                                                     if arg_ty.is_sample() {
-                                                        let f: fn(_, _, _) -> _ = match op {
-                                                            BinOp::Add => {
-                                                                |ib: &Builder, l: VectorValue, r| {
-                                                                    ib.build_float_add(l, r, "r")
-                                                                }
-                                                            }
-                                                            BinOp::Sub => {
-                                                                |ib: &Builder, l: VectorValue, r| {
-                                                                    ib.build_float_sub(l, r, "r")
-                                                                }
-                                                            }
-                                                            BinOp::Mul => {
-                                                                |ib: &Builder, l: VectorValue, r| {
-                                                                    ib.build_float_mul(l, r, "r")
-                                                                }
-                                                            }
-                                                            BinOp::Div => {
-                                                                |ib: &Builder, l: VectorValue, r| {
-                                                                    ib.build_float_div(l, r, "r")
-                                                                }
-                                                            }
-                                                        };
-                                                        let vec_ty =
-                                                            self.ctx().f64_type().vec_type(2);
-                                                        ib.build_store(
-                                                            ll_registers[out.0],
-                                                            f(
-                                                                &ib,
-                                                                load!(
-                                                                    vec_ty,
-                                                                    ll_registers[args[0].0],
-                                                                    "lhs"
-                                                                )
-                                                                .into_vector_value(),
-                                                                load!(
-                                                                    vec_ty,
-                                                                    ll_registers[args[1].0],
-                                                                    "rhs"
-                                                                )
-                                                                .into_vector_value(),
-                                                            ),
-                                                        );
+                                                        let s_ptr = ll_registers[out.0];
+                                                        let l_ptr = ll_registers[args[0].0];
+                                                        let r_ptr = ll_registers[args[1].0];
+                                                        let s_ty = self
+                                                            .c
+                                                            .sample
+                                                            .get(self.ctx())
+                                                            .into_struct_type();
+                                                        let f_ty = self.ctx().f64_type();
+                                                        for i in 0..=1 {
+                                                            ib.build_store(
+                                                                gep!(s_ty, s_ptr, i, "s"),
+                                                                f(
+                                                                    &ib,
+                                                                    load!(
+                                                                        f_ty,
+                                                                        gep!(s_ty, l_ptr, i, "lp"),
+                                                                        "l"
+                                                                    )
+                                                                    .into_float_value(),
+                                                                    load!(
+                                                                        f_ty,
+                                                                        gep!(s_ty, r_ptr, i, "rp"),
+                                                                        "r"
+                                                                    )
+                                                                    .into_float_value(),
+                                                                ),
+                                                            );
+                                                        }
                                                     } else {
-                                                        let f: fn(_, _, _) -> _ = match op {
-                                                            BinOp::Add => {
-                                                                |ib: &Builder, l: FloatValue, r| {
-                                                                    ib.build_float_add(l, r, "r")
-                                                                }
-                                                            }
-                                                            BinOp::Sub => {
-                                                                |ib: &Builder, l: FloatValue, r| {
-                                                                    ib.build_float_sub(l, r, "r")
-                                                                }
-                                                            }
-                                                            BinOp::Mul => {
-                                                                |ib: &Builder, l: FloatValue, r| {
-                                                                    ib.build_float_mul(l, r, "r")
-                                                                }
-                                                            }
-                                                            BinOp::Div => {
-                                                                |ib: &Builder, l: FloatValue, r| {
-                                                                    ib.build_float_div(l, r, "r")
-                                                                }
-                                                            }
-                                                        };
                                                         ib.build_store(
                                                             ll_registers[out.0],
                                                             f(
@@ -1759,6 +1768,11 @@ pub mod llvm {
                                                         BinOp::Div => {
                                                             |ib: &Builder, l: IntValue, r| {
                                                                 ib.build_int_signed_div(l, r, "r")
+                                                            }
+                                                        }
+                                                        BinOp::Mod => {
+                                                            |ib: &Builder, l: IntValue, r| {
+                                                                ib.build_int_signed_rem(l, r, "r")
                                                             }
                                                         }
                                                     };

@@ -1,13 +1,21 @@
+use colored::Colorize;
 use llvm_sys::support::LLVMAddSymbol;
 use std::alloc::Layout;
+use std::f64::consts::{PI, TAU};
 use std::ffi::{c_void, CString};
 use std::ops::AddAssign;
+use std::process::exit;
 
 pub const SAMPLE_RATE: u32 = 44_100;
 
 #[no_mangle]
 extern "C" fn yhim_time_phase(time: f64, freq: f64) -> f64 {
-    ((time % (1.0 / freq)) % 1.0) * std::f64::consts::TAU
+    ((time * freq) % 1.) * TAU
+}
+
+#[no_mangle]
+extern "C" fn yhim_semitones(freq: f64, semitones: f64) -> f64 {
+    freq * 2.0_f64.powf(semitones / 12.0)
 }
 
 #[no_mangle]
@@ -20,6 +28,31 @@ extern "C" fn yhim_cos(theta: f64) -> f64 {
     theta.cos()
 }
 
+#[no_mangle]
+extern "C" fn yhim_exp(x: f64) -> f64 {
+    x.exp()
+}
+
+#[no_mangle]
+extern "C" fn yhim_sqrt(x: f64) -> f64 {
+    x.sqrt()
+}
+
+#[no_mangle]
+extern "C" fn yhim_ln(x: f64) -> f64 {
+    x.ln()
+}
+
+#[no_mangle]
+extern "C" fn yhim_log(x: f64, base: f64) -> f64 {
+    x.log(base)
+}
+
+#[no_mangle]
+extern "C" fn yhim_pow(base: f64, x: f64) -> f64 {
+    base.powf(x)
+}
+
 #[derive(Clone)]
 #[repr(C)]
 struct Array {
@@ -29,23 +62,27 @@ struct Array {
 }
 
 #[no_mangle]
-unsafe extern "C" fn yhim_newarray(len: u64, elem_sz: u64, align: u64) -> Array {
-    let layout = Layout::from_size_align((len * elem_sz) as usize, align as usize).unwrap();
-    let buf = std::alloc::alloc(layout);
-    Array {
-        len,
-        buf,
-        meta: Box::leak(Box::new((layout, 1u64))),
+unsafe extern "C" fn yhim_newarray(ret: *mut Array, len: u64, elem_sz: u64, align: u64) {
+    if let Ok(layout) = Layout::from_size_align((len * elem_sz) as usize, align as usize) {
+        let buf = std::alloc::alloc(layout);
+        ret.write(Array {
+            len,
+            buf,
+            meta: Box::leak(Box::new((layout, 1u64))),
+        })
+    } else {
+        eprintln!("{}: could not allocate array", "fatal error".red().bold());
+        exit(1)
     }
 }
 
 #[no_mangle]
-unsafe extern "C" fn yhim_duparray(arr: Array) {
+unsafe extern "C" fn yhim_duparray(arr: &Array) {
     (*arr.meta).1 += 1;
 }
 
 #[no_mangle]
-unsafe extern "C" fn yhim_droparray(arr: Array, dimensionality: u32) {
+unsafe extern "C" fn yhim_droparray(arr: &Array, dimensionality: u32) {
     let meta = &mut *arr.meta;
     meta.1 -= 1;
     // refcount is 0, deallocate
@@ -54,7 +91,7 @@ unsafe extern "C" fn yhim_droparray(arr: Array, dimensionality: u32) {
         if dimensionality > 0 {
             let arr_buf = std::slice::from_raw_parts(arr.buf as *mut Array, arr.len as usize);
             for subarr in arr_buf {
-                yhim_droparray(subarr.clone(), dimensionality - 1);
+                yhim_droparray(subarr, dimensionality - 1);
             }
             std::mem::forget(arr_buf);
         }
@@ -95,13 +132,13 @@ impl SoundRecv {
 
 #[no_mangle]
 unsafe extern "C" fn yhim_pan(sample: Sample, azimuth: f64) -> Sample {
-    let a_1 = (1. + azimuth) * std::f64::consts::PI / 4.0;
-    let a_2 = (1. - azimuth) * std::f64::consts::PI / 4.0;
+    let a_1 = (1. + azimuth) * PI / 4.0;
+    let a_2 = (1. - azimuth) * PI / 4.0;
     let (s_1, c_1) = a_1.sin_cos();
     let (s_2, c_2) = a_2.sin_cos();
-    let gain_left = 2f64.sqrt() * (c_1 - s_2);
-    let gain_right = 2f64.sqrt() * (c_2 - s_1);
-    Sample(sample.0 * gain_left, sample.1 * gain_right)
+    let a_left = 1. + 2f64.sqrt() * (c_1 - s_1);
+    let a_right = 1. + 2f64.sqrt() * (c_2 - s_2);
+    Sample(sample.0 * a_left, sample.1 * a_right)
 }
 
 #[no_mangle]
@@ -115,13 +152,13 @@ unsafe extern "C" fn yhim_mix(this: &mut SoundRecv, sample: Sample) {
 }
 
 #[no_mangle]
-extern "C" fn yhim_skip(this: &mut SoundRecv, by: u64) {
-    this.pos += by;
+extern "C" fn yhim_skip(this: &mut SoundRecv, by: f64) {
+    this.pos += by as u64;
 }
 
 #[no_mangle]
 extern "C" fn yhim_next(this: &mut SoundRecv) {
-    yhim_skip(this, 1);
+    this.pos += 1;
 }
 
 pub fn add_symbols() {
@@ -132,9 +169,12 @@ pub fn add_symbols() {
         yhim_time_phase,
         yhim_sin,
         yhim_cos,
+        yhim_exp,
+        yhim_sqrt,
         yhim_newarray,
         yhim_duparray,
         yhim_droparray,
+        yhim_semitones,
         yhim_pan,
         yhim_mix,
         yhim_skip,

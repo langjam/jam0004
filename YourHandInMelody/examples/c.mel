@@ -3,8 +3,11 @@ oscillator sine(): sample {
 }
 
 sound main() {
-    do t = 0; t < 10; t + SAMPLE_PERIOD {
-        mix(sine() at time_phase(t, 440))
-        next()
+    for p in [440, 460, 480] {
+        do t = 0 ; t < 1 ; t + SAMPLE_PERIOD {
+            let s = 0.3 * sine() at time_phase(t, p)
+            mix(pan(s, sin(t * TAU)))
+            next()
+        }
     }
 }
