@@ -398,6 +398,34 @@ class Interpreter {
           this.env = parentEnv;
         }
       }
+
+      case Token.GETVAR: {
+        let vardata = this.env.getVar(expr.id);
+
+        if (!vardata) {
+          // it shouldnt be possible, but just in case
+          await this.runtimeError(`Missing variable #${expr.id}`)
+          throw unreachable();
+        }
+
+        return vardata[1];
+      }
+
+      case Token.LET: {
+        let value = await this.visitExpr(expr.value);
+
+        let parentEnv = this.env;
+        let letEnv = new Environment(parentEnv);
+
+        letEnv.setVar(expr.id, expr.value.type, value);
+
+        try{
+          this.env = letEnv;
+          return await this.visitExpr(expr.inExpr);
+        } finally {
+          this.env = parentEnv;
+        }
+      }
     }
 
     throw unreachable();
@@ -687,7 +715,7 @@ class Parser{
     let instrTok = await this.consumeNumber();
 
     if (instrTok.startsWith(Token.GETVAR.toString())) {
-      // parse get variable
+      return this.parseGetVar(instrTok);
     } else if (instrTok.startsWith(Token.FUNCALL.toString())) {
       return this.parseFunCall(instrTok);
     }
@@ -752,6 +780,9 @@ class Parser{
 
       case Token.IF:
         return this.parseIf();
+
+      case Token.LET:
+        return this.parseLet();
     }
 
     await this.parseError(`unknown instruction ${instrTok}`);
@@ -813,6 +844,50 @@ class Parser{
     }
 
     return new Expr.FunCall(func.type.returnType, func, args);
+  }
+
+  async parseGetVar(token: string) : Promise<Expr> {
+    // *0nnn
+    let startpos = this.cursor - token.length;
+    if (token.length < 2) {
+      await this.parseError("invalid get var format.", startpos);
+    }
+
+    let id = parseInt(token.slice(1), 10);
+    let vardata = this.env.getVar(id);
+
+    if (!vardata) {
+      await this.parseError(`unknown function with id ${id}`, startpos + 1);
+      throw unreachable();
+    }
+
+    let type = vardata[0];
+
+    return new Expr.GetVar(type, id);
+  }
+
+  async parseLet() : Promise<Expr> {
+    // *LET * nn * v * e
+    await this.consumeStar();
+    let id = parseInt(await this.consumeNumber(), 10);
+
+    await this.consumeStar();
+    let value = await this.parseExpression();
+
+    let parentEnv = this.env;
+    let tempEnv = new Environment(parentEnv);
+
+    tempEnv.setVar(id, value.type, null); // dummy variable
+
+    try {
+      this.env = tempEnv;
+      await this.consumeStar();
+      let inExpr = await this.parseExpression();
+
+      return new Expr.Let(inExpr.type, id, value, inExpr);
+    } finally {
+      this.env = parentEnv;
+    }
   }
 
   // tuple

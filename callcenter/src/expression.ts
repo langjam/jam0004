@@ -78,11 +78,10 @@ export enum Token {
   // 1 => * number * ret_type * num_param * type1 * type2 * e
 
   FUNCALL = 1, // *1nnn * e1 * e2 * ...
-  CALL = 2255, // *call * nn * e * param...
 
-  LET = 538, // *LET * nn * v * e
   GETVAR = 0, // *0nn,
 
+  LET = 538, // *LET * nn * v * e
   IFL = 435, // ifl * nn * ty * e * et * ef
 
   NUMBER = -1
@@ -90,7 +89,8 @@ export enum Token {
 
 export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit |
                    Expr.TypeConversion | Expr.Unary | Expr.ListCons | Expr.Append | Expr.Get |
-                   Expr.Set | Expr.Len | Expr.Chrs | Expr.Tuple | Expr.IfExpr | Expr.FunCall;
+                   Expr.Set | Expr.Len | Expr.Chrs | Expr.Tuple | Expr.IfExpr | Expr.FunCall |
+                   Expr.GetVar | Expr.Let;
 
 export namespace Expr {
   export class NumberExpr implements ExprLike {
@@ -175,5 +175,15 @@ export namespace Expr {
   export class FunCall implements ExprLike {
     kind: Token.FUNCALL = Token.FUNCALL
     constructor(public type: CCType, public func: FunctionObj, public args: Expr[]){}
+  }
+
+  export class GetVar implements ExprLike {
+    kind: Token.GETVAR = Token.GETVAR
+    constructor(public type: CCType, public id: number){};
+  }
+
+  export class Let implements ExprLike {
+    kind: Token.LET = Token.LET
+    constructor(public type: CCType, public id: number, public value: Expr, public inExpr: Expr){}
   }
 }
