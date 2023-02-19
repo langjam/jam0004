@@ -1,0 +1,17 @@
+[workspace]
+default-members = ["lhs-core"]
+members = [
+  "lhs-core",
+  "lhs-ui",
+  "xtask",
+]
+
+[profile.release]
+opt-level = "s"
+strip = "debuginfo"
+lto = "thin"
+
+[profile.profiling]
+inherits = "release"
+strip = false
+debug = true

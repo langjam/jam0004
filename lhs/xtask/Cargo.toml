@@ -1,0 +1,10 @@
+[package]
+name = "xtask"
+version = "0.1.0"
+authors = ["xiuxiu62 <jacremer@live.com>"]
+edition = "2021"
+
+[dependencies]
+env_logger = "0.10.0"
+log = "0.4.17"
+xtask-wasm = "0.1.10"
