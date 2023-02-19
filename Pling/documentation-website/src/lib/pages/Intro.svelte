@@ -237,6 +237,22 @@ var result = #sum 1, 2;
             A function can also call itself using it's name.
         </p>
 
+        <h2>The Standard Library</h2>
+
+        <p>
+            The standard library is a collection of functions that are included with Pling. It contains functions for
+            working with strings and numbers, as well as functions for reading and writing files, playing sounds,
+            reading input, http requests, and more. To use a module from the standard library, you must import it.
+        </p>
+
+        <pre>use fs;</pre>
+
+        <p>
+            Now, we can use the functions from the <code>fs</code> module. You can find the documentation for the
+            standard library <a href="#/reference">here</a>. There are also some built-in functions that are always
+            available. In Pling, these are called internal functions.
+        </p>
+
         <hr>
 
         <p>
