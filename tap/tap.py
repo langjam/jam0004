@@ -1,7 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass
 from typing import Optional
-import string
 
 
 # Show the line on which the error happens and then point with arrows
@@ -28,6 +27,7 @@ class IllegalCharacterError(Error):
 class UnkownKeywordError(Error):
     def __init__(self, position: tuple[str, int, int], details):
         super().__init__(position, "Unknown keyword error", details)
+
 
 class SyntaxError(Error):
     def __init__(self, position: tuple[str, int, int], details):
@@ -129,7 +129,7 @@ class Lexer:
                     return ret_value.show()
                 tokens.append(ret_value)
                 self.advance()
-            elif self.current_char in "\n":
+            elif "n" in self.current_char:
                 tokens.append(Token(TokenType.EOF))
                 self.advance()
             elif self.current_char in " \t":
@@ -215,7 +215,7 @@ class Lexer:
                            "unterminated string literal")
 
 
-with open("examples/hello_world.tap", 'r') as f:
+with open("examples/test.tap", 'r') as f:
     simple_program = f.read()
 
 print(simple_program)
