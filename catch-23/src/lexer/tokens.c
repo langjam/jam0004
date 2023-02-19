@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ALPHA "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define ALPHA "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
 #define NUMERICAL "0123456789"
 
 // handler format:
@@ -41,6 +41,7 @@ Token token_parse_comment(Unit* unit)
         fprintf(stderr, "error: %s:%i:%i comment has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
 
         scanner_advance_n(&unit->scan, comment_text.len); /* skip past the erroneous code */
+        scanner_destroy_string(comment_text);
 
         return token_nil();
     }
@@ -70,6 +71,7 @@ Token token_parse_number(Unit* unit)
         fprintf(stderr, "error: %s:%i:%i number has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
 
         scanner_advance_n(&unit->scan, number_text.len); /* skip past the erroneous code */
+        scanner_destroy_string(number_text);
 
         return token_nil();
     }
@@ -99,6 +101,7 @@ Token token_parse_identifier(Unit* unit)
         fprintf(stderr, "error: %s:%i:%i variable name has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
 
         scanner_advance_n(&unit->scan, identifier_text.len); /* skip past the erroneous code */
+        scanner_destroy_string(identifier_text);
 
         return token_nil();
     }
