@@ -121,7 +121,12 @@ class Lexer:
             # if self.current_char not in " \t\n":
             # print("WHAT IS WRONG?", repr(self.current_char))
 
-            if self.current_char.isdigit():
+            if self.cursor+1 < len(self.code) and \
+               self.current_char == "/" and self.code[self.cursor+1] == "/":
+                while self.current_char != "\n" and \
+                      self.current_char is not None:
+                    self.advance()
+            elif self.current_char.isdigit():
                 ret_value = self.number()
                 if isinstance(ret_value, Error):
                     return ret_value
