@@ -521,6 +521,11 @@ path-parse@^1.0.7:
   resolved "https://registry.yarnpkg.com/path-parse/-/path-parse-1.0.7.tgz#fbc114b60ca42b30d9daf5858e4bd68bbedb6735"
   integrity sha512-LDJzPVEEEPR+y48z93A0Ed0yXb8pAByGWo/k5YYdYgpY2/2EsOsksJrq7lOHxryrVOn1ejG6oAp8ahvOIQD8sw==
 
+phosphor-svelte@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/phosphor-svelte/-/phosphor-svelte-1.2.1.tgz#a0e78652b723bd93b0eb94bf57e6e1f0f8b83351"
+  integrity sha512-mJDTRr4kBTRYA+SqEAj7rSZ9jbtRWrkqKjn+uYG8Ivhe17LnD685ZehRbQPNdkN8v+T4rjnfnysyKhqn3WXeTw==
+
 picocolors@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/picocolors/-/picocolors-1.0.0.tgz#cb5bdc74ff3f51892236eaf79d68bc44564ab81c"

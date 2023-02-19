@@ -21,7 +21,7 @@
     right: 0;
     background-color: var(--surface);
 
-    z-index: 1;
+    z-index: 4;
   }
 
   nav ul {

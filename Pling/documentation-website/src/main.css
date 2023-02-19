@@ -12,6 +12,7 @@
 
 :root {
   --background: #232634;
+  --background2: #2c2f3f;
   --surface: #414559;
   --primary: #a6d189;
   --secondary: #85c1dc;
@@ -36,4 +37,33 @@ html, body {
 
 .secondary {
   color: var(--secondary) !important;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--surface);
+}
+
+a {
+  color: var(--secondary);
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+  color: var(--primary);
+}
+
+code {
+  font-family: 'Space Mono', monospace;
+  background: var(--surface);
+  padding: 2px;
+  border-radius: 0.2em;
+}
+
+pre {
+  font-family: 'Space Mono', monospace;
+  background: var(--surface);
+  padding: 1em;
+  border-radius: 0.2em;
 }

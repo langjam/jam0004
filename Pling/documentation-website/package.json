@@ -19,6 +19,7 @@
     "vite": "^4.1.0"
   },
   "dependencies": {
+    "phosphor-svelte": "^1.2.1",
     "svelte-spa-router": "^3.3.0",
     "timeago.js": "^4.0.2",
     "url-slug": "^3.0.4"

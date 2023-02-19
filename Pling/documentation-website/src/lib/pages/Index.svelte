@@ -1,6 +1,9 @@
 <script>
     import IndexBackgroundArt from "../IndexBackgroundArt.svelte";
     import {onMount} from "svelte";
+    import MouseIndicator from "../MouseIndicator.svelte";
+    import AboutSection from "../AboutSection.svelte";
+    import Footer from "../../Footer.svelte";
 
     const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -18,7 +21,7 @@
                 clearInterval(interval);
                 word.innerText = word.dataset.value;
             }
-        }, 30);
+        }, 50);
     }
 
     let prevElem = -1;
@@ -57,21 +60,27 @@
 <div class="splash">
     <div class="splash__content">
         <h1
+                bind:this={imagineElem}
                 class="splash__title"
                 data-value="Imagine"
-                bind:this={imagineElem}
         >Imagine</h1>
         <h1
+                bind:this={codeElem}
                 class="splash__title"
                 data-value="Code"
-                bind:this={codeElem}
         >Code</h1>
         <h1
+                bind:this={listenElem}
                 class="splash__title"
                 data-value="Listen"
-                bind:this={listenElem}
         >Listen</h1>
     </div>
+    <MouseIndicator/>
+</div>
+
+<div class="other">
+    <AboutSection/>
+    <Footer/>
 </div>
 
 <style>
@@ -106,5 +115,21 @@
     .splash__title {
       font-size: 2.5rem;
     }
+  }
+
+  .other {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    background: var(--background2);
+
+    padding: 3em;
+  }
+
+  .other > * {
+    max-width: 800px;
+    margin: 0 auto;
   }
 </style>

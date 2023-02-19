@@ -5,10 +5,13 @@
 
     function mouseMove(e) {
         const x = e.clientX - 125;
-        const y = e.clientY - 125;
+        let y = e.clientY - 125 + window.scrollY;
 
-        // blob.style.left = x + 'px';
-        // blob.style.top = y + 'px';
+        // Stop going off the bottom of the screen
+        if (y > window.innerHeight - 250) {
+            y = window.innerHeight
+        }
+
         blob.animate({
             left: x + 'px',
             top: y + 'px'
