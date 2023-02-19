@@ -1,15 +1,25 @@
 import { interpret, Stream, Output } from "../src/interpreter";
 
 import * as readline from 'node:readline/promises';
-import { stdin as input, stdout as output } from 'node:process';
+import { exit, stdin as input, stdout as output } from 'node:process';
+import { parseArgs } from "node:util";
+import { createReadStream } from "node:fs";
 
 class Console implements Stream, Output {
   private rl : readline.Interface;
   private buffer: string;
   private resolv: () => void;
 
-  constructor(private quiet: boolean = false) {
-    this.rl = readline.createInterface(input, output);
+  constructor(private quiet: boolean = false, file?: string) {
+    if (!file){
+      this.rl = readline.createInterface(input, output);
+    } else {
+      let f = createReadStream(file).on("error", () => {
+        console.error("Error when opening file", file);
+        exit(1);
+      });
+      this.rl = readline.createInterface(f, output);
+    }
     this.resolv = () => {};
     this.buffer = "";
 
@@ -74,9 +84,13 @@ class Console implements Stream, Output {
 }
 
 async function main() {
-  let args = new Set(process.argv);
-  let quiet = args.has("-q") || args.has("--quiet");
-  const consl = new Console(quiet);
+  let options = {quiet: {type: 'boolean', short: 'q'}, file: {type: 'string', short: 'f'}};
+  let args = parseArgs({args: process.argv.slice(2), options, strict: false} as any)
+
+  let quiet = args.values.quiet as boolean || false;
+  let file = args.values.file as string;
+
+  const consl = new Console(quiet, file);
   interpret(consl, consl);
 }
 

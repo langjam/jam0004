@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "typecheck": "tsc -p tsconfig.check.json",
-    "build": "yarn typecheck && parcel build --target cmd --no-cache --no-optimize"
+    "build": "yarn typecheck && parcel build --target cmd --no-cache",
+    "callcenter": "node dist/index.js"
   },
   "targets": {
     "cmd": {
