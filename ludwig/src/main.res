@@ -8,9 +8,12 @@ let editorText = ref("")
 
 registerInterpreter(text => editorText := text)
 
-let playNote = (note) => {
-  playNoteRaw(Syntax.noteToString(note), "4n")
-  Js.log(note)
+let playNote = (duration, pitch, octave) => {
+  playNoteRaw(
+    Syntax.noteToString(pitch) ++ Belt.Int.toString(octave),
+    Belt.Int.toString(duration) ++ "n",
+  )
+  Js.log3(duration, Syntax.noteToString(pitch), octave)
 }
 
 registerRunClick(() => {

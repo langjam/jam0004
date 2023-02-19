@@ -1,4 +1,4 @@
-type duration = N16 | N8 | N4 | N2 | N1
+// type duration = N16 | N8 | N4 | N2 | N1
 
 type note =
   | A
@@ -18,6 +18,7 @@ type note =
   | G
   | GSharp // same
   | AFlat // thing
+  | Pause
 
 type rec expr =
   // x
@@ -42,10 +43,10 @@ type rec expr =
   | Sequentialize(expr)
   // fail
   | Fail
-  // C
-  | Note(note)
-  // n8 e
-  | Duration(duration, expr)
+  // C4
+  | Note(int, note, int)
+// n8 e
+// | Duration(int, expr)
 
 // This needs to be defined here thanks to closures :/
 and env = {
@@ -54,7 +55,6 @@ and env = {
   // We need to keep a list of scopes since each branch of a choice should get its own (mutable!)
   // scope.
   variableValueScopes: list<Belt.HashMap.t<Unique.t, value, Unique.Hashable.identity>>,
-  
   // This maps variables to their identities, making it possible to look up the value stored in variableValues.
   // Unlike variableValues, this is an *immutable* map which respects lexical scope
   variableIdentities: Belt.Map.String.t<Unique.t>,
@@ -65,32 +65,34 @@ and value =
 
   | VStuckVar(env, string, Unique.t)
   | VStuckApp(value, value)
-  // These can only be created during evaluation. 
+  // These can only be created during evaluation.
   // Lambda expressions always evaluate to closures
   | Closure(env, string, expr)
   | VChoice(value, value)
   | VCons(value, value)
   | VEmptyList
-  | VNote(note)
+  | VNote(int, note, int)
   | VFail
   | VConst(Unique.t)
 
-let noteToString = note => switch note {
-  | A => "A4"
-  | ASharp => "A#4"
-  | BFlat => "Bb4"// thing
-  | B => "B4"
-  | C => "C4"
-  | CSharp => "C#4" // same
-  | DFlat => "Db4" // thing
-  | D => "D4"
-  | DSharp => "D#4"// same
-  | EFlat => "Eb4"// thing
-  | E => "E4"
-  | F => "F4"
-  | FSharp => "F#4" // same
-  | GFlat => "Gb4" // thing
-  | G => "G4"
-  | GSharp => "G#4" // same
-  | AFlat => "Ab4" // thing
-}
+let noteToString = note =>
+  switch note {
+  | A => "A"
+  | ASharp => "A#"
+  | BFlat => "Bb" // thing
+  | B => "B"
+  | C => "C"
+  | CSharp => "C#" // same
+  | DFlat => "Db" // thing
+  | D => "D"
+  | DSharp => "D#" // same
+  | EFlat => "Eb" // thing
+  | E => "E"
+  | F => "F"
+  | FSharp => "F#" // same
+  | GFlat => "Gb" // thing
+  | G => "G"
+  | GSharp => "G#" // same
+  | AFlat => "Ab" // thing
+  | Pause => "_"
+  }

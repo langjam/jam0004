@@ -18,7 +18,6 @@ type token =
   | FAIL
   | EQUALS
   | EOF
-  | DURATION of (Syntax.duration)
   | CONST
   | COMMA
   | COLON
