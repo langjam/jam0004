@@ -578,7 +578,7 @@ class Interpreter:
             return False
 
 
-file_name = "examples/variable.tap"
+file_name = "examples\guide.tap"
 with open(file_name, 'r') as f:
     simple_program = f.read()
     # print(simple_program.split("\t"))
