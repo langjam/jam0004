@@ -1,6 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
 from typing import Optional
+import string
 
 
 # Show the line on which the error happens and then point with arrows
@@ -28,6 +29,10 @@ class UnkownKeywordError(Error):
     def __init__(self, position: tuple[str, int, int], details):
         super().__init__(position, "Unknown keyword error", details)
 
+class SyntaxError(Error):
+    def __init__(self, position: tuple[str, int, int], details):
+        super().__init__(position, "Syntax error", details)
+
 
 class Keyword:
     keywords = ["thumb",
@@ -44,9 +49,11 @@ class Keyword:
 class TokenType(Enum):
     INT = "INT"
     FLOAT = "FLOAT"
+    STRING = "STRING"
     KEYWORD = "KEYWORD"
     COLON = ":"
     EOF = "EOF"
+    INDENT = "INDENT"
 
 
 @dataclass
@@ -72,7 +79,6 @@ class Lexer:
         self.column += 1
         if self.cursor < len(self.code):
             self.current_char = self.code[self.cursor]
-            print(self.current_char, "Hello")
             if self.current_char == "\n":
                 self.prev_column = self.column
                 self.column = 0
@@ -97,32 +103,41 @@ class Lexer:
     def tokenize(self):
         tokens = []
 
-        while self.current_char is not None:
-            if self.current_char not in " \t\n":
-                print(self.current_char)
+        n = 0
+        while self.current_char is not None and n <= 10:
+            # if self.current_char not in " \t\n":
+            #     print(self.current_char)
 
             if self.current_char.isdigit():
                 ret_value = self.number()
                 if isinstance(ret_value, Error):
                     return ret_value.show()
                 tokens.append(ret_value)
-                if self.current_char == "\n":
-                    tokens.append(Token(TokenType.EOF))
                 self.advance()
             elif self.current_char.isalpha():
                 ret_value = self.identify()
                 if isinstance(ret_value, Error):
                     return ret_value.show()
                 tokens.append(ret_value)
-                print(f"Ret value: {self.current_char}")
                 self.advance()
             elif self.current_char == ":":
                 tokens.append(Token(TokenType.COLON))
                 self.advance()
+            elif self.current_char == '"':
+                ret_value = self._string()
+                if isinstance(ret_value, Error):
+                    return ret_value.show()
+                tokens.append(ret_value)
+                self.advance()
             elif self.current_char in "\n":
                 tokens.append(Token(TokenType.EOF))
-                print("Hello")
                 self.advance()
+            elif self.current_char in " \t":
+                tokens.append(Token(TokenType.INDENT))
+                self.advance()
+            else:
+                print(n)
+                n += 1
 
         return tokens
 
@@ -164,7 +179,6 @@ class Lexer:
 
         while self.current_char is not None:
             if curr_str in Keyword.keywords:
-                print('Inside')
                 # self.previous()
                 return Token(TokenType.KEYWORD, curr_str)
             elif self.current_char in " \t\n":
@@ -174,12 +188,10 @@ class Lexer:
                                            self.column),
                                           f"'{curr_str}'")
             else:
-                print("1")
                 curr_str += self.current_char
                 self.advance()
 
         if curr_str in Keyword.keywords:
-            print("Outside")
             # self.previous()
             return Token(TokenType.KEYWORD, curr_str)
         else:
@@ -188,8 +200,24 @@ class Lexer:
                                        self.column),
                                       f"'{curr_str}'")
 
+    def _string(self):
+        curr_str = ""
 
-simple_program = "thumb :\n"
+        self.advance()
+        while self.current_char is not None:
+            if self.current_char == '"':
+                return Token(TokenType.STRING, str(curr_str))
+
+            curr_str += self.current_char
+            self.advance()
+
+        return SyntaxError((self.filename, self.line_number, self.column),
+                           "unterminated string literal")
+
+
+with open("examples/hello_world.tap", 'r') as f:
+    simple_program = f.read()
+
 print(simple_program)
 lexer = Lexer("none", simple_program)
 print(lexer.tokenize())
