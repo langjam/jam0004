@@ -22,7 +22,7 @@ public class IoBuiltins extends BuiltinExplorer {
         }
     }
 
-    @BuiltinExplorerInfo(name = "io.parsenum", description = "Parses a number from a string", usage = "#io.parseNum [string] -> [number]")
+    @BuiltinExplorerInfo(name = "io.parsenum", description = "Parses a number from a string", usage = "#io.parsenum [string] -> [number]")
     public double parseNum(String str) {
         return Double.parseDouble(str);
     }
