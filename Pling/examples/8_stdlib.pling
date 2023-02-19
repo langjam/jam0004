@@ -1,0 +1,12 @@
+// Let's explore the standard library
+use fs;
+use io;
+
+#io.printcolor `green`, #fs.read `;/example.txt`;
+
+#printnf `Input something: `;
+
+var input = #io.readln;
+
+#printnf `You entered: `;
+#printnf input;
