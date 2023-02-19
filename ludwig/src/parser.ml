@@ -299,7 +299,7 @@ let _menhir_action_10 =
   fun _1 ->
     (
 # 61 "src/parser.mly"
-                                            ( Var(_1, None) )
+                                            ( Var(_1) )
 # 304 "src/parser.ml"
      : (
 # 34 "src/parser.mly"
@@ -323,7 +323,7 @@ let _menhir_action_12 =
   fun _2 _4 _6 ->
     (
 # 63 "src/parser.mly"
-                                            ( Let(_2, Unify(Var(_2, None), _4, _6)) )
+                                            ( Let(_2, Unify(Var(_2), _4, _6)) )
 # 328 "src/parser.ml"
      : (
 # 34 "src/parser.mly"

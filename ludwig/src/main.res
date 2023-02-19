@@ -2,22 +2,35 @@
 @module("./editor") external registerRunClick : (unit => unit) => unit = "registerRunClick"
 @module("./editor") external displayNote : string => unit = "displayNote"
 
+@module("./player") external playNoteRaw : (string, string) => unit = "playNote"
+@module("./player") external runAfterDuration : (string, unit => unit) => unit = "runAfterDuration"
+
+
 let editorText = ref("")
 
 registerInterpreter(text => editorText := text)
 
+let playNote = (note, ~onComplete) => {
+    // playNoteRaw(Syntax.noteToString(note), "4n")
+    Js.log(note)
+    runAfterDuration("4n", onComplete)
+}
+
 registerRunClick(() => {
     let text = editorText.contents
 
-    let lexbuf = Lexing.from_string(text)
+    try {
+        Driver.playExpr(~playNote, text)
 
-    let expr = Parser.main (Lexer.token, lexbuf)
-
-    let stringified = switch Js.Json.stringifyAny(expr) {
-        | None => "Error stringifying expression"
-        | Some(str) => str
+        displayNote("Should be playing?")
+    } catch {
+        | Driver.DriverError(error) => switch error {
+            | InvalidNote(expr) => displayNote("Invalid note: " ++ Belt.Option.getWithDefault (Js.Json.stringifyAny(expr), "<Unable to stringify value>"))
+            | EvalError(UnboundVariable(varname)) => displayNote("Unbound variable: " ++ varname)
+            | EvalError(TryingToCallNonFunction(expr)) => displayNote("Trying to call non-function: " ++ Belt.Option.getWithDefault (Js.Json.stringifyAny(expr), "<Unable to stringify value>"))
+        }
+        | Js.Exn.Error(error) => displayNote("JS error: " ++ Belt.Option.getWithDefault (Js.Exn.message(error), "<No exception message>"))
+        | error => displayNote("ERROR: " ++ Belt.Option.getWithDefault (Js.Json.stringifyAny(error), "<Unable to stringify value>"))
     }
-
-    displayNote(stringified)
 })
 

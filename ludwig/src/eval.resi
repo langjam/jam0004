@@ -1,5 +1,12 @@
 open Syntax
 
-let eval: (env, expr) => expr
+type evalError = 
+  | UnboundVariable(string)
+  | TryingToCallNonFunction(value)
 
-// (Cn4 | En8) : (D | F) : Bd
+exception EvalError(evalError)
+
+let eval: (env, expr) => value
+
+let makeEnvironment : unit => env
+

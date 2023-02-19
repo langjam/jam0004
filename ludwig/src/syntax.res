@@ -21,13 +21,9 @@ type note =
 
 type rec expr =
   // x
-  // The associated unique is Some iff the variable has been associated with a let binding or lambda at runtime
-  | Var(string, option<Unique.t>)
+  | Var(string)
   // \x -> e
   | Lambda(string, expr)
-  // These can only be created during evaluation. 
-  // Lambda expressions always evaluate to closures
-  | Closure(env, string, expr)
   // let x in e
   | Let(string, expr)
   // e1 = e2 in e
@@ -55,10 +51,43 @@ and env = {
   // values stored inside variable identites.
   // We need to keep a list of scopes since each branch of a choice should get its own (mutable!)
   // scope.
-  variableValueScopes: list<Belt.HashMap.t<Unique.t, expr, Unique.Hashable.identity>>,
+  variableValueScopes: list<Belt.HashMap.t<Unique.t, value, Unique.Hashable.identity>>,
   
   // This maps variables to their identities, making it possible to look up the value stored in variableValues.
   // Unlike variableValues, this is an *immutable* map which respects lexical scope
   variableIdentities: Belt.Map.String.t<Unique.t>,
 }
+and value =
+  // Thunks need to keep their environment
+  | Thunk(env, expr)
 
+  | VStuckVar(env, string, Unique.t)
+  | VStuckApp(value, value)
+  // These can only be created during evaluation. 
+  // Lambda expressions always evaluate to closures
+  | Closure(env, string, expr)
+  | VChoice(value, value)
+  | VCons(value, value)
+  | VEmptyList
+  | VNote(note)
+  | VFail
+
+let noteToString = note => switch note {
+  | A => "A4"
+  | ASharp => "A#4"
+  | BFlat => "Bb4"// thing
+  | B => "B4"
+  | C => "C4"
+  | CSharp => "C#4" // same
+  | DFlat => "Db4" // thing
+  | D => "D4"
+  | DSharp => "D#4"// same
+  | EFlat => "Eb4"// thing
+  | E => "E4"
+  | F => "F4"
+  | FSharp => "F#4" // same
+  | GFlat => "Gb4" // thing
+  | G => "G4"
+  | GSharp => "G#4" // same
+  | AFlat => "Ab4" // thing
+}

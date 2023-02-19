@@ -58,9 +58,9 @@ expr3:
 
 expr_leaf:    
     | "(" expr ")"                          { $2 }
-    | IDENT                                 { Var($1, None) }
+    | IDENT                                 { Var($1) }
     | LET IDENT IN expr                     { Let($2, $4) }
-    | LET IDENT "=" expr IN expr            { Let($2, Unify(Var($2, None), $4, $6)) }
+    | LET IDENT "=" expr IN expr            { Let($2, Unify(Var($2), $4, $6)) }
     | expr1 "=" expr IN expr                { Unify($1, $3, $5) }
     | "[" sep_by_trailing(",", expr) "]"    { List.fold_right (fun x rest -> Cons(x, rest)) $2 EmptyList }
     | LIST expr2                            { Sequentialize($2) }
