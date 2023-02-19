@@ -8,7 +8,7 @@ class Console implements Stream, Output {
   private buffer: string;
   private resolv: () => void;
 
-  constructor() {
+  constructor(private quiet: boolean = false) {
     this.rl = readline.createInterface(input, output);
     this.resolv = () => {};
     this.buffer = "";
@@ -60,7 +60,7 @@ class Console implements Stream, Output {
   }
 
   async log(text: string): Promise<void> {
-    console.log(text);
+    if (!this.quiet) console.log(text);
   }
 
   async out(o: any): Promise<void> {
@@ -74,7 +74,9 @@ class Console implements Stream, Output {
 }
 
 async function main() {
-  const consl = new Console();
+  let args = new Set(process.argv);
+  let quiet = args.has("-q") || args.has("--quiet");
+  const consl = new Console(quiet);
   interpret(consl, consl);
 }
 

@@ -39,16 +39,15 @@ export enum Token {
   STR = 787, // str any
 
   NEG = 634, // int | float -> int | float
-
   NOT = 668, // bool -> bool
 
   // LIST
   // a [a] -> [a] | [a] a -> [a] | [a] -> [a] -> [a]
   // int string -> string | string int -> string | string string -> string
 
-  APP = 277, // app a [a] / [a] a / [a] [a]
-
   LIST = 5478, // *LIST * nn * a * a * a * ...
+
+  APP = 277, // app a [a] / [a] a / [a] [a]
 
   // string | [a], int -> string | a
   GET = 438, // get list index
@@ -80,7 +79,7 @@ export enum Token {
   NUMBER = -1
 }
 
-export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit | Expr.TypeConversion;
+export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit | Expr.TypeConversion | Expr.Unary;
 
 export namespace Expr {
   export class NumberExpr implements ExprLike {
@@ -112,5 +111,10 @@ export namespace Expr {
   export type ConversionToken = Token.INT | Token.FLO | Token.STR;
   export class TypeConversion implements ExprLike {
     constructor(public kind: ConversionToken, public type: CCType, public expr: Expr) {}
+  }
+
+  export type UnaryToken = Token.NEG | Token.NOT;
+  export class Unary implements ExprLike {
+    constructor(public kind: UnaryToken, public type: CCType, public expr: Expr) {}
   }
 }

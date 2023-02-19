@@ -230,6 +230,16 @@ class Interpreter {
         let val = await this.visitExpr(expr.expr);
         return stringify(val);
       }
+
+      case Token.NOT: {
+        let val = await this.visitExprAsBool(expr.expr);
+        return !val;
+      }
+
+      case Token.NEG: {
+        let val = await this.visitExprAsNumber(expr.expr);
+        return -val;
+      }
     }
 
     // TODO:
@@ -376,6 +386,10 @@ class Parser{
       case Token.FLO:
       case Token.STR:
         return this.parseConversion(instr);
+
+      case Token.NEG:
+      case Token.NOT:
+        return this.parseUnary(instr);
     }
 
     await this.parseError(`Unknown instruction ${instrTok}`);
@@ -442,6 +456,7 @@ class Parser{
   async parseConversion(operator: Expr.ConversionToken): Promise<Expr> {
     await this.consumeStar();
     let expr = await this.parseExpression();
+
     let type = BaseType.None;
     let target = BaseType.None;
     switch (operator) {
@@ -464,6 +479,24 @@ class Parser{
     }
 
     return new Expr.TypeConversion(operator, type, expr);
+  }
+
+  async parseUnary(operation: Expr.UnaryToken): Promise<Expr> {
+    await this.consumeStar();
+    let expr = await this.parseExpression();
+
+    let type = BaseType.None
+    if (operation === Token.NEG && (expr.type === BaseType.Int || expr.type === BaseType.Float)) {
+      type = expr.type;
+    } else if (operation === Token.NOT && expr.type === BaseType.Bool) {
+      type = BaseType.Bool;
+    }
+
+    if (type === BaseType.None) {
+      await this.parseError(`invalid operation for type ${typename(expr.type)}`);
+    }
+
+    return new Expr.Unary(operation, type, expr);
   }
 
   async parseNumber() : Promise<Expr> {
