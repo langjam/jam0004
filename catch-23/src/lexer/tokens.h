@@ -12,6 +12,7 @@
     X(TokenComment, "comment", token_parse_comment) \
     X(TokenThingArray, "#[]", NULL) \
     X(TokenThing, "#", NULL) \
+    X(TokenFloatNegative, "'-", NULL) \
     X(TokenFloatEqual, "'=", NULL) \
     X(TokenDoubleEqual, "==", NULL) \
     X(TokenFloatLess, "'<", NULL) \

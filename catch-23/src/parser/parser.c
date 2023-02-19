@@ -64,6 +64,15 @@ Ast *copy_ast(Parser *p, Ast ast)
     return result;
 }
 
+static bool is_prefix_operator_token_type(enum TokenType tt) {
+    return tt == TokenHyphen ||
+        tt == TokenTilde ||
+        tt == TokenIntToFloat ||
+        tt == TokenFloatToInt ||
+        tt == TokenFloatNegative ||
+        tt == TokenBoolNot;
+}
+
 static bool is_infix_operator_token_type(enum TokenType tt) {
     return tt == TokenAdd ||
         tt == TokenHyphen ||
@@ -129,7 +138,7 @@ static bool parse_definition(Parser *p, Ast *dest)
     return true;
 }
 
-
+bool parse_expression(Parser *p, Ast *left);
 bool parse_atomic(Parser *p, Ast *dest)
 {
     switch (peek_token(p).type) {
@@ -140,16 +149,39 @@ bool parse_atomic(Parser *p, Ast *dest)
             };
             next_token(p);
             return true;
+        case TokenParenLeft:
+            next_token(p);
+            checkout(parse_expression(p, dest));
+            checkout(expect_token_type(p, TokenParenRight));
+            next_token(p);
+            return true;
         default:
             return false;
     }
 }
 
+bool parse_prefix(Parser *p, Ast *dest)
+{
+
+    if (is_prefix_operator_token_type(peek_token(p).type)) {
+        Ast curr = (Ast){0}; 
+        curr.type = AST_PREFIX_OPERATOR;
+        curr.tok = peek_token(p);
+        curr.child = alloc_ast(p);
+        next_token(p);
+        checkout(parse_prefix(p, curr.child));
+        *dest = curr;
+    } else {
+        checkout(parse_atomic(p, dest));
+    }
+
+    return true;
+}
 
 bool parse_binary(Parser *p, Ast *dest)
 {
     Ast *left = alloc_ast(p);
-    checkout(parse_atomic(p, left));
+    checkout(parse_prefix(p, left));
 
     while (is_infix_operator_token_type(peek_token(p).type)) {
         Ast *curr = alloc_ast(p); 
@@ -158,7 +190,7 @@ bool parse_binary(Parser *p, Ast *dest)
         curr->child = left;
         curr->child->sibling = alloc_ast(p);
         next_token(p);
-        checkout(parse_atomic(p, curr->child->sibling));
+        checkout(parse_prefix(p, curr->child->sibling));
         left = curr;
     }
 
