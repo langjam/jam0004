@@ -230,7 +230,7 @@ struct scanner_string scanner_split(Scanner* scanner, struct scanner_match prefi
 
 struct scanner_string scanner_split_exclusively(Scanner* scanner, struct scanner_match matcher)
 {
-    return scanner_split_impl(scanner, (struct scanner_match) {}, matcher, true);
+    return scanner_split_impl(scanner, (struct scanner_match) {0}, matcher, true);
 }
 
 struct scanner_string scanner_parse_number(Scanner* scanner, int base)
