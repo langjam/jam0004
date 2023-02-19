@@ -3,7 +3,10 @@
 
 #define AST_TYPES(X)\
     X(AST_INVALID, "invalid"),\
+    X(AST_VAR, "var"),\
+    X(AST_FALSE, "false"),\
     X(AST_GOTO, "goto"),\
+    X(AST_UNLESS, "unless"),\
     X(AST_LABEL, "label"),\
     X(AST_BREAK, "break"),\
     X(AST_NEVER, "never"),\

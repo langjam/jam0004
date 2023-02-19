@@ -15,7 +15,7 @@ Parser parser_create(TokenList *token_list)
 
 static TokenList *skip_whitespace_tokens(TokenList *l)
 {
-    while (l && (l->token.type == TokenWhitespace || l->token.type == TokenCr || l->token.type == TokenNewline)) {
+    while (l && (l->token.type == TokenComment || l->token.type == TokenWhitespace || l->token.type == TokenCr || l->token.type == TokenNewline)) {
         l = l->next;
     }
 
@@ -98,6 +98,18 @@ static bool is_infix_operator_token_type(enum TokenType tt) {
         tt == TokenBoolOr;
 }
 
+static bool parse_var_ident(Parser *p, Token *dest)
+{
+    checkout(expect_token_type_and_get(p, TokenIdentifier, dest));
+    next_token(p);
+
+    if (dest->data.len != 2) {
+        return false;
+    }
+
+    return true;
+}
+
 static bool parse_type(Parser *p, Ast *dest)
 {
     Token t = peek_token(p);
@@ -121,8 +133,7 @@ static bool parse_definition(Parser *p, Ast *dest)
     next_token(p);
 
     Token name;
-    checkout(expect_token_type_and_get(p, TokenIdentifier, &name));
-    next_token(p);
+    checkout(parse_var_ident(p, &name));
 
     checkout(expect_token_type(p, TokenColon));
     next_token(p);
@@ -139,6 +150,15 @@ static bool parse_definition(Parser *p, Ast *dest)
 }
 
 bool parse_expression(Parser *p, Ast *left);
+bool parse_paren(Parser *p, Ast *dest)
+{
+    next_token(p);
+    checkout(parse_expression(p, dest));
+    checkout(expect_token_type(p, TokenParenRight));
+    next_token(p);
+    return true;
+}
+
 bool parse_atomic(Parser *p, Ast *dest)
 {
     switch (peek_token(p).type) {
@@ -150,11 +170,22 @@ bool parse_atomic(Parser *p, Ast *dest)
             next_token(p);
             return true;
         case TokenParenLeft:
-            next_token(p);
-            checkout(parse_expression(p, dest));
-            checkout(expect_token_type(p, TokenParenRight));
+            return parse_paren(p, dest);
+            *dest = (Ast){
+                .type = AST_FALSE,
+                .tok = peek_token(p),
+            };
             next_token(p);
             return true;
+        case TokenDollar: {
+            next_token(p);
+            Token name;
+            checkout(parse_var_ident(p, &name));
+            *dest = (Ast){
+                .type = AST_VAR,
+                .tok = name,
+            };
+        } return true;
         default:
             return false;
     }
@@ -169,7 +200,15 @@ bool parse_prefix(Parser *p, Ast *dest)
         curr.tok = peek_token(p);
         curr.child = alloc_ast(p);
         next_token(p);
-        checkout(parse_prefix(p, curr.child));
+        if (curr.tok.type != TokenBoolNot) {
+            checkout(parse_prefix(p, curr.child));
+        } else {
+            bool success = parse_prefix(p, curr.child);
+            if (!success) {
+                curr.type = AST_FALSE;
+                curr.child = NULL;
+            }
+        }
         *dest = curr;
     } else {
         checkout(parse_atomic(p, dest));
@@ -232,8 +271,7 @@ static bool parse_assignment(Parser *p, Ast *dest)
     next_token(p);
 
     Token name;
-    checkout(expect_token_type_and_get(p, TokenIdentifier, &name));
-    next_token(p);
+    checkout(parse_var_ident(p, &name));
 
     checkout(expect_token_type(p, TokenSqBrLeft));
     next_token(p);
@@ -275,6 +313,22 @@ bool parser_decide_toplevel(Parser *p, Ast *dest)
             next_token(p);
             dest->type = AST_BREAK;
             return true;
+        case TokenQuestMark: {
+            next_token(p);
+            Ast *left = alloc_ast(p);
+            checkout(parse_paren(p, left))
+            Ast *right = alloc_ast(p);
+
+            checkout(expect_token_type(p, TokenCurlyBrLeft));
+            next_token(p);
+            checkout(parse_toplevel(p, right, TokenCurlyBrRight));
+            next_token(p); // Skip Sentinel
+
+            dest->child = left;
+            dest->child->sibling = right;
+            dest->type = AST_UNLESS;
+            return true;
+        }
         case TokenGoto:
             next_token(p);
             dest->type = AST_GOTO;
