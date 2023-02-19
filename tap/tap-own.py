@@ -50,6 +50,11 @@ class InvalidArgumentNumberError(Error):
         super().__init__((filename, 0, 0), "InvalidArgumentNumberError", details)
 
 
+class InvalidOperatorNameError(Error):
+    def __init__(self, filename: str, details):
+        super().__init__((filename, 0, 0), "InvalidOperatorNameError", details)
+
+
 class Keyword:
     keywords = ["thumb",
                 "index",
