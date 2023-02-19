@@ -347,6 +347,13 @@ class Interpreter {
 
         return values;
       }
+
+      case Token.IF: {
+        let cond = await this.visitExprAsBool(expr.cond);
+        let toVisit = cond ? expr.trueVal : expr.falseVal;
+
+        return await this.visitExpr(toVisit);
+      }
     }
 
     // TODO:
@@ -528,6 +535,9 @@ class Parser{
 
       case Token.TSET:
         return this.parseTset();
+
+      case Token.IF:
+        return this.parseIf();
     }
 
     await this.parseError(`unknown instruction ${instrTok}`);
@@ -618,6 +628,32 @@ class Parser{
   }
 
   // expression
+
+  // control & call
+
+  async parseIf() : Promise<Expr> {
+    // if * c * t * f
+    await this.consumeStar();
+    let startpos = this.cursor;
+    let cond = await this.parseExpression();
+
+    if (cond.type !== BaseType.Bool) {
+      await this.parseError(`invalid type ${typename(cond.type)} for if condition expression.`, startpos);
+    }
+
+    await this.consumeStar();
+    let trueExpr = await this.parseExpression();
+
+    await this.consumeStar();
+    let falseExpr = await this.parseExpression();
+
+    let type = trueExpr.type;
+    if (!isTypeEqual(trueExpr.type, falseExpr.type)) {
+      type = new OptionType([trueExpr.type, falseExpr.type]);
+    }
+
+    return new Expr.IfExpr(type, cond, trueExpr, falseExpr);
+  }
 
   // tuple
   async parseTup() : Promise<Expr> {

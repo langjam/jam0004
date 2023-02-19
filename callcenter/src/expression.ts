@@ -81,7 +81,7 @@ export enum Token {
 
 export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit |
                    Expr.TypeConversion | Expr.Unary | Expr.ListCons | Expr.Append | Expr.Get |
-                   Expr.Set | Expr.Len | Expr.Chrs | Expr.Tuple;
+                   Expr.Set | Expr.Len | Expr.Chrs | Expr.Tuple | Expr.IfExpr;
 
 export namespace Expr {
   export class NumberExpr implements ExprLike {
@@ -156,5 +156,10 @@ export namespace Expr {
   export class Tuple implements ExprLike {
     kind: Token.TUP = Token.TUP
     constructor(public type: TupleType, public values: Expr[]){}
+  }
+
+  export class IfExpr implements ExprLike {
+    kind: Token.IF = Token.IF
+    constructor(public type: CCType, public cond: Expr, public trueVal: Expr, public falseVal: Expr){}
   }
 }
