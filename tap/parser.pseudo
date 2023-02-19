@@ -24,7 +24,7 @@ func parser(self, filename, tokens):
 					ast.append[["create_variable"]]
 					// REPEAT FOR REST
 				case other:
-					raise Error unexpected token	
+					raise Error unexpected token
 
 		if token.type == KEYWORD and token.value in ("thumb", "index", "middle", "ring", "pinky"):
 			expected_tokens = ("soft", "medium", "loud")
