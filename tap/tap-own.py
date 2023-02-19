@@ -21,17 +21,22 @@ class Error:
 
 class IllegalCharacterError(Error):
     def __init__(self, position: tuple[str, int, int], details):
-        super().__init__(position, "Illegal character error", details)
+        super().__init__(position, "IllegalCharacterError", details)
 
 
 class UnkownKeywordError(Error):
     def __init__(self, position: tuple[str, int, int], details):
-        super().__init__(position, "Unknown keyword error", details)
+        super().__init__(position, "UnknownKeywordError", details)
 
 
 class SyntaxError(Error):
     def __init__(self, position: tuple[str, int, int], details):
-        super().__init__(position, "Syntax error", details)
+        super().__init__(position, "SyntaxError", details)
+
+
+class IllegalKeywordValuePairError(Error):
+    def __init__(self, position: tuple[str, int, int], details):
+        super().__init__(position, "IllegalKeywordValueError", details)
 
 
 class Keyword:
@@ -53,13 +58,14 @@ class TokenType(Enum):
     STRING = "STRING"
     KEYWORD = "KEYWORD"
     COLON = ":"
-    EOF = "EOF"
-    INDENT = "INDENT"
+    # EOF = "EOF"
+    # INDENT = "INDENT"
 
 
 @dataclass
 class Token:
     Type: TokenType
+    Position: (str, int, int)
     Value: Optional[str] = None
 
 
@@ -112,29 +118,30 @@ class Lexer:
             if self.current_char.isdigit():
                 ret_value = self.number()
                 if isinstance(ret_value, Error):
-                    return ret_value.show()
+                    return ret_value
                 tokens.append(ret_value)
                 self.advance()
             elif self.current_char.isalpha():
                 ret_value = self.identify()
                 # print(tokens)
                 if isinstance(ret_value, Error):
-                    return ret_value.show()
+                    return ret_value
                 tokens.append(ret_value)
             elif self.current_char == ":":
-                tokens.append(Token(TokenType.COLON))
+                tokens.append(Token(TokenType.COLON, (self.filename,
+                                    self.line_number, self.column)))
                 self.advance()
             elif self.current_char == '"':
                 ret_value = self._string()
                 if isinstance(ret_value, Error):
-                    return ret_value.show()
+                    return ret_value
                 tokens.append(ret_value)
                 self.advance()
             # elif "n" in self.current_char:
             #     tokens.append(Token(TokenType.EOF))
             #     self.advance()
             elif self.current_char in " \t":
-            #     tokens.append(Token(TokenType.INDENT))
+                # tokens.append(Token(TokenType.INDENT))
                 self.advance()
             else:
                 print(n)
@@ -171,9 +178,11 @@ class Lexer:
 
         # print(number_str, dot_found)
         if dot_found:
-            return Token(TokenType.FLOAT, float(number_str))
+            return Token(TokenType.FLOAT, (self.filename,
+                         self.line_number, self.column), float(number_str))
         else:
-            return Token(TokenType.INT, int(number_str))
+            return Token(TokenType.INT, (self.filename,
+                         self.line_number, self.column), int(number_str))
 
     def identify(self):
         curr_str = ""
@@ -181,7 +190,8 @@ class Lexer:
         while self.current_char is not None:
             if curr_str in Keyword.keywords and self.current_char in " \t\n:":
                 # self.previous()
-                return Token(TokenType.KEYWORD, curr_str)
+                return Token(TokenType.KEYWORD, (self.filename,
+                             self.line_number, self.column), curr_str)
             elif self.current_char in " \t\n":
                 return UnkownKeywordError((self.filename,
                                            self.line_number,
@@ -193,7 +203,8 @@ class Lexer:
 
         if curr_str in Keyword.keywords:
             # self.previous()
-            return Token(TokenType.KEYWORD, curr_str)
+            return Token(TokenType.KEYWORD, (self.filename,
+                         self.line_number, self.column), curr_str)
         else:
             return UnkownKeywordError((self.filename,
                                        self.line_number,
@@ -206,7 +217,8 @@ class Lexer:
         self.advance()
         while self.current_char is not None:
             if self.current_char == '"':
-                return Token(TokenType.STRING, str(curr_str))
+                return Token(TokenType.STRING, (self.filename,
+                             self.line_number, self.column), str(curr_str))
 
             curr_str += self.current_char
             self.advance()
@@ -215,42 +227,78 @@ class Lexer:
                            "unterminated string literal")
 
 
-# class Parser:
-#     def __init__(self, filename: str, tokens):
-#         self.filename: str = filename
-#         self.tokens = tokens
-#         self.token_index: int = -1
-#         self.current_token = None
+class Parser:
+    def __init__(self, filename: str, tokens):
+        self.filename: str = filename
+        self.tokens = tokens
+        self.token_index: int = -1
+        self.current_token = None
 
-#         self.advance()
+        self.advance()
 
-#     def advance(self):
-#         self.token_index += 1
-#         if self.token_index < len(self.tokens):
-#             self.current_token = self.tokens[self.token_index]
-#         else:
-#             self.current_token = None
-#         return self.current_token
+    def advance(self):
+        self.token_index += 1
+        if self.token_index < len(self.tokens):
+            self.current_token = self.tokens[self.token_index]
+        else:
+            self.current_token = None
+        return self.current_token
 
-#     def parse(self):
-#         ast = []
+    def parse(self):
+        ast = []
 
-#         while self.current_token is not None:
-#             print(self.current_token.Type)
-#             if self.current_token.Type == KEYWORD:
-                
-#             elif self.current_token.Type == "":
-#                 pass
-#             self.advance()
-#         return ast
+        while self.current_token is not None:
+            print(self.current_token.Type)
+            if self.current_token.Type == TokenType.KEYWORD:
+                ret_value = self.uncover()
+                if isinstance(ret_value, Error):
+                    return ret_value.show()
+                ast.append(ret_value)
+            elif self.current_token.Type == "":
+                pass
+            self.advance()
+
+        return ast
+
+    def uncover(self):
+        cur_ast = []
+
+        previous_token = self.current_token
+
+        print(previous_token)
+
+        self.advance()
+        while self.current_token is not None:
+            if self.current_token.Type == TokenType.KEYWORD:
+                keyword_value_pair = f"{previous_token.Value} {self.current_token.Value}"
+                match keyword_value_pair:
+                    case "thumb soft":
+                        cur_ast.append("")
+                    case "index soft":
+                        cur_ast.append("print_value")
+                    case other:
+                        return IllegalKeywordValuePairError(self.current_token.Position,
+                                                            f"'{keyword_value_pair}'")
+            else:
+                pass
+            print(self.current_token)
+            self.advance()
+
+        return cur_ast
 
 
 with open("examples/hello_world.tap", 'r') as f:
     simple_program = f.read()
+    print(simple_program.split("\t"))
 
 print(simple_program)
 lexer = Lexer("none", simple_program)
 tokens = lexer.tokenize()
-print(tokens)
-# parser = Parser("hello_world.tap", tokens)
-# print(parser.parse())
+print("#######TOKENIZING##########")
+if not isinstance(tokens, Error):
+    print(tokens)
+    parser = Parser("hello_world.tap", tokens)
+    print("#########PARSING###########")
+    print(parser.parse())
+else:
+    print(tokens.show())
