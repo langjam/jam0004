@@ -22,10 +22,11 @@ class Env:
                     self.stack[-1].append(word)
                 else:
                     self.stack[-1].append(word)
-        elif (word[0] == ',' and ',' in word[1:]) or (word[0] != ',' and ',' in word):
+        elif ',' in word:
             *spl, name = word.split(',')
             for i in spl:
-                self.run(i)
+                if i != '':
+                    self.run(i)
             self.defs[name] = str(self.stack.pop())
         elif word == '[':
             self.stack.append([])
@@ -59,6 +60,30 @@ class Env:
         elif word == 'not' or word == '!':
             a = self.stack.pop()
             self.stack.append(not a)
+        elif word == 'xnor':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append((not a) == (not b))
+        elif word == 'nor':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append((not b) or (not a))
+        elif word == 'nand':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(not (a and b))
+        elif word == 'xor':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append((not a) != (not b))
+        elif word == 'or' or word == '||' or word == '|':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(b or a)
+        elif word == 'and' or word == '&&' or word == '&':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(b and a)
         elif word == 'lt' or word == '=' or word == '==':
             a = self.stack.pop()
             b = self.stack.pop()
@@ -103,15 +128,30 @@ class Env:
             a = self.stack.pop()
             b = self.stack.pop()
             self.stack.append(b % a)
+        elif word == 'pow' or word == '^':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(b ** a)
         elif word == 'do':
             f = self.stack.pop()
             for thing in f.split(' '):
                 self.run(thing)
-        elif word == 'when':
+        elif word == 'if':
             c = self.stack.pop()
             f = self.stack.pop()
+            t = self.stack.pop()
+            for thing in (t if c else f).split(' '):
+                self.run(thing)
+        elif word == 'select':
+            c = self.stack.pop()
+            f = self.stack.pop()
+            t = self.stack.pop()
+            self.stack.append(t if c else f)
+        elif word == 'when':
+            c = self.stack.pop()
+            t = self.stack.pop()
             if c:
-                for thing in f.split(' '):
+                for thing in t.split(' '):
                     self.run(thing)
         elif word == 'swap':
             a = self.stack.pop()
@@ -124,7 +164,10 @@ class Env:
             v = self.stack.pop()
             self.stack.append(v)
             self.stack.append(v)
-        elif word == 'def' or word == 'is' or word == '=':
+        elif word == 'get':
+            n = self.stack.pop()
+            self.append(self.defs[n])
+        elif word == 'def' or word == 'set' or word == 'is' or word == '=':
             n = self.stack.pop()
             o = self.stack.pop()
             self.defs[n] = str(o)

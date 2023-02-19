@@ -15,12 +15,11 @@ class Node:
         else:
             self.pos = [0, 0]
             self.size = 0
-        self.max_size = 256
-        self.min_size = 50
         self.color = [127, 127, 127]
         self.state = 'out'
         self.list = []
         self.root = False
+        self.config = None 
 
     def __str__(self):
         return ' '.join(str(i) for i in self.list)
@@ -43,9 +42,6 @@ class Node:
         return v2dist(self.pos, pos) < self.size
 
     def each(self, pos):
-        if hasattr(self, 'text'):
-            size = cv2.getTextSize(self.text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
-            self.size = int(min(self.max_size, max(max(size) * 0.5 + 10, self.min_size)))
         if self.has(pos):
             if self.state != 'in':
                 self.enter(pos)
@@ -64,6 +60,8 @@ class Node:
         pass
 
     def draw(self, img):
+        font_size = self.config('font-size', default=0.5)
+        font_weight = self.config('font-weight', default=1)
         if not self.root:
             for lno, l in enumerate(self.list):
                 cv2.line(
@@ -71,43 +69,52 @@ class Node:
                     [int(i) for i in self.pos],
                     [int(i) for i in l.pos],
                     tuple((i*3+256)//4 for i in l.color[::-1]),
-                    10
+                    16
                 )
+                start = self.config('index-label', default=0.5)
                 if len([i for i in self.list if not isinstance(i, SelectorOption)]) != 1:
-                    size = cv2.getTextSize(str(lno+1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
+                    size = cv2.getTextSize(str(lno+1), cv2.FONT_HERSHEY_SIMPLEX, font_size, font_weight)[0]
                     cv2.putText(
                         img,
                         str(lno+1),
-                        [int(self.pos[0]/2 + l.pos[0]/2 - size[0]/3), int(self.pos[1]/2 + l.pos[1]/2 + size[1]/4)],
+                        [int(self.pos[0]*start + l.pos[0]*(1-start) - size[0]/3), int(self.pos[1]*start + l.pos[1]*(1-start) + size[1]/4)],
                         cv2.FONT_HERSHEY_SIMPLEX,
-                        0.5,
+                        font_size,
                         (0, 0, 0),
-                        1,
+                        font_weight,
                         cv2.LINE_AA
                     )
         if self.size > 0:
+            if self.text != '':
+                size = self.size
+            else:
+                # size = 8
+                size = self.size
             cv2.circle(
                 img,
                 [int(i) for i in self.pos],
-                int(self.size),
+                int(size),
                 (int(self.color[2]), int(self.color[1]), int(self.color[0])),
                 cv2.FILLED
             )
         self.body(img)
         for l in self.list:
+            l.config = self.config
             l.draw(img)
 
     def body(self, img):
+        font_size = self.config('font-size', default=0.5)
+        font_weight = self.config('font-weight', default=1)
         if hasattr(self, 'text'):
-            size = cv2.getTextSize(self.text, cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
+            size = cv2.getTextSize(self.text, cv2.FONT_HERSHEY_SIMPLEX, font_size, font_weight)[0]
             cv2.putText(
                 img,
                 self.text,
                 [int(self.pos[0] - size[0]/2), int(self.pos[1] + size[1]/4)],
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.5,
+                font_size,
                 (0, 0, 0),
-                1,
+                font_weight,
                 cv2.LINE_AA
             )
         if hasattr(self, 'value'):
@@ -117,32 +124,37 @@ class Node:
                 self.value,
                 [int(self.pos[0] - size[0]/2), int(self.pos[1] + size[1] + self.size)],
                 cv2.FONT_HERSHEY_SIMPLEX,
-                0.5,
+                font_size,
                 (0, 0, 0),
-                1,
+                font_weight,
                 cv2.LINE_AA
             )
 
     def add(self, e):
+        e.conifg = self.config
         self.list.append(e)
 
 
 class Selector(Node):
     def __init__(self, *init):
-        self.text = init[-2]
-        self.opts = init[-1]
-        self.into = None
-        Node.__init__(self, *init[:-2])
-        self.then = lambda obj: None
         global n
         n += phi
+        self.text = init[-1]
+        self.into = None
+        Node.__init__(self, *init[:-1])
+        self.then = lambda obj: None
         c = colorsys.hls_to_rgb(n % 1, 0.65, 0.1)
         self.color = [int(i * 255) for i in c]
     
     def __str__(self):
         names = []
+        if self.text == 'quote' or self.text == 'quo':
+            names.append('[')
         names.extend(str(i) for i in self.list)
-        names.append(self.text)
+        if self.text == 'quote' or self.text == 'quo':
+            names.append(']')
+        else:
+            names.append(self.text)
         return ' '.join(names)
 
     def make_cb(self, n, angle):
@@ -161,6 +173,7 @@ class Selector(Node):
         return ret
 
     def enter(self, pos):
+        option_offset = self.config('opt-offset', 1)
         self.oldcolor = self.color
         self.color = tuple((i + 255) / 2 for i in self.color)
         [x, y] = v2sub(pos, self.pos)
@@ -168,9 +181,12 @@ class Selector(Node):
         angle = math.degrees(angle)
         angle = round(angle/60)*60
         angle = math.radians(angle)
-        for (v, c, n) in self.opts:
-            x = math.cos(angle + math.pi + math.radians(v)) * self.size * 1.25 + self.pos[0]
-            y = math.sin(angle + math.pi + math.radians(v)) * self.size * 1.25 + self.pos[1]
+        for (v, c, n) in [
+                (-60, (64, 255, 64), 'add'),
+                (60, (255, 64, 64), 'del'),
+        ]:
+            x = math.cos(angle + math.pi + math.radians(v)) * self.size * option_offset + self.pos[0]
+            y = math.sin(angle + math.pi + math.radians(v)) * self.size * option_offset + self.pos[1]
             case = SelectorOption([x, y], self.size / 2, n, self.make_cb(n, angle + math.pi))
             case.color = c
             self.add(case)
@@ -199,8 +215,6 @@ class SelectorOption(Node):
         self.cb = args[-1]
         Node.__init__(self, *args[:-2])
         self.color = (255, 0, 0)
-        self.max_size = self.size
-        self.min_size = self.size
 
     def enter(self, pos):
         self.cb(pos)

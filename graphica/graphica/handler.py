@@ -2,6 +2,7 @@
 import math
 import json
 import pathlib
+import configparser
 import cv2
 import numpy as np
 from graphica.node import Node, Selector
@@ -10,7 +11,11 @@ from graphica.forth import run, Env
 import graphica.save as save
 
 class Handler:
-    def __init__(self, one_hand=True):  
+    def __init__(self, one_hand=True):
+        parser = configparser.ConfigParser()
+        parser.read(pathlib.Path(__file__).parent / 'graphica.ini')
+        self.ini_force = parser['force'] if 'force' in parser.sections() else {}
+        self.ini_vars = parser['vars'] if 'vars' in parser.sections() else {}
         def mouse_cb(who_cares, x, y, *who_cares_two_electic_boogaloo):
             self.mouse_xy = [x, y]
         self.window_name = cv2.namedWindow('Graphica')
@@ -18,12 +23,15 @@ class Handler:
         self.one_hand = one_hand
         self.img = None
         self.node = Node()
+        self.node.config = self.config
         self.node.root = True
         self.pt = None
         self.src = []
         self.selected = []
         self.mouse_xy = None
         self.env = Env()
+        for key in self.ini_vars:
+            self.env.defs[key] = self.override[key]
         if one_hand:
             self.cap = cv2.VideoCapture(0)
             if "FindHands" not in globals():
@@ -32,17 +40,27 @@ class Handler:
                 self.hands = FindHands()
             else:
                 self.hands = globals()["FindHands"]()
-        self.config_file = pathlib.Path(__file__).parent.parent / "saves/save.json"
+        self.save_file = pathlib.Path(__file__).parent.parent / "saves/save.json"
         try:
-            with open(self.config_file) as save:
+            with open(self.save_file) as save:
                 self.full_load(save.read())
         except IOError as ioe:
             print(ioe)
         except json.JSONDecodeError as jse:
             print(jse)
 
+    def config(self, var, default=None):
+        if var in self.ini_force:
+            return type(default)(self.override[var])
+        elif var in self.env.defs:
+            return type(default)(self.env.defs[var])
+        else:
+            return default
+
     def data_load(self, src):
         self.env.defs = json.loads(src)
+        for key in self.ini_vars:
+            self.env.defs[key] = self.override[key]
 
     def code_loads(self, src):
         self.node = save.load_post(self, json.loads(src))
@@ -67,13 +85,10 @@ class Handler:
         })
 
     def make_node(self, pos, size, name):
-        options = [
-                (-45, (64, 255, 64), 'add'),
-                (45, (255, 64, 64), 'del'),
-        ]
-        ret = Selector(pos, size, name, options)
+        ret = Selector(pos, size, name)
         ret.then = self.then
         ret.into = self.selected
+        ret.config = self.config
         return ret
 
     def then(self, data):
@@ -85,15 +100,14 @@ class Handler:
     def node_on_add(self, data):
         size = data['self'].size
         angle = data['angle']
-        x = math.cos(angle) * (size + 100)
-        y = math.sin(angle) * (size + 100)
+        x = math.cos(angle) * (size * 2.5)
+        y = math.sin(angle) * (size * 2.5)
         xy = [x, y]
-        print(x, y)
         dpos = data['self'].pos
         res = v2add(xy, dpos)
         src = ''.join(self.src)
         self.src = []
-        data['self'].add(self.make_node(res, 50, src))
+        data['self'].add(self.make_node(res, 65, src))
 
     def node_remove(self, data):
         self.node.remove(data['self'].pos)
@@ -154,13 +168,14 @@ class Handler:
             else:
                 ximg = np.zeros((720, 1280, 4), dtype=np.uint8)
                 ximg.fill(255)
-            if 'mode' in self.env.defs and self.env.defs['mode'] == 'dark':
+            mode = self.config('mode', default='light')
+            if mode == 'dark':
                 ximg = ~ximg
             self.img = cv2.flip(ximg, 1)
             pt = self.get(8)
             if len(self.node.list) == 0:
                 size = self.img.shape[:2]
-                self.node.add(self.make_node([150, size[0]//2], 50, ''))
+                self.node.add(self.make_node([200, size[0]//2], 65, 'id'))
             if len(pt) == 1:
                 self.handle(pt[0])
             else:
@@ -168,7 +183,7 @@ class Handler:
             next_state = self.code_save()
             if next_state != last_state:
                 run(self.env, self.node)
-                with open(self.config_file, "w") as save:
+                with open(self.save_file, "w") as save:
                     save.write(self.full_save())
                 last_state = next_state
             if self.pt is not None:
@@ -183,7 +198,7 @@ class Handler:
                 2,
                 cv2.LINE_AA
             )
-            if 'mode' in self.env.defs and self.env.defs['mode'] == 'dark':
+            if mode == 'dark':
                 self.img = ~self.img
             cv2.imshow('Graphica', self.img)
             key = cv2.waitKey(1)
