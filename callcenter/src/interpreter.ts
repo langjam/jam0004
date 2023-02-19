@@ -1,4 +1,4 @@
-import { BaseType, CCType, typename } from "./types";
+import { BaseType, CCType, isBaseType, isFunctionType, isTypeEqual, typename } from "./types";
 import {Expr, JSValue, Token} from "./expression";
 
 export interface Stream {
@@ -131,6 +131,7 @@ class Interpreter {
     switch (expr.kind) {
       case Token.NUMBER: return expr.number;
 
+      // math ops
       case Token.ADD:
         return (await this.visitExprAsNumber(expr.left)) + (await this.visitExprAsNumber(expr.right));
       case Token.SUB:
@@ -163,6 +164,50 @@ class Interpreter {
 
         return leftval % rightval;
       }
+
+      // comparison
+      case Token.EQ: {
+        let leftval = await this.visitExpr(expr.left);
+        let rightval = await this.visitExpr(expr.right);
+
+        let compared = compare(leftval as ComparableTypes, rightval as ComparableTypes);
+        return compared === 0;
+      }
+      case Token.NE: {
+        let leftval = await this.visitExpr(expr.left);
+        let rightval = await this.visitExpr(expr.right);
+
+        let compared = compare(leftval as ComparableTypes, rightval as ComparableTypes);
+        return compared !== 0;
+      }
+      case Token.LT: {
+        let leftval = await this.visitExpr(expr.left);
+        let rightval = await this.visitExpr(expr.right);
+
+        let compared = compare(leftval as ComparableTypes, rightval as ComparableTypes);
+        return compared < 0;
+      }
+      case Token.GT: {
+        let leftval = await this.visitExpr(expr.left);
+        let rightval = await this.visitExpr(expr.right);
+
+        let compared = compare(leftval as ComparableTypes, rightval as ComparableTypes);
+        return compared > 0;
+      }
+      case Token.LTE: {
+        let leftval = await this.visitExpr(expr.left);
+        let rightval = await this.visitExpr(expr.right);
+
+        let compared = compare(leftval as ComparableTypes, rightval as ComparableTypes);
+        return compared <= 0;
+      }
+      case Token.GTE: {
+        let leftval = await this.visitExpr(expr.left);
+        let rightval = await this.visitExpr(expr.right);
+
+        let compared = compare(leftval as ComparableTypes, rightval as ComparableTypes);
+        return compared >= 0;
+      }
     }
 
     // TODO:
@@ -171,6 +216,49 @@ class Interpreter {
 
   async visitExprAsNumber (expr: Expr) : Promise<number> {
     return await this.visitExpr(expr) as number;
+  }
+}
+
+type ComparableBase = number | boolean | string
+type ComparableTypes =  ComparableBase | null | ComparableTypes[];
+
+function compare (a: ComparableTypes, b: ComparableTypes) : number {
+  if (Array.isArray(a)) {
+    return compareList(a as ComparableTypes[], b as ComparableTypes[]);
+  }
+
+  return compareBase(a as ComparableBase, b as ComparableBase);
+}
+
+function compareBase(a: ComparableBase | null, b: ComparableBase | null) : number {
+  if (a == null) return 0;
+  let ax = a as ComparableBase;
+  let bx = b as ComparableBase;
+
+  if (ax < bx) return -1;
+  else if (ax > bx) return 1;
+  else return 0;
+}
+
+function compareList(a: ComparableTypes[], b: ComparableTypes[]) : number {
+  const n = Math.min(a.length, b.length);
+
+  for (let i = 0; i < n; i++) {
+    if (Array.isArray(a[i])) {
+      let compared = compareList(a[i] as ComparableTypes[], b[i] as ComparableTypes[]);
+      if (compared !== 0) return compared;
+    } else {
+      let compared = compareBase(a[i] as ComparableBase, b[i] as ComparableBase);
+      if (compared !== 0) return compared;
+    }
+  }
+
+  if (a.length < b.length) {
+    return -1;
+  } else if (a.length > b.length) {
+    return 1;
+  } else {
+    return 0;
   }
 }
 
@@ -240,7 +328,14 @@ class Parser{
       case Token.DIV:
       case Token.MOD:
         return this.parseBinaryMath(instr);
-      break;
+
+      case Token.EQ:
+      case Token.NE:
+      case Token.LT:
+      case Token.GT:
+      case Token.LTE:
+      case Token.GTE:
+        return this.parseCompare(instr);
     }
 
     await this.parseError(`Unknown instruction ${instrTok}`);
@@ -271,10 +366,24 @@ class Parser{
     }
 
     if (type === BaseType.None) {
-      await this.parseError(`can't do math operation between ${typename(left.type)} and ${typename(right.type)}`);
+      await this.parseError(`unable to do math operation between types ${typename(left.type)} and ${typename(right.type)}`);
     }
 
     return new Expr.BinaryMath(operator, type, left, right);
+  }
+
+  async parseCompare(operator: Expr.CompareToken) : Promise<Expr> {
+    await this.consumeStar();
+    let left = await this.parseExpression();
+    await this.consumeStar();
+    let right = await this.parseExpression();
+
+    // type check
+    if (isFunctionType(left.type) || isFunctionType(right.type) || !isTypeEqual(left.type, right.type)) {
+      await this.parseError(`unable to do comparison between types ${typename(left.type)} and ${typename(right.type)}`);
+    }
+
+    return new Expr.Comparison(operator, left, right);
   }
 
   async parseNumber() : Promise<Expr> {
