@@ -117,11 +117,10 @@ class Lexer:
                 self.advance()
             elif self.current_char.isalpha():
                 ret_value = self.identify()
-                print(tokens)
+                # print(tokens)
                 if isinstance(ret_value, Error):
                     return ret_value.show()
                 tokens.append(ret_value)
-                self.advance()
             elif self.current_char == ":":
                 tokens.append(Token(TokenType.COLON))
                 self.advance()
@@ -180,7 +179,7 @@ class Lexer:
         curr_str = ""
 
         while self.current_char is not None:
-            if curr_str in Keyword.keywords:
+            if curr_str in Keyword.keywords and self.current_char in " \t\n:":
                 # self.previous()
                 return Token(TokenType.KEYWORD, curr_str)
             elif self.current_char in " \t\n":
@@ -246,7 +245,7 @@ class Lexer:
 #         return ast
 
 
-with open("examples/user_input.tap", 'r') as f:
+with open("examples/hello_world.tap", 'r') as f:
     simple_program = f.read()
 
 print(simple_program)
