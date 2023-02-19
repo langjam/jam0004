@@ -9,8 +9,8 @@
     X(TokenIdentifier, "identifier", token_parse_identifier) \
     X(TokenNumber, "number", token_parse_number) \
     X(TokenComment, "comment", token_parse_comment) \
-    X(TokenBoolean, "#?", NULL) \
-    X(TokenThing64, "##", NULL) \
+    X(TokenThingArray, "#[]", NULL) \
+    X(TokenThing, "#", NULL) \
     X(TokenDoubleEqual, "==", NULL) \
     X(TokenShiftLeft, "\"<", NULL) \
     X(TokenShiftRight, "\">", NULL) \
@@ -19,6 +19,11 @@
     X(TokenIntToFloat, "''", NULL) \
     X(TokenNotEqual, "<>", NULL) \
     X(TokenFloatNotEqual, "><", NULL) \
+    X(TokenArrowLeft, "<~", NULL) \
+    X(TokenArrowRight, "~>", NULL) \
+    X(TokenAgainst, ";;", NULL) \
+    X(TokenDont, ":;", NULL) \
+    X(TokenDoubleColon, "::", NULL) \
     X(TokenFloatToInt, "\"", NULL) \
     X(TokenSingleQuote, "'", NULL) \
     X(TokenThing32, "#", NULL) \
@@ -48,7 +53,9 @@
     X(TokenQuestMark, "?", NULL) \
     X(TokenEquals, "=", NULL) \
     X(TokenTilde, "~", NULL) \
-    X(TokenWhitespace, " ", NULL)
+    X(TokenWhitespace, " ", NULL) \
+    X(TokenNewline, "\n", NULL) \
+    X(TokenCr, "\r", NULL)
 
 #define TOKEN_MACRO_ENUM(NAME_, SAMPLE_, HANDLER_) NAME_,
 
@@ -92,5 +99,5 @@ Token token_parse_identifier(Unit* unit);
 
 static inline Token token_nil()
 {
-    return (Token) { TokenNill, {0} };
+    return (Token) { TokenNill };
 }

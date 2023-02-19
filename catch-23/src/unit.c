@@ -38,6 +38,5 @@ bool unit_load_from_file(const char *path, Unit* destination, DestroyList dl)
     };
 
     return true;
-    return input;
 }
 

@@ -11,6 +11,7 @@ static struct scanner_iterator create_iterator(const Scanner* scanner, ptrdiff_t
     return (struct scanner_iterator) { scanner, index, ch };
 }
 
+
 // TODO: improve preformance of this function
 struct scanner_location scanner_location_of(struct scanner_iterator it)
 {
@@ -23,10 +24,12 @@ struct scanner_location scanner_location_of(struct scanner_iterator it)
 
     for(size_t i = 0; i < it._index; i++)
     {
-        if(it._scanner->text[it._scanner->_index] == '\n')
+        if(it._scanner->text[i] == '\n')
         {
             loc.line_num++;
-            loc.col_num = 0;
+            loc.col_num = 1;
+
+            continue;
         }
 
         loc.col_num++;
@@ -288,7 +291,7 @@ struct scanner_string scanner_parse_number(Scanner* scanner, int base)
     size_t len = scanner->_index - old_index;
     char* buff = malloc((len + 1) * sizeof(char));
 
-    if(!buff) return (struct scanner_string) { NULL, len };
+    if(!buff) return (struct scanner_string) { scanner_current(scanner), NULL, len };
 
     memcpy(buff, &scanner->text[old_index], len);
 

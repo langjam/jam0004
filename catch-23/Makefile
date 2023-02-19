@@ -9,6 +9,7 @@ CREATE_DIRS = mkdir -p $(@D)
 CFLAGS := \
 		-I $(SRC_DIRECTORY) \
 		-std=c11 \
+		-Wall \
 		-g
 
 LFLAGS :=

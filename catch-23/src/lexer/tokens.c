@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define ALPHA "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define ALPHA "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ_"
 #define NUMERICAL "0123456789"
 
 // handler format:
@@ -23,7 +23,10 @@
 
 Token token_parse_comment(Unit* unit)
 {
-    if(!scanner_is_match(scanner_current(&unit->scan), match_lexeme("*\\")))
+    bool is_multiline = scanner_is_match(scanner_current(&unit->scan), match_lexeme("*\\"));
+
+    if(!is_multiline &&
+       !scanner_is_match(scanner_current(&unit->scan), match_lexeme("\\\\")))
     {
         return token_nil();
     }
@@ -32,15 +35,17 @@ Token token_parse_comment(Unit* unit)
 
     token.type = TokenComment;
 
-    struct scanner_string comment_text = scanner_split(&unit->scan, match_lexeme("*\\"), match_lexeme("\\*"));
+    struct scanner_string comment_text = is_multiline ? scanner_split(&unit->scan, match_lexeme("*\\"), match_lexeme("\\*")) :
+                                                        scanner_split(&unit->scan, match_lexeme("\\\\"), match_chars("\r\n"));
 
     if(comment_text.str == NULL)
     {
         struct scanner_location loc = scanner_location_of(scanner_current(&unit->scan));
 
-        fprintf(stderr, "error: %s:%i:%i comment has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
+        fprintf(stderr, "error: %s:%lli:%lli comment has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
 
         scanner_advance_n(&unit->scan, comment_text.len); /* skip past the erroneous code */
+        scanner_destroy_string(comment_text);
 
         return token_nil();
     }
@@ -67,9 +72,10 @@ Token token_parse_number(Unit* unit)
     {
         struct scanner_location loc = scanner_location_of(scanner_current(&unit->scan));
 
-        fprintf(stderr, "error: %s:%i:%i number has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
+        fprintf(stderr, "error: %s:%lli:%lli number has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
 
         scanner_advance_n(&unit->scan, number_text.len); /* skip past the erroneous code */
+        scanner_destroy_string(number_text);
 
         return token_nil();
     }
@@ -96,9 +102,10 @@ Token token_parse_identifier(Unit* unit)
     {
         struct scanner_location loc = scanner_location_of(scanner_current(&unit->scan));
 
-        fprintf(stderr, "error: %s:%i:%i variable name has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
+        fprintf(stderr, "error: %s:%lli:%lli variable name has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
 
         scanner_advance_n(&unit->scan, identifier_text.len); /* skip past the erroneous code */
+        scanner_destroy_string(identifier_text);
 
         return token_nil();
     }
