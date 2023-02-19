@@ -9,12 +9,12 @@ let editorText = ref("")
 registerInterpreter(text => editorText := text)
 
 let playNote = (duration, pitch, octave) => {
-  playNoteRaw(
-    Syntax.noteToString(pitch) ++ Belt.Int.toString(octave),
-    Belt.Int.toString(duration) ++ "n",
-  )
-  Js.log3(duration, Syntax.noteToString(pitch), octave)
-  displayNote(Syntax.noteToString(pitch))
+  let pitch = Syntax.noteToString(pitch)
+  if pitch !== "_" {
+    playNoteRaw(pitch ++ Belt.Int.toString(octave), Belt.Int.toString(duration) ++ "n")
+    displayNote(pitch)
+  }
+  Js.log3(duration, pitch, octave)
 }
 
 registerRunClick(() => {
