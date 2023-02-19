@@ -73,6 +73,13 @@ The language does not allow you to read the output, but you can read the variabl
 
 and then write them down in a book somewhere.
 
+** Running a file
+
+You can put gdb instructions into a file, and load it
+into gdb with
+
+=source example.wow=
+
 * Complaints
 
 ** I followed the official instructions and it didn't produce any meaningful results
@@ -120,11 +127,13 @@ All instructions are conveniently named after its hexadecimal value.
 | 0xAB00  | Write ACC to all memory                                                                                                             |
 |---------+-------------------------------------------------------------------------------------------------------------------------------------|
 | 0xBAXX  | Set INS to *XX                                                                                                                      |
-| 0xBBXX  | Set INS to *XX, Setup deferred jammer to set BB(XX+1)                                                                               |
+| 0xBBXX  | Set INS to *XX, Setup deferred jammer to set BA(XX+1)                                                                               |
 | 0xBCXX  | Set INS to *XX, if (*XX & 0xFF0000) > 0, then setup deferred jammer to BXYY where YY is the value from the bitwise operation above. |
 |---------+-------------------------------------------------------------------------------------------------------------------------------------|
 | 0xC0XX  | If ACC == 0 -> Set INS to *XX                                                                                                       |
 | 0xC1XX  | If ACC != 0 -> Set INS to *XX                                                                                                       |
+| 0xC2XX  | If ACC > *XX -> Set INS to *(XX+1) else *(XX+2)                                                                                     |
+| 0xC3XX  | If ACC < *XX -> Set INS to *(XX+1) else *(XX+2)                                                                                     |
 |---------+-------------------------------------------------------------------------------------------------------------------------------------|
 | 0xFFFF  | Exit                                                                                                                                |
 |         |                                                                                                                                     |
