@@ -1,9 +1,13 @@
-import { BaseType, CCType, ListType, TupleType } from "./types";
+import { BaseType, CCType, FunctionType, ListType, TupleType } from "./types";
 
 export type JSValue = number | boolean | string | Function | JSValue[] | null;
 
 export class Value {
   constructor(public type: CCType, value: JSValue){}
+}
+
+export class FunctionObj {
+  constructor(public name: number, public type: FunctionType, public body: Expr) {}
 }
 
 interface ExprLike {
@@ -69,19 +73,24 @@ export enum Token {
   TSET = 8738, // 8738 * tuple nn val
 
   IF = 43, // if * c * t * f
-  IFL = 435, // ifl * nn * ty * e * et * ef
 
-  GETVAR = 0, // *0nn,
-  FUNCALL = 1, // *1nnn direct call
-  LET = 538, // *LET * nn * v * e
+  // function definition
+  // 1 => * number * ret_type * num_param * type1 * type2 * e
+
+  FUNCALL = 1, // *1nnn * e1 * e2 * ...
   CALL = 2255, // *call * nn * e * param...
+
+  LET = 538, // *LET * nn * v * e
+  GETVAR = 0, // *0nn,
+
+  IFL = 435, // ifl * nn * ty * e * et * ef
 
   NUMBER = -1
 }
 
 export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit |
                    Expr.TypeConversion | Expr.Unary | Expr.ListCons | Expr.Append | Expr.Get |
-                   Expr.Set | Expr.Len | Expr.Chrs | Expr.Tuple | Expr.IfExpr;
+                   Expr.Set | Expr.Len | Expr.Chrs | Expr.Tuple | Expr.IfExpr | Expr.FunCall;
 
 export namespace Expr {
   export class NumberExpr implements ExprLike {
@@ -161,5 +170,10 @@ export namespace Expr {
   export class IfExpr implements ExprLike {
     kind: Token.IF = Token.IF
     constructor(public type: CCType, public cond: Expr, public trueVal: Expr, public falseVal: Expr){}
+  }
+
+  export class FunCall implements ExprLike {
+    kind: Token.FUNCALL = Token.FUNCALL
+    constructor(public type: CCType, public func: FunctionObj, public args: Expr[]){}
   }
 }

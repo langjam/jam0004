@@ -1,5 +1,5 @@
 import { BaseType, CCType, coversType, FunctionType, isBaseType, isFunctionType, isListType, isTupleType, isTypeEqual, ListType, OptionType, TupleType, TypeKind, typename } from "./types";
-import {Expr, JSValue, Token} from "./expression";
+import {Expr, FunctionObj, JSValue, Token} from "./expression";
 
 export interface Stream {
   next () : Promise<string | null>;
@@ -26,10 +26,44 @@ export async function interpret(src: Stream, output: Output) {
   await interpreter.run();
 }
 
+class Environment {
+  vars: Map<number, [CCType, JSValue]>
+  funcs: Map<number, FunctionObj>
+  constructor(public parent?: Environment) {
+    this.vars = new Map();
+    this.funcs = new Map();
+  }
+
+  getVar(name: number): [CCType, JSValue] | undefined {
+    let local = this.vars.get(name);
+    if (local) return local;
+
+    if (this.parent) return this.parent.getVar(name);
+  }
+
+  setVar(name: number, type: CCType, value: JSValue) {
+    this.vars.set(name, [type, value]);
+  }
+
+  getFunc(name: number) : FunctionObj | undefined {
+    let local = this.funcs.get(name);
+    if (local) return local;
+
+    if (this.parent) return this.parent.getFunc(name);
+  }
+
+  setFunc(name: number, func: FunctionObj) {
+    this.funcs.set(name, func);
+  }
+}
+
 class Interpreter {
   parser: Parser
+  env: Environment
+
   constructor (private src: Stream, private output: Output) {
-    this.parser = new Parser(src, output);
+    this.env = new Environment();
+    this.parser = new Parser(src, output, this.env);
   }
 
   log(text: string): Promise<void> {
@@ -63,8 +97,10 @@ class Interpreter {
 
     switch(instr) {
       case "1":
-        // define function
-
+        {
+          await this.log("Please input your function definition.");
+          await this.interpretFunctionDef();
+        }
       break;
       case "2":
         // define type
@@ -101,33 +137,23 @@ class Interpreter {
       }
 
     } catch (e) {
-      // TODO: handle runtime error
-
-      switch (e) {
-        case PARSE_ERROR: {
-          if (fullyParsed) {
-            this.parser.next();
-            return;
-          }
-
-          // recover to the next nearest '#'
-          while (await this.parser.peek() !== "#") {
-            await this.parser.next();
-          }
-          await this.parser.next();
-
-        } break;
-        case RUNTIME_ERROR: {
-
-        } break;
-        default: throw e;
-      }
+      this.handleError(fullyParsed, e);
     }
   }
 
-  async runtimeError(message: string) {
-    await this.output.err("Sorry, we found a runtime error: " + message);
-    throw RUNTIME_ERROR;
+  async interpretFunctionDef() {
+    let fullyParsed = false;
+    try{
+      this.parser.resetCursor();
+      await this.parser.parseFunctionDefinition();
+      fullyParsed = true;
+
+      await this.parser.consumeHash();
+
+      this.log("Function is now declared.");
+    } catch (e) {
+      this.handleError(fullyParsed, e);
+    }
   }
 
   async visitExpr (expr: Expr) : Promise<JSValue> {
@@ -354,10 +380,27 @@ class Interpreter {
 
         return await this.visitExpr(toVisit);
       }
+
+      case Token.FUNCALL: {
+        let parentEnv = this.env;
+        let funcEnv = new Environment(parentEnv);
+
+        for (let i = 0; i < expr.args.length; i++) {
+          let arg = expr.args[i];
+          let value = await this.visitExpr(arg);
+          funcEnv.setVar(i, arg.type, value);
+        }
+
+        try {
+          this.env = funcEnv;
+          return await this.visitExpr(expr.func.body);
+        } finally {
+          this.env = parentEnv;
+        }
+      }
     }
 
-    // TODO:
-    return null;
+    throw unreachable();
   }
 
   async visitExprAsNumber (expr: Expr) : Promise<number> {
@@ -366,6 +409,34 @@ class Interpreter {
 
   async visitExprAsBool (expr: Expr) : Promise<boolean> {
     return await this.visitExpr(expr) as boolean;
+  }
+
+  async handleError(fullyParsed: boolean, e: any) {
+    // TODO: handle runtime error
+    switch (e) {
+      case PARSE_ERROR: {
+        if (fullyParsed) {
+          this.parser.next();
+          return;
+        }
+
+        // recover to the next nearest '#'
+        while (await this.parser.peek() !== "#") {
+          await this.parser.next();
+        }
+        await this.parser.next();
+
+      } break;
+      case RUNTIME_ERROR: {
+
+      } break;
+      default: throw e;
+    }
+  }
+
+  async runtimeError(message: string) {
+    await this.output.err("Sorry, we found a runtime error: " + message);
+    throw RUNTIME_ERROR;
   }
 }
 
@@ -419,7 +490,7 @@ function compareList(a: ComparableTypes[], b: ComparableTypes[]) : number {
 
 class Parser{
   cursor: number
-  constructor(private src: Stream, private output: Output) {
+  constructor(private src: Stream, private output: Output, private env: Environment) {
     this.cursor = 0;
   }
 
@@ -459,90 +530,7 @@ class Parser{
     throw PARSE_ERROR;
   }
 
-  async parseExpression() : Promise<Expr> {
-    if (await this.peek() === '*') {
-      return this.parseInstruction();
-    }
-
-    return this.parseNumber();
-  }
-
-  async parseInstruction() : Promise<Expr> {
-    await this.consumeStar();
-
-    let instrTok = await this.consumeNumber();
-
-    if (instrTok.startsWith(Token.GETVAR.toString())) {
-      // parse get variable
-    } else if (instrTok.startsWith(Token.FUNCALL.toString())) {
-      // parse direct call
-    }
-
-    let instr = parseInt(instrTok, 10);
-
-    switch(instr) {
-      case Token.ADD:
-      case Token.SUB:
-      case Token.MUL:
-      case Token.DIV:
-      case Token.MOD:
-        return this.parseBinaryMath(instr);
-
-      case Token.EQ:
-      case Token.NE:
-      case Token.LT:
-      case Token.GT:
-      case Token.LTE:
-      case Token.GTE:
-        return this.parseCompare(instr);
-
-      case Token.AND:
-      case Token.OR:
-        return this.parseLogic(instr);
-
-      case Token.INT:
-      case Token.FLO:
-      case Token.STR:
-        return this.parseConversion(instr);
-
-      case Token.NEG:
-      case Token.NOT:
-        return this.parseUnary(instr);
-
-      case Token.LIST:
-        return this.parseListCons();
-
-      case Token.APP:
-        return this.parseAppend();
-
-      case Token.GET:
-        return this.parseLSGet();
-
-      case Token.SET:
-        return this.parseLSSet();
-
-      case Token.LEN:
-        return this.parseLen();
-
-      case Token.CHRS:
-        return this.parseChrs();
-
-      case Token.TUP:
-        return this.parseTup();
-
-      case Token.TGET:
-        return this.parseTget();
-
-      case Token.TSET:
-        return this.parseTset();
-
-      case Token.IF:
-        return this.parseIf();
-    }
-
-    await this.parseError(`unknown instruction ${instrTok}`);
-    throw unreachable();
-  }
+  // definitions
 
   // type expression
   async parseType() : Promise<CCType> {
@@ -627,6 +615,149 @@ class Parser{
     return BaseType.None
   }
 
+  // function
+
+  async parseFunctionDefinition() {
+    // * id * num_param * type1 * type2 * ... * ret_type * e
+
+    await this.consumeStar();
+    let id = parseInt(await this.consumeNumber(), 10);
+
+    await this.consumeStar();
+    let startpos = this.cursor;
+    let numParams = parseInt(await this.consumeNumber(), 10);
+
+    if (numParams > 99) {
+      await this.parseError("Function can only have at max 99 paramters.", startpos);
+    }
+
+    let paramTypes : CCType[] = [];
+    for (let i = 0; i < numParams; i++) {
+      await this.consumeStar();
+      paramTypes.push(await this.parseType());
+    }
+
+    await this.consumeStar();
+    let returnType = await this.parseType();
+
+    let funcType = new FunctionType(returnType, paramTypes);
+    let func = new FunctionObj(id, funcType, new Expr.NumberExpr(0)) // dummy expr
+
+    let parentEnv = this.env;
+    let tempEnv = new Environment(parentEnv);
+
+    tempEnv.setFunc(id, func);
+    for (let i = 0; i < numParams; i++) {
+      tempEnv.setVar(i, paramTypes[i], null); // dummy js value
+    }
+
+    try {
+      this.env = tempEnv;
+
+      await this.consumeStar();
+      startpos = this.cursor;
+      let body = await this.parseExpression();
+
+      if (!coversType(returnType, body.type)) {
+        await this.parseError(`unable to assign type ${typename(body.type)} for return type ${typename(returnType)}.`);
+      }
+
+      func.body = body;
+
+      // add to parent (which should be global env) when all is successful
+      parentEnv.setFunc(id, func);
+    } finally {
+      this.env = parentEnv;
+    }
+  }
+
+  // expressions
+
+  async parseExpression() : Promise<Expr> {
+    if (await this.peek() === '*') {
+      return this.parseInstruction();
+    }
+
+    return this.parseNumber();
+  }
+
+  async parseInstruction() : Promise<Expr> {
+    await this.consumeStar();
+
+    let instrTok = await this.consumeNumber();
+
+    if (instrTok.startsWith(Token.GETVAR.toString())) {
+      // parse get variable
+    } else if (instrTok.startsWith(Token.FUNCALL.toString())) {
+      return this.parseFunCall(instrTok);
+    }
+
+    let instr = parseInt(instrTok, 10);
+
+    switch(instr) {
+      case Token.ADD:
+      case Token.SUB:
+      case Token.MUL:
+      case Token.DIV:
+      case Token.MOD:
+        return this.parseBinaryMath(instr);
+
+      case Token.EQ:
+      case Token.NE:
+      case Token.LT:
+      case Token.GT:
+      case Token.LTE:
+      case Token.GTE:
+        return this.parseCompare(instr);
+
+      case Token.AND:
+      case Token.OR:
+        return this.parseLogic(instr);
+
+      case Token.INT:
+      case Token.FLO:
+      case Token.STR:
+        return this.parseConversion(instr);
+
+      case Token.NEG:
+      case Token.NOT:
+        return this.parseUnary(instr);
+
+      case Token.LIST:
+        return this.parseListCons();
+
+      case Token.APP:
+        return this.parseAppend();
+
+      case Token.GET:
+        return this.parseLSGet();
+
+      case Token.SET:
+        return this.parseLSSet();
+
+      case Token.LEN:
+        return this.parseLen();
+
+      case Token.CHRS:
+        return this.parseChrs();
+
+      case Token.TUP:
+        return this.parseTup();
+
+      case Token.TGET:
+        return this.parseTget();
+
+      case Token.TSET:
+        return this.parseTset();
+
+      case Token.IF:
+        return this.parseIf();
+    }
+
+    await this.parseError(`unknown instruction ${instrTok}`);
+    throw unreachable();
+  }
+
   // expression
 
   // control & call
@@ -653,6 +784,35 @@ class Parser{
     }
 
     return new Expr.IfExpr(type, cond, trueExpr, falseExpr);
+  }
+
+  async parseFunCall(token: string) : Promise<Expr> {
+    // *1nnn * e1 * e2 * ...
+    let startpos = this.cursor - token.length;
+    if (token.length < 2) {
+      await this.parseError("invalid function call format.", startpos);
+    }
+
+    let id = parseInt(token.slice(1), 10);
+    let func = this.env.getFunc(id);
+
+    if (!func) {
+      await this.parseError(`unknown function with id ${id}`, startpos + 1);
+      throw unreachable();
+    }
+
+    startpos = this.cursor;
+    let numParams = func.type.paramTypes.length;
+    let args = await this.parseArgs(numParams);
+
+    // typecheck
+    for (let i = 0; i < numParams; i++) {
+      if (!coversType(func.type.paramTypes[i], args[i].type)) {
+        await this.parseError(`unable to assign argument with type ${typename(args[i].type)} to parameter of type ${typename(func.type.paramTypes[i])}`, startpos);
+      }
+    }
+
+    return new Expr.FunCall(func.type.returnType, func, args);
   }
 
   // tuple
