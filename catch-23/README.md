@@ -103,9 +103,6 @@ Unless, written as `?(<boolean expression>)` is the same as an inverted if state
 ### Until
 Until, written as `::(<boolean expression>)` is the same as an inverted while statement in C: `while (!(<boolean expression>))`. Until can only be used directly inside other loops. It cannot be used in a block of code that isn't a loop even if that block of code is inside one.
 
-### Against
-Against, written as `;;(<init>;<boolean expression>;<end of loop/counter stuff>)`, is the same as an inverted for statement in C: `for (<init>; !(<boolean expression>); <end of loop/counter stuff>)`. Against can only be used directly inside other loops. It cannot be used in a block of code that isn't a loop even if that block of code is inside one.
-
 ### Dont
 
 A Dont, written as `:;`, is a block of code that isn't executed. However, if it is being executed, it will run the code once then exit the scope that was created by the Dont. The only way to execute the code inside a Dont is by Goto using a label inside the Dont:
