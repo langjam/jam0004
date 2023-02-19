@@ -1,0 +1,11 @@
+[package]
+name = "numpad"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+logos = "0.12.1"
+clap = { version = "4.0", features = ["derive"] }
+anyhow = "1.0"
+thiserror = "1.0"
+itertools = "0.10"
