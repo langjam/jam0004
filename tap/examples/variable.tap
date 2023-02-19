@@ -57,8 +57,12 @@ middle hard:
 end
 
 pinky soft:
-	2
-	2
+	thumb medium:
+		"setter"
+	end
+	thumb medium:
+		"this is a long var name"
+	end
 end
 
 pinky medium:

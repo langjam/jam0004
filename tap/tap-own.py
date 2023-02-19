@@ -463,7 +463,15 @@ class Interpreter:
             if not idx+1 < len(value):
                 return InvalidArgumentNumberError(self.filename,
                                                   "Invalid number of args for create variable")
-            self._if_value = self._if(value[idx], value[idx+1])
+
+            new_values = value[1:]
+            parts = []
+            for v in new_values:
+                if isinstance(v, list):
+                    parts.append(self.check_todo(v))
+                else:
+                    parts.append(v)
+            self._if_value = self._if(parts[0], parts[1])
 
         elif value[0] == "then":
             if self._if_value is None:
