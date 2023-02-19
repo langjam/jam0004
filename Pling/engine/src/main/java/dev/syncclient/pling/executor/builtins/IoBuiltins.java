@@ -27,6 +27,11 @@ public class IoBuiltins extends BuiltinExplorer {
         return Double.parseDouble(str);
     }
 
+    @BuiltinExplorerInfo(name = "io.parsestr", description = "Parses a string from a number", usage = "#io.parsenum [number] -> [string]")
+    public String parseStr(double num) {
+        return String.valueOf(num);
+    }
+
     @BuiltinExplorerInfo(name = "io.printcolor",
             description = "Prints a string with a color [BLACK, RED, GREEN, YELLOW, BLUE, PURPLE, CYAN, WHITE]",
             usage = "#io.printcolor [color] [string]")

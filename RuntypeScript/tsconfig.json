@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ES2022"],
+
+		"composite": true,
+		"incremental": true,
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+
+		"outDir": "./dist/",
+		"rootDir": "./src/",
+		"tsBuildInfoFile": "./.tsbuildinfo",
+
+		"allowSyntheticDefaultImports": true,
+		"declarationMap": true,
+		"esModuleInterop": true,
+		"exactOptionalPropertyTypes": true,
+		"forceConsistentCasingInFileNames": true,
+		"importHelpers": true,
+		"isolatedModules": true,
+		"newLine": "lf",
+		"noFallthroughCasesInSwitch": true,
+		"removeComments": true,
+		"sourceMap": true,
+		"strict": true,
+	},
+	"include": ["./src/**/*.ts"],
+}

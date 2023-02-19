@@ -1,0 +1,8 @@
+[unstable]
+sparse-registry = true
+
+[alias]
+xtask = "run --package xtask --"
+dist  = "xtask dist"
+watch = "xtask watch"
+start = "xtask start"

@@ -1,0 +1,26 @@
+{
+  "name": "callcenter",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.check.json",
+    "build": "yarn typecheck && parcel build --target cmd --no-cache",
+    "callcenter": "node dist/index.js"
+  },
+  "targets": {
+    "cmd": {
+      "context": "node",
+      "source": [
+        "src-cmd/index.ts"
+      ],
+      "outputFormat": "commonjs",
+      "sourceMap": false
+    }
+  },
+  "devDependencies": {
+    "@types/node": "^18.14.0",
+    "parcel": "^2.8.3",
+    "typescript": "^4.9.5"
+  }
+}

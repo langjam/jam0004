@@ -1,0 +1,50 @@
+// To restrict function types, you can use a signature literal. It looks similar
+// to function literal, but doesn't name arguments, has no body and uses `sig`
+// keyword instead of `fn`.
+
+const binary_op = sig (number, number) number;
+
+// `binary_op` has been defined to represent a function signature that takes two
+// numbers and returns a single number.
+
+const apply = fn (op: binary_op, a: number, b: number) number {
+	return op(a, b);
+};
+
+const add = fn (a: number, b: number) number { return a + b; };
+const sub = fn (a: number, b: number) number { return a - b; };
+const mul = fn (a: number, b: number) number { return a * b; };
+const div = fn (a: number, b: number) number { return a / b; };
+
+// Functions `add`, `sub`, `mul` and `div` are compatible (assignable) with
+// binary_op. We don't have to specify their declared type, but we could if we
+// wanted to enforce that at declaration time.
+//
+// We could also use the `extends` operator to check at runtime, if functions
+// are compatible with a signature, like so:
+//
+// if (add extends binary_op) {
+//     println("add is assignable to binary_op");
+// }
+
+const functions = [add, sub, mul, div];
+
+println("decltype functions = " + to_string(decltype functions));
+
+var i = 0;
+while (i < #functions) {
+	const result = apply(functions[i], 3, 4);
+	println("apply(functions[" + to_string(i) + "], 3, 4) = " + to_string(result));
+	i += 1;
+}
+
+// Note that functions themselves can work as types (as everything in this
+// language), but every function is considered distinct, so you could only
+// assign a single value (the function), just like with using number or string
+// literals as types.
+//
+// Remember that you can always "deliteralize" a function, which will return its
+// signature.
+
+println(" add = " + to_string(add));
+println("~add = " + to_string(~add));

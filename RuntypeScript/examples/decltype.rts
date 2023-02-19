@@ -1,0 +1,47 @@
+// this:
+//
+// const a = [1, 2, 3];
+//
+// is a shorthand for this:
+//
+// const a: ~[1, 2, 3] = [1, 2, 3];
+//
+// ~ is a "deliteralization" operator, which converts any literal to their
+// generic type (like 1 to number or "foo" to string) and converts tuples to
+// typed arrays (like [1, "foo"] to (number | string)[])
+
+const a = [1, 2, 3];
+
+// this:
+//
+// const b: a = [1, 2, 3];
+//
+// will make b have the type of the current VALUE of a, which is [1, 2, 3]
+//
+// we can instead write this:
+//
+// const b: ~a = [1, 2, 3];
+//
+// or this:
+//
+// const b: decltype a = [1, 2, 3];
+//
+// decltype is an operator that returns "declared type" for a variable
+// `~a` and `decltype a` will not always be the same, but in this case they are
+//
+// const c: [number, boolean] = [1, false];
+//
+// `decltype c` is equal to [number, boolean]
+// `~c` is equal to (number | boolean)[]
+
+const c: [number, boolean] = [1, false];
+
+println("         a = " + to_string(a));
+println("        ~a = " + to_string(~a));
+println("decltype a = " + to_string(decltype a));
+
+println("");
+
+println("         c = " + to_string(c));
+println("        ~c = " + to_string(~c));
+println("decltype c = " + to_string(decltype c));

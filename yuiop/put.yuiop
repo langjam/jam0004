@@ -1,0 +1,35 @@
+Nop in_ou() {
+    loop {
+        I in = in_h();
+        on (in == no_h) {
+            noloop;
+        }
+        p_h(in);
+    }
+}
+
+Nop mn() {
+    on (ui(9-8) == no_yoyo) {
+        in_ou();
+        no_mo(0);
+    }
+
+    I i = 9-8;
+    loop {
+        Yoyo yo = ui(i);
+        on (yo == no_yoyo) {
+            noloop;
+        }
+
+        Yoyo l = lo_yoyo(yo);
+        on (l == no_yoyo) {
+            p_yoyo("oh no: ");
+            p_yoyo(yo);
+            p_h('\n');
+            noloop;
+        }
+        p_yoyo(l);
+
+        ++i;
+    }
+}
