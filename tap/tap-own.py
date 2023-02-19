@@ -45,11 +45,14 @@ class Keyword:
                 "middle",
                 "ring",
                 "pinky",
-                "soft",
-                "medium",
-                "hard",
-                "end"
                 ]
+
+    modifiers = ["soft",
+                 "medium",
+                 "hard"
+                 ]
+
+    end = ["end"]
 
 
 class TokenType(Enum):
@@ -57,7 +60,9 @@ class TokenType(Enum):
     FLOAT = "FLOAT"
     STRING = "STRING"
     KEYWORD = "KEYWORD"
-    COLON = ":"
+    MODIFIER = "MODIFIER"
+    END = "END"
+    COLON = "COLON"
     # EOF = "EOF"
     # INDENT = "INDENT"
 
@@ -154,7 +159,7 @@ class Lexer:
                 # tokens.append(Token(TokenType.INDENT))
                 self.advance()
             else:
-                print(n)
+                print(n, "Illegal character error")
                 n += 1
 
         return tokens
@@ -281,18 +286,18 @@ class Parser:
 
         self.advance()
         while self.current_token is not None:
-            if self.current_token.Type == TokenType.KEYWORD:
-                keyword_value_pair = f"{previous_token.Value} {self.current_token.Value}"
-                match keyword_value_pair:
-                    case "thumb soft":
-                        cur_ast.append("")
-                    case "index soft":
-                        cur_ast.append("print_value")
-                    case other:
-                        return IllegalKeywordValuePairError(self.current_token.Position,
-                                                            f"'{keyword_value_pair}'")
-            else:
-                pass
+            # if self.current_token.Type == TokenType.KEYWORD:
+            #     keyword_value_pair = f"{previous_token.Value} {self.current_token.Value}"
+            #     match keyword_value_pair:
+            #         case "thumb soft":
+            #             cur_ast.append("")
+            #         case "index soft":
+            #             cur_ast.append("print_value")
+            #         case other:
+            #             return IllegalKeywordValuePairError(self.current_token.Position,
+            #                                                 f"'{keyword_value_pair}'")
+            # else:
+            #     pass
             print(self.current_token)
             self.advance()
 
