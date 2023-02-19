@@ -68,8 +68,8 @@ class Handler:
 
     def make_node(self, pos, size, name):
         options = [
-                (0.7, (64, 255, 64), 'add'),
-                (1.3, (255, 64, 64), 'del'),
+                (-45, (64, 255, 64), 'add'),
+                (45, (255, 64, 64), 'del'),
         ]
         ret = Selector(pos, size, name, options)
         ret.then = self.then
@@ -84,17 +84,19 @@ class Handler:
 
     def node_on_add(self, data):
         size = data['self'].size
-        x = math.sin(data['angle']) * size * 3.25
-        y = math.cos(data['angle']) * size * 3.25
+        angle = data['angle']
+        x = math.cos(angle) * (size + 100)
+        y = math.sin(angle) * (size + 100)
         xy = [x, y]
-        dpos = data['pos']
+        print(x, y)
+        dpos = data['self'].pos
         res = v2add(xy, dpos)
         src = ''.join(self.src)
         self.src = []
         data['self'].add(self.make_node(res, 50, src))
 
     def node_remove(self, data):
-        self.node.remove(data['pos'])
+        self.node.remove(data['self'].pos)
         
     def get(self, *n):
         if self.one_hand:
@@ -152,6 +154,8 @@ class Handler:
             else:
                 ximg = np.zeros((720, 1280, 4), dtype=np.uint8)
                 ximg.fill(255)
+            if 'mode' in self.env.defs and self.env.defs['mode'] == 'dark':
+                ximg = ~ximg
             self.img = cv2.flip(ximg, 1)
             pt = self.get(8)
             if len(self.node.list) == 0:
@@ -179,8 +183,13 @@ class Handler:
                 2,
                 cv2.LINE_AA
             )
+            if 'mode' in self.env.defs and self.env.defs['mode'] == 'dark':
+                self.img = ~self.img
             cv2.imshow('Graphica', self.img)
-            self.on_key(cv2.waitKey(1))
+            key = cv2.waitKey(1)
+            if key == 27:
+                break
+            self.on_key(key)
             n += 1
 
     def dist(self, a, b):

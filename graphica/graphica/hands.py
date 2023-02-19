@@ -61,16 +61,3 @@ class FindHands():
                 return False
         except:
             return "NO HAND FOUND"
-
-
-if __name__ == "__main__":
-    cap = cv2.VideoCapture(0)
-    hands = FindHands()
-    while True:
-        succeed, img = cap.read()
-        lst = hands.getPosition(img, 8)
-        for pt in lst:
-            cv2.circle(img, pt, 5, (0,255,0), cv2.FILLED)
-        cv2.imshow("Image", img)
-        if cv2.waitKey(10) == ord("q"):
-            break

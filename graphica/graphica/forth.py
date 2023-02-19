@@ -37,7 +37,7 @@ class Env:
                 self.dpeth = 0
             else:
                 self.depth = math.inf
-        elif word[0] == ',':
+        elif word[0] == '\'':
             self.stack.append(word[1:])
         elif word[0].isdigit() or word[0] == '.':
             if '.' in word:

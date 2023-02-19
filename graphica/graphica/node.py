@@ -1,6 +1,11 @@
-import random
 import cv2
+import colorsys
 from graphica.v2math import *
+
+phi = (5 ** 0.5 + 1) / 2
+
+
+n = 0
 
 class Node:
     def __init__(self, *args):
@@ -12,7 +17,7 @@ class Node:
             self.size = 0
         self.max_size = 256
         self.min_size = 50
-        self.color = tuple(i + random.randrange(0, 48) for i in [127, 127, 127])
+        self.color = [127, 127, 127]
         self.state = 'out'
         self.list = []
         self.root = False
@@ -27,7 +32,7 @@ class Node:
     def remove(self, pos):
         next = []
         for i in self.list:
-            if not i.has(pos):
+            if i.pos != pos:
                 i.remove(pos)
                 next.append(i)
             else:
@@ -60,14 +65,26 @@ class Node:
 
     def draw(self, img):
         if not self.root:
-            for l in self.list:
+            for lno, l in enumerate(self.list):
                 cv2.line(
                     img,
                     [int(i) for i in self.pos],
                     [int(i) for i in l.pos],
-                    (int(l.color[2]), int(l.color[1]), int(l.color[0])),
+                    tuple((i*3+256)//4 for i in l.color[::-1]),
                     10
                 )
+                if len([i for i in self.list if not isinstance(i, SelectorOption)]) != 1:
+                    size = cv2.getTextSize(str(lno+1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 1)[0]
+                    cv2.putText(
+                        img,
+                        str(lno+1),
+                        [int(self.pos[0]/2 + l.pos[0]/2 - size[0]/3), int(self.pos[1]/2 + l.pos[1]/2 + size[1]/4)],
+                        cv2.FONT_HERSHEY_SIMPLEX,
+                        0.5,
+                        (0, 0, 0),
+                        1,
+                        cv2.LINE_AA
+                    )
         if self.size > 0:
             cv2.circle(
                 img,
@@ -117,6 +134,10 @@ class Selector(Node):
         self.into = None
         Node.__init__(self, *init[:-2])
         self.then = lambda obj: None
+        global n
+        n += phi
+        c = colorsys.hls_to_rgb(n % 1, 0.65, 0.1)
+        self.color = [int(i * 255) for i in c]
     
     def __str__(self):
         names = []
@@ -124,8 +145,8 @@ class Selector(Node):
         names.append(self.text)
         return ' '.join(names)
 
-    def make_cb(self, n):
-        def ret(pos):
+    def make_cb(self, n, angle):
+        def ret(hit):
             next = []
             for l in self.list:
                 if not isinstance(l, SelectorOption):
@@ -133,8 +154,8 @@ class Selector(Node):
             self.list = next
             return self.then({
                 'name': n,
-                'pos': pos,
-                'angle': self.angle,
+                'hit': hit,
+                'angle': angle,
                 'self': self,
             })
         return ret
@@ -142,12 +163,15 @@ class Selector(Node):
     def enter(self, pos):
         self.oldcolor = self.color
         self.color = tuple((i + 255) / 2 for i in self.color)
-        angle = math.atan2(*v2sub(pos, self.pos))
-        self.angle = angle + math.pi
+        [x, y] = v2sub(pos, self.pos)
+        angle = math.atan2(y, x)
+        angle = math.degrees(angle)
+        angle = round(angle/60)*60
+        angle = math.radians(angle)
         for (v, c, n) in self.opts:
-            x = math.sin(angle + math.pi * v) * self.size * 1.25 + self.pos[0]
-            y = math.cos(angle + math.pi * v) * self.size * 1.25 + self.pos[1]
-            case = SelectorOption([x, y], self.size / 2, n, self.make_cb(n))
+            x = math.cos(angle + math.pi + math.radians(v)) * self.size * 1.25 + self.pos[0]
+            y = math.sin(angle + math.pi + math.radians(v)) * self.size * 1.25 + self.pos[1]
+            case = SelectorOption([x, y], self.size / 2, n, self.make_cb(n, angle + math.pi))
             case.color = c
             self.add(case)
         if isinstance(self.into, list):
