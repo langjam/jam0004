@@ -1,6 +1,7 @@
 
 import math
 import json
+import pathlib
 import cv2
 import numpy as np
 from graphica.node import Node, Selector
@@ -9,7 +10,7 @@ from graphica.forth import run, Env
 import graphica.save as save
 
 class Handler:
-    def __init__(self, one_hand=True):
+    def __init__(self, one_hand=True):  
         def mouse_cb(who_cares, x, y, *who_cares_two_electic_boogaloo):
             self.mouse_xy = [x, y]
         self.window_name = cv2.namedWindow('Graphica')
@@ -21,7 +22,7 @@ class Handler:
         self.pt = None
         self.src = []
         self.selected = []
-        self.mouse_xy = [0, 0]
+        self.mouse_xy = None
         self.env = Env()
         if one_hand:
             self.cap = cv2.VideoCapture(0)
@@ -31,12 +32,20 @@ class Handler:
                 self.hands = FindHands()
             else:
                 self.hands = globals()["FindHands"]()
+        self.config_file = pathlib.Path(__file__).parent.parent / "saves/save.json"
+        try:
+            with open(self.config_file) as save:
+                self.full_load(save.read())
+        except IOError as ioe:
+            print(ioe)
+        except json.JSONDecodeError as jse:
+            print(jse)
 
     def data_load(self, src):
         self.env.defs = json.loads(src)
 
     def code_loads(self, src):
-        self.node = save.load_post(json.loads(src))
+        self.node = save.load_post(self, json.loads(src))
         self.node.root = True
 
     def data_save(self):
@@ -45,10 +54,16 @@ class Handler:
     def code_save(self):
         return json.dumps(save.save_pre(self.node))
 
+    def full_load(self, src):
+        data = json.loads(src)
+        self.env.defs = data['env']
+        self.node = save.load_post(self, data['node'])
+        self.node.root = True
+        
     def full_save(self):
         return json.dumps({
             "node": save.save_pre(self.node),
-            "env": save.save_pre(self.env),
+            "env": self.env.defs,
         })
 
     def make_node(self, pos, size, name):
@@ -84,8 +99,10 @@ class Handler:
     def get(self, *n):
         if self.one_hand:
             return self.hands.getPosition(self.img, n)
-        else:
+        elif self.mouse_xy is not None:
             return [self.mouse_xy]
+        else:
+            return []
             
     def handle1(self, pt):
         self.node.each(pt)
@@ -147,6 +164,8 @@ class Handler:
             next_state = self.code_save()
             if next_state != last_state:
                 run(self.env, self.node)
+                with open(self.config_file, "w") as save:
+                    save.write(self.full_save())
                 last_state = next_state
             if self.pt is not None:
                 cv2.circle(self.img, self.pt, 5, (0,255,0), cv2.FILLED)

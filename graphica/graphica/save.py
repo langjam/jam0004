@@ -21,33 +21,35 @@ def save_pre_node(node):
     return ret
 
 def save_pre(node):
-    if isinstance(node, Node):
-        return save_pre_node(node)
     if isinstance(node, Selector):
         ret = save_pre_node(node)
         ret['type'] = 'selector'
         ret['text'] = node.text
-        ret['opts'] = [[v, [r, g, b], n] for (v, (r, g, b), n) in node.text]
+        ret['opts'] = node.opts
         return ret
+    if isinstance(node, Node):
+        return save_pre_node(node)
 
-def load_post(thing):
+def load_post(self, thing):
     if thing['type'] == 'node':
         ret = Node(thing['pos'], thing['size']['cur'])
         ret.min_size = thing['size']['min']
         ret.max_size = thing['size']['max']
         ret.color = thing['color']
-        ret.list = [load_post(i) for i in thing['children']]
+        ret.list = [load_post(self, i) for i in thing['children']]
         return ret
     elif thing['type'] == 'selector':
         ret = Selector(
             thing['pos'],
             thing['size']['cur'],
             thing['text'],
-            tuple((v, (r, g, b), n) for [v, [r, g, b], n] in thing['opts'])
+            thing['opts']
         )
         ret.min_size = thing['size']['min']
         ret.max_size = thing['size']['max']
         ret.color = thing['color']
-        ret.list = [load_post(i) for i in thing['children']]
+        ret.list = [load_post(self, i) for i in thing['children']]
+        ret.then = self.then
+        ret.into = self.selected
         return ret
     raise Exception("bad load")

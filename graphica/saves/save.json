@@ -1,0 +1,1 @@
+{"node": {"type": "node", "pos": [0, 0], "size": {"min": 50, "max": 50, "cur": 0}, "color": [174, 167, 165], "children": [{"type": "selector", "pos": [150, 360], "size": {"min": 50, "max": 50, "cur": 50}, "color": [142, 142, 166], "children": [], "text": "", "opts": [[0.7, [64, 255, 64], "add"], [1.3, [255, 64, 64], "del"]]}]}, "env": {}}
