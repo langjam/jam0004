@@ -1,101 +1,12 @@
 // Turn your volume down!
 
 use audio;
+use note;
 
 #audio.begin;
 
 #printnf `Audio initialized: `;
 #print #audio.initted;
-var NOTE_B0 = 31;
-var NOTE_C1 = 33;
-var NOTE_CS1 = 35;
-var NOTE_D1 = 37;
-var NOTE_DS1 = 39;
-var NOTE_E1 = 41;
-var NOTE_F1 = 44;
-var NOTE_FS1 = 46;
-var NOTE_G1 = 49;
-var NOTE_GS1 = 52;
-var NOTE_A1 = 55;
-var NOTE_AS1 = 58;
-var NOTE_B1 = 62;
-var NOTE_C2 = 65;
-var NOTE_CS2 = 69;
-var NOTE_D2 = 73;
-var NOTE_DS2 = 78;
-var NOTE_E2 = 82;
-var NOTE_F2 = 87;
-var NOTE_FS2 = 93;
-var NOTE_G2 = 98;
-var NOTE_GS2 = 104;
-var NOTE_A2 = 110;
-var NOTE_AS2 = 117;
-var NOTE_B2 = 123;
-var NOTE_C3 = 131;
-var NOTE_CS3 = 139;
-var NOTE_D3 = 147;
-var NOTE_DS3 = 156;
-var NOTE_E3 = 165;
-var NOTE_F3 = 175;
-var NOTE_FS3 = 185;
-var NOTE_G3 = 196;
-var NOTE_GS3 = 208;
-var NOTE_A3 = 220;
-var NOTE_AS3 = 233;
-var NOTE_B3 = 247;
-var NOTE_C4 = 262;
-var NOTE_CS4 = 277;
-var NOTE_D4 = 294;
-var NOTE_DS4 = 311;
-var NOTE_E4 = 330;
-var NOTE_F4 = 349;
-var NOTE_FS4 = 370;
-var NOTE_G4 = 392;
-var NOTE_GS4 = 415;
-var NOTE_A4 = 440;
-var NOTE_AS4 = 466;
-var NOTE_B4 = 494;
-var NOTE_C5 = 523;
-var NOTE_CS5 = 554;
-var NOTE_D5 = 587;
-var NOTE_DS5 = 622;
-var NOTE_E5 = 659;
-var NOTE_F5 = 698;
-var NOTE_FS5 = 740;
-var NOTE_G5 = 784;
-var NOTE_GS5 = 831;
-var NOTE_A5 = 880;
-var NOTE_AS5 = 932;
-var NOTE_B5 = 988;
-var NOTE_C6 = 1047;
-var NOTE_CS6 = 1109;
-var NOTE_D6 = 1175;
-var NOTE_DS6 = 1245;
-var NOTE_E6 = 1319;
-var NOTE_F6 = 1397;
-var NOTE_FS6 = 1480;
-var NOTE_G6 = 1568;
-var NOTE_GS6 = 1661;
-var NOTE_A6 = 1760;
-var NOTE_AS6 = 1865;
-var NOTE_B6 = 1976;
-var NOTE_C7 = 2093;
-var NOTE_CS7 = 2217;
-var NOTE_D7 = 2349;
-var NOTE_DS7 = 2489;
-var NOTE_E7 = 2637;
-var NOTE_F7 = 2794;
-var NOTE_FS7 = 2960;
-var NOTE_G7 = 3136;
-var NOTE_GS7 = 3322;
-var NOTE_A7 = 3520;
-var NOTE_AS7 = 3729;
-var NOTE_B7 = 3951;
-var NOTE_C8 = 4186;
-var NOTE_CS8 = 4435;
-var NOTE_D8 = 4699;
-var NOTE_DS8 = 4978;
-
 
 // Time of a quarter note in ms (represented with a 4)
 var TIME4 = 300;
@@ -138,85 +49,31 @@ fun playnote #note #duration [
 
 
 
-// NOTE_A4,16
-#playnote NOTE_A4, TIME16;
-
-// NOTE_B4,16
-#playnote NOTE_B4, TIME16;
-// NOTE_D5,16
-#playnote NOTE_D5, TIME16;
-
-// NOTE_B4,16,
-#playnote NOTE_B4, TIME16;
-
-// NOTE_FS5,-8
-#playnote NOTE_FS5, TIME8DOT;
-
-// NOTE_FS5,-8,
-#playnote NOTE_FS5, TIME8DOT;
-
-// NOTE_E5,-4,
-#playnote NOTE_E5, TIME4DOT;
-
-// NOTE_A4,16,
-#playnote NOTE_A4, TIME16;
-
-// NOTE_B4,16,
-#playnote NOTE_B4, TIME16;
-
-// NOTE_D5,16,
-#playnote NOTE_D5, TIME16;
-
-// NOTE_B4,16,
-#playnote NOTE_B4, TIME16;
-
-// NOTE_E5,-8,
-#playnote NOTE_E5, TIME8DOT;
-
-// NOTE_E5,-8,
-#playnote NOTE_E5, TIME8DOT;
-
-// NOTE_D5,-8,
-#playnote NOTE_D5, TIME8DOT;
-
-// NOTE_CS5,16,
-#playnote NOTE_CS5, TIME16;
-
-// NOTE_B4,8,
-#playnote NOTE_B4, TIME8;
-
-// NOTE_A4,16,
-#playnote NOTE_A4, TIME16;
-
-// NOTE_B4,16,
-#playnote NOTE_B4, TIME16;
-
-// NOTE_D5,16,
-#playnote NOTE_D5, TIME16;
-
-// NOTE_B4,16,
-#playnote NOTE_B4, TIME16;
-
-// NOTE_D5,4,
-#playnote NOTE_D5, TIME4;
-
-// NOTE_E5,8,
-#playnote NOTE_E5, TIME8;
-
-// NOTE_CS5,-8,
-#playnote NOTE_CS5, TIME8DOT;
-
-// NOTE_B4,16,
-#playnote NOTE_B4, TIME16;
-
-// NOTE_A4,4,
-#playnote NOTE_A4, TIME4;
-
-// NOTE_A4,8,
-#playnote NOTE_A4, TIME8;
-
-// NOTE_E5,4,
-#playnote NOTE_E5, TIME4;
-
-// NOTE_D5,2
-#playnote NOTE_D5, TIME2;
+#playnote note.a4, TIME16;
+#playnote note.b4, TIME16;
+#playnote note.d5, TIME16;
+#playnote note.b4, TIME16;
+#playnote note.fs5, TIME8DOT;
+#playnote note.fs5, TIME8DOT;
+#playnote note.e5, TIME4DOT;
+#playnote note.a4, TIME16;
+#playnote note.b4, TIME16;
+#playnote note.d5, TIME16;
+#playnote note.b4, TIME16;
+#playnote note.e5, TIME8DOT;
+#playnote note.e5, TIME8DOT;
+#playnote note.d5, TIME8DOT;
+#playnote note.cs5, TIME16;
+#playnote note.b4, TIME8;
+#playnote note.a4, TIME16;
+#playnote note.b4, TIME16;
+#playnote note.d5, TIME16;
+#playnote note.b4, TIME16;
+#playnote note.d5, TIME4;
+#playnote note.e5, TIME8;
+#playnote note.cs5, TIME8DOT;
+#playnote note.b4, TIME16;
+#playnote note.a4, TIME4;
+#playnote note.a4, TIME8;
+#playnote note.e5, TIME4;
+#playnote note.d5, TIME2;

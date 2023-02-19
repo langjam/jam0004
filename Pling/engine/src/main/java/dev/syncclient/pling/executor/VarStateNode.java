@@ -22,8 +22,6 @@ public class VarStateNode extends StateNode {
 
     @Override
     public String toString() {
-        return "VarStateNode{" +
-                "value=" + value +
-                '}';
+        return "VarStateNode[" + name() + " = " + value + "]";
     }
 }

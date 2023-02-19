@@ -32,7 +32,7 @@ public class StateTree {
 
         modules.put("audio", new AudioController());
         modules.put("math", new MathBuiltin());
-        modules.put("notes", new NoteBuiltins());
+        modules.put("note", new NoteBuiltins());
     }
 
     private void reloadCurrentNode() {
