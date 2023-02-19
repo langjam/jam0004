@@ -1,0 +1,19 @@
+mother(padme, luke).
+mother(padme, leia).
+father(anakin, luke).
+father(anakin, leia).
+
+parent(X, Y) :- mother(X, Y).
+parent(X, Y) :- father(X, Y).
+
+sibling(X, Y) :- parent(P, X), parent(P, Y).
+
+alias(anakin, vader).
+alias(X, Y) :- aliax(Y, X).
+
+kissed(anakin, padme).
+kissed(leia, han).
+kissed(luke, leia).
+kissed(X, Y) :- kissed(Y, X).
+
+gross(X, Y) :- kissed(X, Y), sibling(X, Y).

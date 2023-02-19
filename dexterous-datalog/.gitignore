@@ -1,0 +1,6 @@
+notes.md
+.DS_Store
+shell.nix
+.vscode
+/target
+**/*.rs.bk
