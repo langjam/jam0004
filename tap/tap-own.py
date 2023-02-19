@@ -362,7 +362,7 @@ class Parser:
                     case "ring medium":
                         cur_ast.append("break")
                     case "ring hard":
-                        print("OH THAT IS NOT ALLOWED. NU MAG JE NIET OP MIJN FEESTJE KOMEN!!")
+                        print("ring hard is not yet implemented")
                     case "pinky soft":
                         cur_ast.append("if")
                     case "pinky medium":
@@ -388,76 +388,111 @@ class Variables:
 
 
 class Interpreter:
-    def __init__(self, ast):
+    def __init__(self, filename, ast):
+        self.filename = filename
         self.ast = ast
         self.variables = {}
 
     def parse(self):
         for value in self.ast:
-            # if value[0] == "create_variable":
-            #     self.create_variable(value[1])
-            # elif value[0] == "get_variable":
-            #     print(1)
-            #     print(self.create_variable(value[0]))
-            # # elif value[0] == "set_variable":
-            #     # self.create_variable(value[1])
-            # print(value)
             ret_value = self.check_todo(value)
             if isinstance(ret_value, Error):
                 return ret_value
 
     def check_todo(self, value):
-        curr_index = 0
-        curr_value = value[curr_index]
+        idx = 0
+        # print(value, len(value))
+        if value[0] == "create_variable":
+            idx += 1
+            if not idx < len(value):
+                return InvalidArgumentNumberError(self.filename,
+                                                  "Invalid number of args for create variable")
+            return self.create_variable(value[idx])
 
-        while curr_index < len(value):
-            curr_value = value[curr_index]
-            if curr_value == "create_variable":
-                curr_index += 1
-                if not curr_index < len(value):
-                    return InvalidArgumentNumberError(self.filename,
-                                                      "Invalid number of args for create variable")
-                curr_value = value[curr_index]
-                self.create_variable(curr_value)
-            elif curr_value == "set_variable":
-                curr_index += 2
-                if not curr_index < len(value):
-                    return InvalidArgumentNumberError(self.filename,
-                                                      "Invalid number of args for create variable")
-                curr_value = value[curr_index]
-                self.set_variable_value(value[curr_index-1], curr_value)
-            curr_index += 1
+        elif value[0] == "set_variable":
+            idx += 1
+            if not idx+1 < len(value):
+                return InvalidArgumentNumberError(self.filename,
+                                                  "Invalid number of args for set variable")
+            new_values = value[2:]
+            # to_merge = []
+            set_value = None
+            for v in new_values:
+                if isinstance(v, list):
+                    # to_merge.append(self.check_todo(v))
+                    set_value = self.check_todo(v)
+                else:
+                    # to_merge.append(v)
+                    set_value = v
 
-        return None
+            # print("?????", set_value, "???")
+            return self.set_variable(value[idx], set_value)
+
+        elif value[0] == "get_variable":
+            idx += 1
+            if not idx < len(value):
+                return InvalidArgumentNumberError(self.filename,
+                                                  "Invalid number of args for create variable")
+            # print(self.get_variable(value[idx]))
+            return self.get_variable(value[idx])
+
+        elif value[0] == "print":
+            new_values = value[1:]
+            to_print = []
+            for v in new_values:
+                # print(v)
+                if isinstance(v, list):
+                    to_print.append(self.check_todo(v))
+                else:
+                    to_print.append(v)
+
+            # print("To_print", to_print)
+            self._print(to_print)
+        elif value[0] == "get_user_value":
+            if len(value) > 1:
+                return input(value[1])
+            else:
+                return input()
+        else:
+            return None
 
     def create_variable(self, var_name):
         self.variables[var_name] = None
 
-    def set_variable_value(self, var_name, value):
+    def set_variable(self, var_name, value):
         self.variables[var_name] = value
 
-    def get_variable_value(self, var_name):
+    def get_variable(self, var_name):
         return self.variables[var_name]
 
+    def _print(self, to_print):
+        for item in to_print:
+            print(item)
 
-with open("examples/variable.tap", 'r') as f:
+
+file_name = "examples/variable.tap"
+with open(file_name, 'r') as f:
     simple_program = f.read()
     # print(simple_program.split("\t"))
 
 # print(simple_program)
-lexer = Lexer("none", simple_program)
+lexer = Lexer(file_name, simple_program)
 tokens = lexer.tokenize()
 # print("#######TOKENIZING##########")
 if not isinstance(tokens, Error):
     # print(tokens)
-    parser = Parser("hello_world.tap", tokens)
+    parser = Parser(file_name, tokens)
     # print("#########PARSING###########")
     ast = parser.parse()
     if not isinstance(parser, Error):
         print(ast)
-        interpreter = Interpreter(ast)
-        interpreter.parse()
-        print(interpreter.variables)
+        print("\n\n\n")
+        interpreter = Interpreter(file_name, ast)
+        result = interpreter.parse()
+        if not isinstance(result, Error):
+            print(interpreter.variables)
+        else:
+            print(result.show())
     else:
         print(ast.show())
 else:
