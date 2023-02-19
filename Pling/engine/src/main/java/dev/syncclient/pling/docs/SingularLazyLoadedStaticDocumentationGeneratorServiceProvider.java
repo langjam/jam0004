@@ -17,7 +17,7 @@ import java.util.ArrayList;
  * @see DocumentationGeneratorService
  * @since 0.0.1
  */
-public class SingleLazyInstanceStaticDocumentationGeneratorService implements DocumentationGeneratorService {
+public class SingularLazyLoadedStaticDocumentationGeneratorServiceProvider implements DocumentationGeneratorService {
     private static DocumentationGeneratorService instance;
 
     /**
@@ -30,7 +30,7 @@ public class SingleLazyInstanceStaticDocumentationGeneratorService implements Do
      */
     public static DocumentationGeneratorService getInstance() {
         if (instance == null) {
-            instance = new SingleLazyInstanceStaticDocumentationGeneratorService();
+            instance = new SingularLazyLoadedStaticDocumentationGeneratorServiceProvider();
         }
         return instance;
     }
