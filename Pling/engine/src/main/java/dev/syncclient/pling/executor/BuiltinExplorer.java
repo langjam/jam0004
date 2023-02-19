@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class BuiltinExplorer implements Builtin{
+public abstract class BuiltinExplorer implements Builtin {
     @Override
     public void load(StateNode root) {
         // Get all the methods in the class that are annotated with @BuiltinExplorerInfo

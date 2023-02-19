@@ -4,7 +4,7 @@ import dev.syncclient.pling.executor.Builtin;
 import dev.syncclient.pling.executor.FunctionStateNode;
 import dev.syncclient.pling.executor.StateNode;
 
-public class MathBuiltin implements Builtin {
+public class MathBuiltins implements Builtin {
     @Override
     public void load(StateNode root) {
         root.children().add(new FunctionStateNode("math.sin", "Returns the trigonometric sine of an angle.", "#math.sin [num] -> [result]", (args) -> {
