@@ -1,0 +1,50 @@
+// Sieve of Eratosthenes
+//
+// This function generates a union type with all prime numbers from 2 to n,
+// inclusive. We can use it to make a variable that accepts only primes (up to
+// an upper limit).
+
+const primesUpTo = fn (n: number) any {
+	const A: boolean[] = [];
+	var i = 0;
+	while (i <= n) {
+		A[i] = true;
+		i += 1;
+	}
+	i = 2;
+	while (i * i <= n) {
+		if (A[i]) {
+			var j = i * i;
+			while (j <= n) {
+				A[j] = false;
+				j += i;
+			}
+		}
+		i += 1;
+	}
+	var out: number = 2;
+	i = 2;
+	while (i <= n) {
+		if (A[i]) {
+
+			// Here, we use a union operator |.
+			// `out |= i` is a shorthand for `out = out | i`.
+
+			out |= i;
+		}
+		i += 1;
+	}
+	return out;
+};
+
+const type = primesUpTo(50);
+println("Type that accepts primes up to 50: " + to_string(type));
+
+var x: type = 2;
+println("x = " + to_string(x));
+x = 3;
+println("x = " + to_string(x));
+x = 5;
+println("x = " + to_string(x));
+println("Next line should fail");
+x = 10;
