@@ -14,6 +14,7 @@ let playNote = (duration, pitch, octave) => {
     Belt.Int.toString(duration) ++ "n",
   )
   Js.log3(duration, Syntax.noteToString(pitch), octave)
+  displayNote(Syntax.noteToString(pitch))
 }
 
 registerRunClick(() => {
@@ -21,8 +22,6 @@ registerRunClick(() => {
 
   try {
     Driver.playExpr(~playNote, text)
-
-    displayNote("Should be playing?")
   } catch {
   | Driver.DriverError(error) =>
     switch error {
@@ -42,6 +41,7 @@ registerRunClick(() => {
     displayNote(
       "JS error: " ++ Belt.Option.getWithDefault(Js.Exn.message(error), "<No exception message>"),
     )
+  | Parser.Error => displayNote("Parse error")
   | error =>
     displayNote(
       "ERROR: " ++
