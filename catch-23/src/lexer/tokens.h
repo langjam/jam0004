@@ -7,15 +7,23 @@
 #define TOKEN_MACRO(X) \
     X(TokenNill, NULL, NULL) \
     X(TokenIdentifier, "identifier", token_parse_identifier) \
+    X(TokenHyphen, "-", NULL) \
     X(TokenNumber, "number", token_parse_number) \
     X(TokenComment, "comment", token_parse_comment) \
     X(TokenThingArray, "#[]", NULL) \
     X(TokenThing, "#", NULL) \
+    X(TokenFloatEqual, "'=", NULL) \
     X(TokenDoubleEqual, "==", NULL) \
+    X(TokenFloatLess, "'<", NULL) \
+    X(TokenFloatMore, "'>", NULL) \
     X(TokenShiftLeft, "\"<", NULL) \
     X(TokenShiftRight, "\">", NULL) \
     X(TokenBoolAnd, "&&", NULL) \
     X(TokenBoolOr, "||", NULL) \
+    X(TokenFloatSum, "'+", NULL) \
+    X(TokenFloatDiff, "'-", NULL) \
+    X(TokenFloatMul, "'*", NULL) \
+    X(TokenFloatDiv, "'/", NULL) \
     X(TokenIntToFloat, "''", NULL) \
     X(TokenNotEqual, "<>", NULL) \
     X(TokenFloatNotEqual, "><", NULL) \
@@ -35,7 +43,6 @@
     X(TokenBitOr, "|", NULL) \
     X(TokenModulo, "%", NULL) \
     X(TokenDiv, "/", NULL) \
-    X(TokenHyphen, "-", NULL) \
     X(TokenAdd, "+", NULL) \
     X(TokenSqBrRight, "]", NULL) \
     X(TokenSqBrLeft, "[", NULL) \

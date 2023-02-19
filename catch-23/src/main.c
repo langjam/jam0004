@@ -16,14 +16,12 @@ int main(int argc, char* argv[])
     printf("Input string: %s\n", unit.scan.text);
 */
     lex(&unit);
-/*
     printf("Tokens: \n");
 
     for(TokenList* tok = unit.tokens; tok != NULL; tok = tok->next)
     {
         printf("%i %s\n", tok->token.type, tok->token.data.str ? tok->token.data.str : "NULL");
     }
-*/
     Parser p = parser_create(unit.tokens);
     Ast dest;
     if (!parser_parse(&p, dl, &dest)) {

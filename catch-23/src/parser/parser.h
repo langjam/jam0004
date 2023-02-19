@@ -2,6 +2,8 @@
 #include "mem.h"
 
 #define AST_TYPES(X)\
+    X(AST_INVALID, "invalid"),\
+    X(AST_OPERATOR, "operator"),\
     X(AST_PRINT, "print"),\
     X(AST_DEFINE, "define"),\
     X(AST_NUMBER, "number"),\
