@@ -2,14 +2,14 @@
 @module("./editor") external registerRunClick: (unit => unit) => unit = "registerRunClick"
 @module("./editor") external displayNote: string => unit = "displayNote"
 
-@module("./player") external playNoteRaw: (string, string, unit => unit) => unit = "playNote"
+@module("./player") external playNoteRaw: (string, string) => unit = "playNote"
 
 let editorText = ref("")
 
 registerInterpreter(text => editorText := text)
 
-let playNote = (note, ~onComplete) => {
-  playNoteRaw(Syntax.noteToString(note), "4n", onComplete)
+let playNote = (note) => {
+  playNoteRaw(Syntax.noteToString(note), "4n")
   Js.log(note)
 }
 
