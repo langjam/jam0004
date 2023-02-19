@@ -2,3 +2,9 @@ index soft :
 	"Does this function properly?"
 
 index soft : "This is also valid"
+
+index soft :"This is also valid -- but parser will reject me-"
+
+index soft :
+	thumb hard:
+		"Printing variable"
