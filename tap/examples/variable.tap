@@ -1,0 +1,14 @@
+thumb hard:
+	"this is a long var name"
+end
+
+thumb soft:
+	"this is a long var name"
+	"Hello World"
+end
+
+index soft:
+	thumb medium:
+		"this is a long var name"
+	end
+end

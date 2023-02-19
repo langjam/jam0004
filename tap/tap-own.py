@@ -44,6 +44,11 @@ class UnexpectedTokenError(Error):
         super().__init__(position, "UnexpectedTokenError", details)
 
 
+class InvalidArgumentNumberError(Error):
+    def __init__(self, filename: str, details):
+        super().__init__((filename, 0, 0), "InvalidArgumentNumberError", details)
+
+
 class Keyword:
     keywords = ["thumb",
                 "index",
@@ -335,13 +340,13 @@ class Parser:
                 keyword_value_pair = f"{previous_token.Value} {self.current_token.Value}"
                 match keyword_value_pair:
                     case "thumb soft":
-                        cur_ast.append("set_variable_value")
+                        cur_ast.append("set_variable")
                     case "thumb medium":
-                        cur_ast.append("get_variable_value")
+                        cur_ast.append("get_variable")
                     case "thumb hard":
                         cur_ast.append("create_variable")
                     case "index soft":
-                        cur_ast.append("print_value")
+                        cur_ast.append("print")
                     case "index medium":
                         cur_ast.append("get_user_value")
                     case "index hard":
@@ -377,12 +382,65 @@ class Parser:
         return cur_ast
 
 
+class Variables:
+    Name: str
+    Value: str  # I set it to str because it has to have a type but it can be any type
+
+
 class Interpreter:
     def __init__(self, ast):
         self.ast = ast
+        self.variables = {}
+
+    def parse(self):
+        for value in self.ast:
+            # if value[0] == "create_variable":
+            #     self.create_variable(value[1])
+            # elif value[0] == "get_variable":
+            #     print(1)
+            #     print(self.create_variable(value[0]))
+            # # elif value[0] == "set_variable":
+            #     # self.create_variable(value[1])
+            # print(value)
+            ret_value = self.check_todo(value)
+            if isinstance(ret_value, Error):
+                return ret_value
+
+    def check_todo(self, value):
+        curr_index = 0
+        curr_value = value[curr_index]
+
+        while curr_index < len(value):
+            curr_value = value[curr_index]
+            if curr_value == "create_variable":
+                curr_index += 1
+                if not curr_index < len(value):
+                    return InvalidArgumentNumberError(self.filename,
+                                                      "Invalid number of args for create variable")
+                curr_value = value[curr_index]
+                self.create_variable(curr_value)
+            elif curr_value == "set_variable":
+                curr_index += 2
+                if not curr_index < len(value):
+                    return InvalidArgumentNumberError(self.filename,
+                                                      "Invalid number of args for create variable")
+                curr_value = value[curr_index]
+                self.set_variable_value(value[curr_index-1], curr_value)
+            curr_index += 1
+
+        return None
+
+    def create_variable(self, var_name):
+        self.variables[var_name] = None
+
+    def set_variable_value(self, var_name, value):
+        self.variables[var_name] = value
+
+    def get_variable_value(self, var_name):
+        return self.variables[var_name]
 
 
-with open("examples/complete_test.tap", 'r') as f:
+with open("examples/variable.tap", 'r') as f:
     simple_program = f.read()
     # print(simple_program.split("\t"))
 
@@ -397,6 +455,9 @@ if not isinstance(tokens, Error):
     ast = parser.parse()
     if not isinstance(parser, Error):
         print(ast)
+        interpreter = Interpreter(ast)
+        interpreter.parse()
+        print(interpreter.variables)
     else:
         print(ast.show())
 else:
