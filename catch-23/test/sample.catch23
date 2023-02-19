@@ -1,0 +1,14 @@
+*\
+this is
+a multiline
+comment
+\*
+
+\\ this is a single line comment
+
+~> my_never
+::
+{
+  |> my_never
+  \\ code here
+}
