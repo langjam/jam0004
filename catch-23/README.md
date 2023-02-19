@@ -130,12 +130,12 @@ A Never, written as `::`, is a loop that is never executed. However, if it is be
 ```
 
 ## Functions
-Functions use don't use inverted brackets.
+Functions can't have parameters due to time constraints. Instead they have access to the global state
 Functions have the same two-character name limit as variables.
 Return, for returning values and which is written as `=>`, breaks from functions.
-`fn : <return type> (<args>) { *\ code here \* }`
+`fn : <return type> () { *\ code here \* }`
 ```
-mn : ? (as : #[])
+mn : ? ()
 {
   @hw : #[12]
   $hw[100, 150, 154, 154, 157, 40, 127, 157, 162, 154, 144]
