@@ -1,4 +1,0 @@
-// Let's explore the standard library
-use fs;
-
-#print #fs.read `;/example.txt`;

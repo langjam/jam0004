@@ -1,6 +1,6 @@
 use string;
 
-var concatedString = #string.concat `hello`, `world`;
-var stringLength = #string.length concatedString;
+var concatedstring = #string.concat `hello`, `world`;
+var stringlength = #string.length concatedString;
 
-#print concatedString, `is`, stringLength, `characters long`;
+#print concatedstring, `is`, stringlength, `characters long`;

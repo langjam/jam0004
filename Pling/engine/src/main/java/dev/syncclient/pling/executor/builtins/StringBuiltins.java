@@ -33,27 +33,27 @@ public class StringBuiltins extends BuiltinExplorer {
         return a.trim();
     }
 
-    @BuiltinExplorerInfo(name = "string.toLower", description = "Converts a string to lowercase", usage = "#string.toLower [string] -> [result]")
+    @BuiltinExplorerInfo(name = "string.lower", description = "Converts a string to lowercase", usage = "#string.lower [string] -> [result]")
     public String toLower(String a) {
         return a.toLowerCase();
     }
 
-    @BuiltinExplorerInfo(name = "string.toUpper", description = "Converts a string to uppercase", usage = "#string.toUpper [string] -> [result]")
+    @BuiltinExplorerInfo(name = "string.upper", description = "Converts a string to uppercase", usage = "#string.upper [string] -> [result]")
     public String toUpper(String a) {
         return a.toUpperCase();
     }
 
-    @BuiltinExplorerInfo(name = "string.charAt", description = "Returns the character at a given index", usage = "#string.charAt [string] [index] -> [result]")
+    @BuiltinExplorerInfo(name = "string.charat", description = "Returns the character at a given index", usage = "#string.charat [string] [index] -> [result]")
     public char charAt(String a, int index) {
         return a.charAt(index);
     }
 
-    @BuiltinExplorerInfo(name = "string.indexOf", description = "Returns the index of a character in a string", usage = "#string.indexOf [string] [char] -> [result]")
+    @BuiltinExplorerInfo(name = "string.index", description = "Returns the index of a character in a string", usage = "#string.index [string] [char] -> [result]")
     public int indexOf(String a, char c) {
         return a.indexOf(c);
     }
 
-    @BuiltinExplorerInfo(name = "string.lastIndexOf", description = "Returns the last index of a character in a string", usage = "#string.lastIndexOf [string] [char] -> [result]")
+    @BuiltinExplorerInfo(name = "string.lastindex", description = "Returns the last index of a character in a string", usage = "#string.lastindex [string] [char] -> [result]")
     public int lastIndexOf(String a, char c) {
         return a.lastIndexOf(c);
     }
@@ -63,13 +63,23 @@ public class StringBuiltins extends BuiltinExplorer {
         return a.contains(c);
     }
 
-    @BuiltinExplorerInfo(name = "string.startsWith", description = "Returns whether a string starts with a character", usage = "#string.startsWith [string] [char] -> [result]")
+    @BuiltinExplorerInfo(name = "string.startswith", description = "Returns whether a string starts with a character", usage = "#string.startswith [string] [char] -> [result]")
     public boolean startsWith(String a, String b) {
         return a.startsWith(b);
     }
 
-    @BuiltinExplorerInfo(name = "string.endsWith", description = "Returns whether a string ends with a character", usage = "#string.endsWith [string] [char] -> [result]")
+    @BuiltinExplorerInfo(name = "string.endswith", description = "Returns whether a string ends with a character", usage = "#string.endswith [string] [char] -> [result]")
     public boolean endsWith(String a, String b) {
         return a.endsWith(b);
+    }
+
+    @BuiltinExplorerInfo(name = "string.matches", description = "Returns whether a string matches a regex", usage = "#string.matches [string] [regex] -> [result]")
+    public boolean matches(String a, String b) {
+        return a.matches(b);
+    }
+
+    @BuiltinExplorerInfo(name = "string.split", description = "Splits a string by a regex", usage = "#string.split [string] [regex] [matchNum] -> [result]")
+    public String split(String a, String b, int num) {
+        return a.split(b)[num];
     }
 }

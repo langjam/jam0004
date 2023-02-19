@@ -33,6 +33,7 @@ public class StateTree {
         modules.put("note", new NoteBuiltins());
         modules.put("fs", new FsBuiltins());
         modules.put("http", new HttpBuiltins());
+        modules.put("io", new IoBuiltins());
         modules.put("string", new StringBuiltins());
         modules.put("os", new OSBuiltins());
     }
