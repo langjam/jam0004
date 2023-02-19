@@ -26,6 +26,8 @@ type rec expr =
   | Lambda(string, expr)
   // let x in e
   | Let(string, expr)
+  // const x in e
+  | LetConst(string, expr)
   // e1 = e2 in e
   | Unify(expr, expr, expr)
   // e1 e2
@@ -71,6 +73,7 @@ and value =
   | VEmptyList
   | VNote(note)
   | VFail
+  | VConst(Unique.t)
 
 let noteToString = note => switch note {
   | A => "A4"

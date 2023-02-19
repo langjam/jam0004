@@ -19,7 +19,8 @@ let playExpr = (~playNote, programText) => {
                 // so we cannot know how to play it
                 | (Syntax.VStuckVar(_) 
                 | Closure(_)
-                | VStuckApp(_)) as value => raise(DriverError(InvalidNote(value)))
+                | VStuckApp(_)
+                | VConst(_)) as value => raise(DriverError(InvalidNote(value)))
 
                 | Thunk(thunkEnv, expr) => evaluateNotes(Eval.eval(thunkEnv, expr), cont)
 

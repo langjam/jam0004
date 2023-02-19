@@ -35,6 +35,13 @@ let rec eval = (env, expr) =>
     let updatedEnv = { ...env, variableIdentities : Belt.Map.String.set(env.variableIdentities, name, unique) }
 
     eval(updatedEnv, rest)
+  | LetConst(name, rest) =>
+    let unique = Unique.fresh ()
+    let updatedEnv = { ...env, variableIdentities : Belt.Map.String.set(env.variableIdentities, name, unique) }
+    insertVarValue(updatedEnv, unique, VConst(unique))
+
+    eval(updatedEnv, rest)
+
   | Unify(expr1, expr2, rest) =>
     if unify(Thunk(env, expr1), Thunk(env, expr2)) {
       eval(env, rest)
@@ -67,7 +74,7 @@ and evalApp : _ => _ => value = (funValue, argValue) =>
   switch tryReduceStuck(funValue) {
     | Thunk(thunkEnv, expr) => 
       evalApp(eval(thunkEnv, expr), argValue)
-    | (VStuckVar(_) | VStuckApp(_)) as stuckValue => 
+    | (VStuckVar(_) | VStuckApp(_) | VConst(_)) as stuckValue => 
       VStuckApp(stuckValue, argValue)
     | Closure(closureEnv, closureParam, closureBody) => {
       let paramUnique = Unique.fresh ()
@@ -138,6 +145,7 @@ and unify : (value, value) => bool = (value1, value2) => switch (value1, value2)
     unify(value, eval(thunkEnv, thunkExpr))
   }
   | (VFail, _) | (_, VFail) => false
+  | (VConst(unique1), VConst(unique2)) => unique1 == unique2
   | _ => false
 }
 

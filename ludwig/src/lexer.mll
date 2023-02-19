@@ -26,6 +26,7 @@ rule token = parse
 | [' ' '\t' '\n']       { token lexbuf }
 | ['0'-'9']+ as literal { INT(int_of_string literal) }
 | "let"                 { LET }
+| "const"               { CONST }
 | "in"                  { IN }
 | (ident_start ident*) as str { IDENT(str) }
 | "="                   { EQUALS }

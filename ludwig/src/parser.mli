@@ -19,6 +19,7 @@ type token =
   | EQUALS
   | EOF
   | DURATION of (Syntax.duration)
+  | CONST
   | COMMA
   | COLON
   | ARROW

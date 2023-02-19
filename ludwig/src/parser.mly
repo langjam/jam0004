@@ -7,6 +7,7 @@ open Syntax
 %token <Syntax.note>     NOTE
 %token <Syntax.duration> DURATION
 %token LET
+%token CONST
 %token IN
 %token EQUALS "="
 %token LAMBDA "\\"
@@ -41,7 +42,7 @@ main:
     | expr EOF { $1 }
 
 expr:
-    | "\\" IDENT "->" expr1 { Lambda($2, $4) }
+    | "\\" IDENT "->" expr { Lambda($2, $4) }
     | expr1 { $1 }
 
 expr1:
@@ -61,6 +62,7 @@ expr_leaf:
     | IDENT                                 { Var($1) }
     | LET IDENT IN expr                     { Let($2, $4) }
     | LET IDENT "=" expr IN expr            { Let($2, Unify(Var($2), $4, $6)) }
+    | CONST IDENT IN expr                   { LetConst($2, $4) }
     | expr1 "=" expr IN expr                { Unify($1, $3, $5) }
     | "[" sep_by_trailing(",", expr) "]"    { List.fold_right (fun x rest -> Cons(x, rest)) $2 EmptyList }
     | LIST expr2                            { Sequentialize($2) }
