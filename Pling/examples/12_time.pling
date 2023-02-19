@@ -1,0 +1,5 @@
+use time;
+
+var date = #time.date;
+
+#print date;

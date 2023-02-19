@@ -36,6 +36,7 @@ public class StateTree {
         modules.put("io", new IoBuiltins());
         modules.put("string", new StringBuiltins());
         modules.put("os", new OSBuiltins());
+        modules.put("time", new TimeBuiltins());
     }
 
     private void reloadCurrentNode() {
