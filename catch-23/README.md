@@ -9,7 +9,6 @@ Because the theme is interpreted as being nonsense, the language is full of ambi
 
 The language doesn't come with traditional types, instead it comes in three types:
 + Thing32, written as `#` and a Thing32 pointer/array by extension:  `#*` and `#[]`
-+ Thing64, written as `##` and a Thing64 pointer/array by extension: `##*` and `##[]`
 + Boolean, written as `#?` and a Boolan pointer/array by extension: `#?*` and `#?[]`
 
 Those types can represent anything that is a floating point number, an integer number and a character.
@@ -128,20 +127,5 @@ A Never, written as `::`, is a loop that is never executed. However, if it is be
 {
   |> my_never
   \\ code here
-}
-```
-
-## Functions
-Functions can't have parameters due to time constraints. Instead they have access to the global state
-Functions have the same two-character name limit as variables.
-Return, for returning values and which is written as `=>`, breaks from functions.
-`fn : <return type> () { *\ code here \* }`
-```
-mn : ? ()
-{
-  @hw : #[12]
-  $hw[100, 150, 154, 154, 157, 40, 127, 157, 162, 154, 144]
-  \\ prints hello world
-  print($hw)
 }
 ```
