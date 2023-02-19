@@ -1,13 +1,15 @@
-/**/
+//
+// Part of Numpad
+// Copyright (c) 2023 Remy Pierre Bushnell Clarke & Sander in 't Veld
+// License: MIT
+//
 
 use crate::common::*;
 
+use log::*;
 use logos::Logos;
 
-pub fn lex(
-    source: &str,
-    verbose: bool,
-) -> Result<Vec<LabelPass1>, anyhow::Error> {
+pub fn lex(source: &str) -> Result<Vec<LabelPass1>, anyhow::Error> {
     let mut lex: logos::Lexer<Token> = Token::lexer(source);
     let mut definition_end = false;
     let mut tree: Vec<LabelPass1> = vec![];
@@ -15,12 +17,10 @@ pub fn lex(
     let mut current_token_tree: Vec<TokenTreePass1> = vec![];
     let mut defer_nest: Vec<Vec<TokenTreePass1>> = vec![];
     while let Some(token) = lex.next() {
-        if verbose {
-            if token == Token::Error {
-                println!("\n{:?}\t| {token:?} ", lex.slice())
-            } else {
-                print!("\n{:?}\t| {token:?} ", lex.slice().trim())
-            }
+        if token == Token::Error {
+            debug!("{:?}\t| {token:?} ", lex.slice())
+        } else {
+            trace!("{:?}\t| {token:?} ", lex.slice().trim())
         }
         let mut operator = |x, y| -> Result<(), anyhow::Error> {
             if definition_end {
@@ -34,7 +34,12 @@ pub fn lex(
             prev_num = false;
             Ok(())
         };
+
         match token {
+            Token::Ceiling => operator(Binary::Abort, Unary::Ceiling)?,
+            Token::Floor => operator(Binary::Abort, Unary::Floor)?,
+            Token::Print => operator(Binary::Abort, Unary::Print)?,
+
             Token::Star => operator(Binary::Mult, Unary::Fetch)?,
             Token::Plus => operator(Binary::Plus, Unary::Signum)?,
             Token::Minus => operator(Binary::Assign, Unary::Neg)?,
@@ -89,16 +94,13 @@ pub fn lex(
     }
     tree.push(LabelPass1(core::mem::take(&mut current_token_tree)));
 
-    if verbose {
-        println!();
-        println!();
-        for LabelPass1(tokens) in tree.iter() {
-            {
-                println!("Label : ")
-            };
-            for i in tokens.iter() {
-                println!("\t{i:?}")
-            }
+    trace!("");
+    for LabelPass1(tokens) in tree.iter() {
+        {
+            trace!("Label : ")
+        };
+        for i in tokens.iter() {
+            trace!("\t{i:?}")
         }
     }
     Ok(tree)
@@ -116,16 +118,23 @@ enum Token {
     #[regex(r"/[ \t]*")]
     Slash,
 
+    #[regex(r"\+[ \t]*\.[ \t]*")]
+    Ceiling,
+    #[regex(r"\-[ \t]*\.[ \t]*")]
+    Floor,
+    #[regex(r"\*[ \t]*\.[ \t]*")]
+    Print,
+
     // Structurals
-    #[regex(r"/\.[ \t]*")]
+    #[regex(r"/[ \t]*\.[ \t]*")]
     OpenExpr,
-    #[regex(r"\./[ \t]*")]
+    #[regex(r"\.[ \t]*/[ \t]*")]
     CloseExpr,
-    #[regex(r"\.\.[ \t]*")]
+    #[regex(r"\.[ \t]*\.[ \t]*")]
     Separator,
 
     // Literals
-    #[regex(r"[0-9][0-9 \t]*(\.[0-9 \t]+)?")]
+    #[regex(r"[0-9][0-9 \t]*(\.[0-9][0-9 \t]*)?")]
     Number,
 
     // Display
