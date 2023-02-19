@@ -83,11 +83,12 @@ class Lexer:
         self.advance()
 
     def advance(self):
+        print(repr(self.current_char))
         self.cursor += 1
         self.column += 1
         if self.new_line:
             self.prev_column = self.column
-            self.column = 0
+            self.column = -1
             self.line_number += 1
             self.new_line = False
             self.advance()
@@ -125,7 +126,7 @@ class Lexer:
                 if isinstance(ret_value, Error):
                     return ret_value
                 tokens.append(ret_value)
-                self.advance()
+                print(self.current_char)
             elif self.current_char.isalpha():
                 ret_value = self.identify()
                 # print(tokens)
@@ -159,7 +160,6 @@ class Lexer:
         dot_found = False
 
         while self.current_char is not None:
-            print(repr(self.current_char))
             if self.current_char == ".":
                 match dot_found:
                     case True:

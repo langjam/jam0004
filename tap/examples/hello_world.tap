@@ -1,4 +1,5 @@
 index soft:
+thumb
 	"Hello World!"
 	132
 end
