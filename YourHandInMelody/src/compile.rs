@@ -1163,6 +1163,7 @@ impl Compiler {
                         )))?;
                     }
                     let out = ib.func.new_register(ty);
+                    let arg = self.compile_expr(ib, &*arg)?;
                     ib.block().insns.push(Insn::Call {
                         out,
                         callee: Callee::Builtin(Builtin::Op1(match op.value.as_str() {
@@ -1171,7 +1172,7 @@ impl Compiler {
                             "!" => UnOp::Not,
                             _ => unreachable!(),
                         })),
-                        args: vec![],
+                        args: vec![arg],
                     });
                     out
                 }
