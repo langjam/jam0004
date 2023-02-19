@@ -29,9 +29,11 @@ export async function interpret(src: Stream, output: Output) {
 class Environment {
   vars: Map<number, [CCType, JSValue]>
   funcs: Map<number, FunctionObj>
+  types: Map<number, CCType>
   constructor(public parent?: Environment) {
     this.vars = new Map();
     this.funcs = new Map();
+    this.types = new Map();
   }
 
   getVar(name: number): [CCType, JSValue] | undefined {
@@ -54,6 +56,17 @@ class Environment {
 
   setFunc(name: number, func: FunctionObj) {
     this.funcs.set(name, func);
+  }
+
+  getType(name: number) : CCType | undefined {
+    let local = this.types.get(name);
+    if (local) return local;
+
+    if (this.parent) return this.parent.getType(name);
+  }
+
+  setType(name: number, type: CCType) {
+    this.types.set(name, type);
   }
 }
 
@@ -103,9 +116,10 @@ class Interpreter {
         }
       break;
       case "2":
-        // define type
+        await this.log("Please input your function definition.");
+        await this.interpretTypeDef();
       break;
-      case "3":  // eval expression
+      case "3":
         {
           await this.log("Please input your expression.");
           await this.interpretExpression()
@@ -133,7 +147,7 @@ class Interpreter {
 
       if (value != null) {
         this.log("The expression is evaluated to: ");
-        this.output.out(value); // TODO: format this
+        this.output.out(value);
       }
 
     } catch (e) {
@@ -151,6 +165,21 @@ class Interpreter {
       await this.parser.consumeHash();
 
       this.log("Function is now declared.");
+    } catch (e) {
+      this.handleError(fullyParsed, e);
+    }
+  }
+
+  async interpretTypeDef() {
+    let fullyParsed = false;
+    try{
+      this.parser.resetCursor();
+      await this.parser.parseTypeDefinition();
+      fullyParsed = true;
+
+      await this.parser.consumeHash();
+
+      this.log("Type is now declared.");
     } catch (e) {
       this.handleError(fullyParsed, e);
     }
@@ -440,7 +469,6 @@ class Interpreter {
   }
 
   async handleError(fullyParsed: boolean, e: any) {
-    // TODO: handle runtime error
     switch (e) {
       case PARSE_ERROR: {
         if (fullyParsed) {
@@ -561,6 +589,25 @@ class Parser{
   // definitions
 
   // type expression
+  async parseTypeDefinition() {
+    // * type 1nnn * type
+    await this.consumeStar();
+    let startpos = this.cursor;
+
+    let n = await this.consumeDigit();
+    if (n !== 1) await this.parseError("Custom type must start with 1", startpos);
+
+    let hundreds = await this.consumeDigit();
+    let tens = await this.consumeDigit();
+    let units = await this.consumeDigit();
+
+    let id = 1000 + hundreds*100 + tens*10 + units;
+
+    await this.consumeStar();
+    let aliasType = await this.parseType();
+    this.env.setType(id, aliasType);
+  }
+
   async parseType() : Promise<CCType> {
     let token = await this.consumeDigit();
 
@@ -639,8 +686,19 @@ class Parser{
   }
 
   async parseTypeCustom() : Promise<CCType> {
-    //TODO: resolve custom type
-    return BaseType.None
+    let hundreds = await this.consumeDigit();
+    let tens = await this.consumeDigit();
+    let units = await this.consumeDigit();
+
+    let id = 1000 + hundreds*100 + tens*10 + units;
+
+    let type = this.env.getType(id);
+    if (type == null) {
+      await this.parseError(`unknown declared type with id ${type}.`);
+      throw unreachable();
+    }
+
+    return type;
   }
 
   // function
