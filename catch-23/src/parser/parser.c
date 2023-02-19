@@ -261,6 +261,9 @@ static bool parse_assignment(Parser *p, Ast *dest)
     return true;
 }
 
+
+bool parse_toplevel(Parser *p, Ast *dest, enum TokenType sentinel);
+
 bool parser_decide_toplevel(Parser *p, Ast *dest)
 {
     switch (peek_token(p).type) {
@@ -268,16 +271,32 @@ bool parser_decide_toplevel(Parser *p, Ast *dest)
             return parse_definition(p, dest);
         case TokenDollar: 
             return parse_assignment(p, dest);
+        case TokenDont: 
+            next_token(p);
+            checkout(expect_token_type(p, TokenCurlyBrLeft));
+            next_token(p);
+            checkout(parse_toplevel(p, dest, TokenCurlyBrRight));
+            next_token(p); // Skip Sentinel
+            dest->type = AST_DONT;
+            return true;
+        case TokenNever: 
+            next_token(p);
+            checkout(expect_token_type(p, TokenCurlyBrLeft));
+            next_token(p);
+            checkout(parse_toplevel(p, dest, TokenCurlyBrRight));
+            next_token(p); // Skip Sentinel
+            dest->type = AST_NEVER;
+            return true;
         default:
             return parse_expression(p, dest);
     }
 }
 
-bool parse_toplevel(Parser *p, Ast *dest)
+bool parse_toplevel(Parser *p, Ast *dest, enum TokenType sentinel)
 {
     Tail t = create_tail();
 
-    while (peek_token(p).type != TokenNill) {
+    while (peek_token(p).type != TokenNill && peek_token(p).type != sentinel) {
         append_tail(&t, p);
         checkout(parser_decide_toplevel(p, t.current));
     }   
@@ -294,7 +313,7 @@ bool parser_parse(Parser *p, DestroyList dl, Ast *dest)
     p->dl = dl;
 
     *dest = (Ast){0};
-    return parse_toplevel(p, dest);
+    return parse_toplevel(p, dest, TokenNill);
 }
 
 void ast_print(Ast *ast, int indent)

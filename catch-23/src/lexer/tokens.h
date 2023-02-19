@@ -32,7 +32,7 @@
     X(TokenArrowRight, "~>", NULL) \
     X(TokenAgainst, ";;", NULL) \
     X(TokenDont, ":;", NULL) \
-    X(TokenDoubleColon, "::", NULL) \
+    X(TokenNever, "::", NULL) \
     X(TokenFloatToInt, "\"", NULL) \
     X(TokenSingleQuote, "'", NULL) \
     X(TokenThing32, "#", NULL) \

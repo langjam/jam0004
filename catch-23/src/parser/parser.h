@@ -3,6 +3,8 @@
 
 #define AST_TYPES(X)\
     X(AST_INVALID, "invalid"),\
+    X(AST_NEVER, "never"),\
+    X(AST_DONT, "dont"),\
     X(AST_PREFIX_OPERATOR, "prefix operator"),\
     X(AST_OPERATOR, "operator"),\
     X(AST_PRINT, "print"),\
