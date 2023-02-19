@@ -83,35 +83,35 @@ class Lexer:
         self.advance()
 
     def advance(self):
-        print(repr(self.current_char))
         self.cursor += 1
         self.column += 1
         if self.new_line:
             self.prev_column = self.column
-            self.column = -1
+            self.column = 0
             self.line_number += 1
             self.new_line = False
-            self.advance()
+            # print(f"CURSOR--------------{self.cursor}")
 
         if self.cursor < len(self.code):
             self.current_char = self.code[self.cursor]
             if self.current_char == "\n":
+                # print("New line detected")
                 self.new_line = True
         else:
             self.current_char = None
 
-    def previous(self):
-        self.cursor -= 1
-        self.column -= 1
+    # def previous(self):
+    #     self.cursor -= 1
+    #     self.column -= 1
 
-        if self.cursor >= 0:
-            self.current_char = self.code[self.cursor]
-            if self.current_char == self.column:
-                if self.prev_column is None:
-                    print("Warn: column cannot be reset")
-                else:
-                    self.column = self.prev_column
-                self.previous()
+    #     if self.cursor >= 0:
+    #         self.current_char = self.code[self.cursor]
+    #         if self.current_char == self.column:
+    #             if self.prev_column is None:
+    #                 print("Warn: column cannot be reset")
+    #             else:
+    #                 self.column = self.prev_column
+    #             self.previous()
 
     def tokenize(self):
         tokens = []
@@ -119,14 +119,13 @@ class Lexer:
         n = 0
         while self.current_char is not None and n <= 10:
             # if self.current_char not in " \t\n":
-            #     print(self.current_char)
+            # print("WHAT IS WRONG?", repr(self.current_char))
 
             if self.current_char.isdigit():
                 ret_value = self.number()
                 if isinstance(ret_value, Error):
                     return ret_value
                 tokens.append(ret_value)
-                print(self.current_char)
             elif self.current_char.isalpha():
                 ret_value = self.identify()
                 # print(tokens)
@@ -192,6 +191,8 @@ class Lexer:
 
     def identify(self):
         curr_str = ""
+
+        # print(f"CURR CHAR: {self.current_char}")
 
         while self.current_char is not None:
             if curr_str in Keyword.keywords and self.current_char in " \t\n:":
@@ -292,11 +293,6 @@ class Parser:
 
         return cur_ast
 
-
-char = "\n"
-print(repr(char))
-if char in " \t\n":
-    print("Hello World Bitches")
 
 with open("examples/hello_world.tap", 'r') as f:
     simple_program = f.read()
