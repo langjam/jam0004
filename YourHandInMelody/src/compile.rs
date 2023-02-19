@@ -986,7 +986,7 @@ impl Compiler {
                             op.span()
                                 .err(format!("unrecognised operator: '{}'", op.value.as_str()))
                         })?;
-                        while let Some(true) = op_stack.back().map(|(_, p)| *p > prec) {
+                        while let Some(true) = op_stack.back().map(|(_, p)| *p >= prec) {
                             pop_apply(self, ib, &mut op_stack, &mut val_stack)?;
                         }
                         op_stack.push_back((op, prec));
@@ -1054,6 +1054,31 @@ impl Compiler {
                         "E" => Some(DynamicValue::Number(E)),
                         "PI" => Some(DynamicValue::Number(PI)),
                         "TAU" => Some(DynamicValue::Number(TAU)),
+                        s if regex::Regex::new("^[A-G][♯♭sf]?[0-9]?$")
+                            .unwrap()
+                            .is_match(s) =>
+                        {
+                            let mut cs = s.chars();
+                            let note = cs.next().unwrap();
+                            let sharp_or_octave = cs.next().unwrap();
+                            let maybe_octave = cs.next();
+                            let (sharp, octave) = if let Some(octave) = maybe_octave {
+                                (Some(sharp_or_octave), octave)
+                            } else {
+                                (None, sharp_or_octave)
+                            };
+                            let note_semitones = [0, 2, 3 - 12, 5 - 12, 7 - 12, 8 - 12, 10 - 12]
+                                [note as usize - 'A' as usize];
+                            let sharp_offset = match sharp {
+                                Some('♯' | 's') => 1,
+                                Some('♭' | 'f') => -1,
+                                _ => 0,
+                            };
+                            let octave_offset = octave.to_digit(10).unwrap() as i32 - 4;
+                            let delta_from_a4 = octave_offset * 12 + note_semitones + sharp_offset;
+                            let freq = 440.0 * 2.0_f64.powf(delta_from_a4 as f64 / 12.0);
+                            Some(DynamicValue::Number(freq))
+                        }
                         _ => None,
                     } {
                         let out = ib.func.new_register(Type::Number);
@@ -1550,26 +1575,22 @@ pub mod llvm {
                                                 let c_ll_ty = self.llvm_type(c_ty);
                                                 let i64 = self.ctx().i64_type();
                                                 let arr_reg = ll_registers[out.0];
-                                                ib
-                                                    .build_call(
-                                                        fv,
-                                                        &[
-                                                            arr_reg.into(),
-                                                            i64.const_int(
-                                                                arg_vec.len() as u64,
-                                                                false,
-                                                            )
+                                                ib.build_call(
+                                                    fv,
+                                                    &[
+                                                        arr_reg.into(),
+                                                        i64.const_int(arg_vec.len() as u64, false)
                                                             .into(),
-                                                            c_ll_ty.size_of().unwrap().into(),
-                                                            i64.const_int(
-                                                                std::mem::align_of::<f64>() as u64,
-                                                                false,
-                                                            )
-                                                            .into(),
-                                                        ],
-                                                        "arr",
-                                                    )
-                                                    .try_as_basic_value();
+                                                        c_ll_ty.size_of().unwrap().into(),
+                                                        i64.const_int(
+                                                            std::mem::align_of::<f64>() as u64,
+                                                            false,
+                                                        )
+                                                        .into(),
+                                                    ],
+                                                    "arr",
+                                                )
+                                                .try_as_basic_value();
 
                                                 let ptr_to_buf = gep!(
                                                     self.c

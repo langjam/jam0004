@@ -2,12 +2,17 @@ oscillator sine(): sample {
     return sin(phase())
 }
 
+sound play(note: pitch, duration: time) {
+    do t = 0 ; t < duration ; t + SAMPLE_PERIOD {
+        let s = 0.3 * sine() at time_phase(t, note)
+        mix(pan(s, sin(t * TAU) * 0.5))
+        next()
+    }
+}
+
 sound main() {
-    for p in [440, 460, 480] {
-        do t = 0 ; t < 1 ; t + SAMPLE_PERIOD {
-            let s = 0.3 * sine() at time_phase(t, p)
-            mix(pan(s, sin(t * TAU)))
-            next()
-        }
+    for note in [C4, D4, E4, F4, G4, A4, B4, C5] {
+        play(note, 1/4)
+        skip(1 / 4 * SAMPLE_RATE)
     }
 }

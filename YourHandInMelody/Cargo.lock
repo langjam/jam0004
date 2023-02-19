@@ -544,5 +544,6 @@ dependencies = [
  "hound",
  "inkwell",
  "llvm-sys",
+ "regex",
  "unicode_reader",
 ]

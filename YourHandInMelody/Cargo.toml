@@ -13,3 +13,4 @@ inkwell = { version = "0.1.1", features = ["llvm15-0"] }
 llvm-sys = "150.0.5"
 colored = "2.0.0"
 hound = "3.5.0"
+regex = "1.7.1"
