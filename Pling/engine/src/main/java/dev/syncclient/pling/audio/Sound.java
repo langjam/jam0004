@@ -17,28 +17,6 @@ public class Sound extends Thread {
         super("Sound");
     }
 
-
-    public void fillSine() {
-//        for (int i = 0; i < BUFFER_SIZE; i+=2) {
-//            float t = (float) ((2.0f * PI * omega * (i + lastOffset)) / ((float) NUM_SAMPLES));
-//
-//            short VV = (short) (volume * sin(t));
-//
-//            // 16-bit sample: 2 bytes
-//            jbuffers[currentBuffer][i * 2] = (short) (VV & 0xFF);
-//            jbuffers[currentBuffer][i * 2 + 1] = (short) (VV >> 8);
-//        }
-//
-//        lastOffset += BUFFER_SIZE / 2;
-//        lastOffset %= NUM_SAMPLES; // was FSignalFreq
-//
-//        short realHeight = (short) (volume * 32768);
-//        for (int i = 0; i < jbuffers[currentBuffer].length; i += 2) {
-//            jbuffers[currentBuffer][i] = realHeight;
-//            jbuffers[currentBuffer][i + 1] = (short) -realHeight;
-//        }
-    }
-
     @Override
     public void run() {
         LinkedList<Integer> bufferQueue = new LinkedList<>();

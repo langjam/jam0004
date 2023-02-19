@@ -8,6 +8,11 @@ use audio;
 #print #audio.initted;
 
 var handle = #audio.new;
+var sine = #audio.sine.new;
+
+#audio.sine.volume sine, 1;
+
+#audio.bindsource handle, sine;
 
 var NOTE_B0 = 31;
 var NOTE_C1 = 33;
@@ -122,10 +127,15 @@ var TIME2 = 1000;
 
 
 fun playnote #note #duration [
-    #audio.sine handle, note, 1;
+    #audio.sine.volume sine, 0;
+    #sleep 2;
+    #audio.sine.volume sine, 1;
+    #audio.sine.frequency sine, note;
     #sleep duration;
-    #audio.stop handle;
 ]
+
+
+#audio.start handle;
 
 // NOTE_A4,16
 #playnote NOTE_A4, TIME16;
@@ -209,3 +219,5 @@ fun playnote #note #duration [
 
 // NOTE_D5,2
 #playnote NOTE_D5, TIME2;
+
+#audio.stop handle;

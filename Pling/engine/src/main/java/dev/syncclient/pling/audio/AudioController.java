@@ -2,6 +2,7 @@ package dev.syncclient.pling.audio;
 
 import dev.syncclient.pling.audio.source.MicrophoneSource;
 import dev.syncclient.pling.audio.source.SilenceSource;
+import dev.syncclient.pling.audio.source.SineSource;
 import dev.syncclient.pling.executor.Builtin;
 import dev.syncclient.pling.executor.FunctionStateNode;
 import dev.syncclient.pling.executor.StateNode;
@@ -22,6 +23,7 @@ public class AudioController implements Builtin {
     private final HashMap<Double, Sound> sounds = new HashMap<>();
     private final HashMap<Double, MicrophoneSource> microphones = new HashMap<>();
     private final HashMap<Double, SilenceSource> silences = new HashMap<>();
+    private final HashMap<Double, SineSource> sineSources = new HashMap<>();
     private double nextHandle = 0;
     private long device;
     private long context;
@@ -96,6 +98,27 @@ public class AudioController implements Builtin {
                 "Sets the position of the sound",
                 "#audio.xyz [handle] [x] [y] [z]",
                 this::setLocation
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.sine.new",
+                "Creates a new sine wave handle (number)",
+                "#audio.sine.new -> [handle]",
+                this::newSineSource
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.sine.frequency",
+                "Sets the frequency of the sine wave",
+                "#audio.sine.frequency [handle] [frequency]",
+                this::setSineFrequency
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.sine.volume",
+                "Sets the volume of the sine wave",
+                "#audio.sine.volume [handle] [volume]",
+                this::setSineVolume
         ));
     }
 
@@ -207,14 +230,16 @@ public class AudioController implements Builtin {
             throw new IllegalStateException("Invalid handle");
         }
 
-        if (!microphones.containsKey(sourceHandle) && !silences.containsKey(sourceHandle)) {
+        if (!microphones.containsKey(sourceHandle) && !silences.containsKey(sourceHandle) && !sineSources.containsKey(sourceHandle)) {
             throw new IllegalStateException("Invalid source handle");
         }
 
         if (microphones.containsKey(sourceHandle)) {
             sounds.get(handle).getDescriptor().source(microphones.get(sourceHandle));
-        } else {
+        } else if (silences.containsKey(sourceHandle)) {
             sounds.get(handle).getDescriptor().source(silences.get(sourceHandle));
+        } else if (sineSources.containsKey(sourceHandle)) {
+            sounds.get(handle).getDescriptor().source(sineSources.get(sourceHandle));
         }
 
         return null;
@@ -235,6 +260,49 @@ public class AudioController implements Builtin {
         }
 
         sounds.get(handle).getDescriptor().xyz(x.floatValue(), y.floatValue(), z.floatValue());
+        return null;
+    }
+
+    private Object newSineSource(List<Object> objects) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = nextHandle++;
+        sineSources.put(handle, new SineSource());
+
+        return handle;
+    }
+
+    private Object setSineFrequency(List<Object> objects) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = (Double) objects.get(0);
+        Double frequency = (Double) objects.get(1);
+
+        if (!sineSources.containsKey(handle)) {
+            throw new IllegalStateException("Invalid handle");
+        }
+
+        sineSources.get(handle).setFrequency(frequency.floatValue());
+        return null;
+    }
+
+    private Object setSineVolume(List<Object> objects) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = (Double) objects.get(0);
+        Double amplitude = (Double) objects.get(1);
+
+        if (!sineSources.containsKey(handle)) {
+            throw new IllegalStateException("Invalid handle");
+        }
+
+        sineSources.get(handle).setVolume(amplitude.floatValue());
         return null;
     }
 
