@@ -6,6 +6,8 @@ Enum TokenType:
 	FLOAT
 	STR
 	ADD
+	THUMB
+	SOFT
 
 struct Token:
 	type: TokenType
@@ -17,12 +19,18 @@ func tokenizer(program):
 
 	tokens = []
 	
+	curr_str = ""
 	while cursor < len(program):
 		if program[cursor].isdigit():
 			tokens.append(tokenizer.create_number())
 		elif program[cursor] == "+":
 			tokens.append(Token(TokenType.ADD))
 			// Repeat for minus, multiply, divide, lparen and rparen
+		elif curr_str == "thumb"
+			tokens.append(Token(TokenType.THUMB))
+			// Repeat for other fingers
+		elif curr_str == "soft":
+			// Repeat for other 
 
 	return tokens
 
