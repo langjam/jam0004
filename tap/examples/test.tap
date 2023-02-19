@@ -1,2 +1,4 @@
 index soft : 
 	"Does this function properly?"
+
+index soft : "This is also valid"
