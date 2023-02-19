@@ -34,6 +34,7 @@ public class StateTree {
         modules.put("fs", new FsBuiltins());
         modules.put("http", new HttpBuiltins());
         modules.put("io", new IoBuiltins());
+        modules.put("string", new StringBuiltins());
     }
 
     private void reloadCurrentNode() {
