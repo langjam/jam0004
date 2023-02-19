@@ -116,7 +116,7 @@ class Interpreter {
         }
       break;
       case "2":
-        await this.log("Please input your function definition.");
+        await this.log("Please input your type definition.");
         await this.interpretTypeDef();
       break;
       case "3":
