@@ -39,6 +39,11 @@ class IllegalKeywordValuePairError(Error):
         super().__init__(position, "IllegalKeywordValueError", details)
 
 
+class UnexpectedTokenError(Error):
+    def __init__(self, position: tuple[str, int, int], details):
+        super().__init__(position, "UnexpectedTokenError", details)
+
+
 class Keyword:
     keywords = ["thumb",
                 "index",
@@ -205,10 +210,16 @@ class Lexer:
         # print(f"CURR CHAR: {self.current_char}")
 
         while self.current_char is not None:
-            if curr_str in Keyword.keywords and self.current_char in " \t\n:":
+            if curr_str in Keyword.keywords and self.current_char in " \t\n":
                 # self.previous()
                 return Token(TokenType.KEYWORD, (self.filename,
                              self.line_number, self.column), curr_str)
+            elif curr_str in Keyword.modifiers and self.current_char in " \t\n:":
+                return Token(TokenType.MODIFIER, (self.filename,
+                             self.line_number, self.column), curr_str)
+            elif curr_str in Keyword.end and self.current_char in " \t\n":
+                return Token(TokenType.END, (self.filename,
+                             self.line_number, self.column))
             elif self.current_char in " \t\n":
                 return UnkownKeywordError((self.filename,
                                            self.line_number,
@@ -222,6 +233,12 @@ class Lexer:
             # self.previous()
             return Token(TokenType.KEYWORD, (self.filename,
                          self.line_number, self.column), curr_str)
+        elif curr_str in Keyword.modifiers:
+            return Token(TokenType.MODIFIER, (self.filename,
+                         self.line_number, self.column), curr_str)
+        elif curr_str in Keyword.end:
+            return Token(TokenType.END, (self.filename,
+                         self.line_number, self.column))
         else:
             return UnkownKeywordError((self.filename,
                                        self.line_number,
@@ -265,7 +282,7 @@ class Parser:
         ast = []
 
         while self.current_token is not None:
-            print(self.current_token.Type)
+            # print(self.current_token.Type)
             if self.current_token.Type == TokenType.KEYWORD:
                 ret_value = self.uncover()
                 if isinstance(ret_value, Error):
@@ -281,25 +298,73 @@ class Parser:
         cur_ast = []
 
         previous_token = self.current_token
-
-        print(previous_token)
+        expected_token_type = None
 
         self.advance()
         while self.current_token is not None:
-            # if self.current_token.Type == TokenType.KEYWORD:
-            #     keyword_value_pair = f"{previous_token.Value} {self.current_token.Value}"
-            #     match keyword_value_pair:
-            #         case "thumb soft":
-            #             cur_ast.append("")
-            #         case "index soft":
-            #             cur_ast.append("print_value")
-            #         case other:
-            #             return IllegalKeywordValuePairError(self.current_token.Position,
-            #                                                 f"'{keyword_value_pair}'")
-            # else:
-            #     pass
-            print(self.current_token)
-            self.advance()
+            if expected_token_type is not None:
+                if self.current_token.Type == expected_token_type:
+                    expected_token_type = None
+                    if self.current_token.Type == TokenType.COLON:
+                        end_found = False
+                        while self.current_token is not None:
+                            if self.current_token.Type == TokenType.END:
+                                end_found = True
+                                break
+                            if self.current_token.Type == TokenType.STRING:
+                                cur_ast.append(self.current_token.Value)
+                            self.advance()
+                        if not end_found:
+                            return SyntaxError(self.current_token.Position,
+                                               "missing 'END' token")
+                        self.advance()
+                else:
+                    print("Error about to happen", self.current_token)
+                    # This goes wrong with colons as colons have a value of None
+                    return UnexpectedTokenError(self.current_token.Position,
+                                                f"'{self.current_token.Type.value}'")
+            elif previous_token.Type == TokenType.KEYWORD and \
+                 self.current_token.Type == TokenType.MODIFIER:
+                keyword_value_pair = f"{previous_token.Value} {self.current_token.Value}"
+                match keyword_value_pair:
+                    case "thumb soft":
+                        pass
+                    case "thumb medium":
+                        pass
+                    case "thumb hard":
+                        pass
+                    case "index soft":
+                        cur_ast.append("print_value")
+                        expected_token_type = TokenType.COLON
+                    case "index medium":
+                        pass
+                    case "index hard":
+                        pass
+                    case "middle soft":
+                        pass
+                    case "middle medium":
+                        pass
+                    case "middle hard":
+                        pass
+                    case "ring soft":
+                        pass
+                    case "ring medium":
+                        pass
+                    case "ring hard":
+                        pass
+                    case "pinky soft":
+                        pass
+                    case "pinky medium":
+                        pass
+                    case "pinky hard":
+                        pass
+                    case other:
+                        return IllegalKeywordValuePairError(self.current_token.Position,
+                                                            f"'{keyword_value_pair}'")
+                self.advance()
+            else:
+                print(f"ELSE: {self.current_token}")
+                self.advance()
 
         return cur_ast
 

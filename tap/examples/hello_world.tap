@@ -2,5 +2,7 @@
 
 index soft: // So is this
 	"Hello World!"
+	"Hello World!"
+	"Hello World!"
 	132.22
 end
