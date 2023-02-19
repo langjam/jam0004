@@ -1,6 +1,8 @@
 use crate::compile::llvm::{SampleTy, SoundRecvTy};
+use crate::compile::Units::Dimensionless;
 use crate::parser::{Block, CallExpr, Expr, Item, NoteKind, Program, Span, Stmt, Token};
 use crate::yihmstd::SAMPLE_RATE;
+use crate::SourcedError;
 use anyhow::anyhow;
 use inkwell::context::ContextRef;
 use inkwell::types::AnyTypeEnum;
@@ -176,6 +178,19 @@ enum BinOp {
     Mod,
 }
 
+impl BinOp {
+    fn logarithmise(self) -> Self {
+        match self {
+            BinOp::Add => BinOp::Mul,
+            BinOp::Sub => BinOp::Div,
+            // these shouldn't usually happen
+            BinOp::Mul => self,
+            BinOp::Div => self,
+            BinOp::Mod => self,
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 enum Comparison {
     Lt,
@@ -186,12 +201,12 @@ enum Comparison {
     Ne,
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Clone, Debug)]
 struct Foreign {
     name: &'static str,
     has_sound_receiver: bool,
     llvm_ty: HideDbg<for<'c> fn(&ContextRef<'c>) -> AnyTypeEnum<'c>>,
-    local_ty: (&'static Type, &'static [&'static Type]),
+    local_ty: (Type, Vec<Type>),
 }
 
 #[derive(Copy, Clone)]
@@ -289,14 +304,80 @@ struct Binding {
 enum Type {
     Unit,
 
-    Number,
-    Time,
-    Pitch,
+    Number(Units),
+
     Sample,
 
     Integer,
     Boolean,
     Array(Box<Self>),
+}
+
+#[derive(Copy, Clone, Debug, Ord, PartialOrd, Eq, PartialEq)]
+enum Units {
+    Dimensionless,
+
+    Seconds,
+
+    Hertz,
+    Semitones,
+
+    Decibels,
+}
+
+impl Units {
+    fn apply(self, op: BinOp, rhs: Units) -> Option<Self> {
+        use BinOp::*;
+        use Units::*;
+        match (self, op, rhs) {
+            (Dimensionless, Add | Sub, Decibels) => Some(Dimensionless),
+            (Hertz, Add | Sub, Semitones) => Some(Dimensionless),
+
+            (l, Add | Sub | Mod, r) => {
+                if l == r {
+                    Some(l)
+                } else {
+                    None
+                }
+            }
+
+            (l, Div, r) if l == r => Some(Dimensionless),
+            (Dimensionless, Mul, o) | (o, Mul, Dimensionless) | (o, Div, Dimensionless) => Some(o),
+
+            (Seconds, Mul, Hertz) | (Hertz, Mul, Seconds) => Some(Dimensionless),
+            (Dimensionless, Div, Seconds) => Some(Hertz),
+            (Dimensionless, Div, Hertz) => Some(Seconds),
+
+            _ => None,
+        }
+    }
+
+    fn name(&self) -> &'static str {
+        match self {
+            Dimensionless => "number",
+            Units::Hertz => "hertz",
+            Units::Semitones => "semitones",
+            Units::Decibels => "decibels",
+            Units::Seconds => "seconds",
+        }
+    }
+
+    fn from_name(name: &str) -> Option<Self> {
+        match name {
+            "num" | "number" => Some(Dimensionless),
+            "hz" | "hertz" => Some(Units::Hertz),
+            "st" | "semitones" => Some(Units::Semitones),
+            "dB" | "decibels" => Some(Units::Decibels),
+            "s" | "secs" | "seconds" => Some(Units::Seconds),
+            _ => None,
+        }
+    }
+}
+
+impl Display for Units {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.name())
+    }
 }
 
 impl Display for Type {
@@ -307,11 +388,9 @@ impl Display for Type {
             "{}",
             match self {
                 Unit => "void",
-                Number => "num",
+                Number(u) => u.name(),
                 Boolean => "bool",
                 Integer => "int",
-                Time => "time",
-                Pitch => "pitch",
                 Sample => "sample",
                 Array(of) => return write!(f, "[{}]", of),
             }
@@ -322,9 +401,7 @@ impl Display for Type {
 impl Type {
     pub fn is_float(&self) -> Option<bool> {
         Some(match self {
-            Type::Number => true,
-            Type::Time => true,
-            Type::Pitch => true,
+            Type::Number(_) => true,
             Type::Sample => true,
             Type::Integer => false,
             Type::Boolean => false,
@@ -342,19 +419,19 @@ impl Type {
 }
 
 trait LocalTypable {
-    const TYPE: &'static Type;
+    const TYPE: Type;
 }
 
 impl LocalTypable for f64 {
-    const TYPE: &'static Type = &Type::Number;
+    const TYPE: Type = Type::Number(Dimensionless);
 }
 
 impl LocalTypable for SampleTy {
-    const TYPE: &'static Type = &Type::Sample;
+    const TYPE: Type = Type::Sample;
 }
 
 impl LocalTypable for () {
-    const TYPE: &'static Type = &Type::Unit;
+    const TYPE: Type = Type::Unit;
 }
 
 impl Compiler {
@@ -362,9 +439,8 @@ impl Compiler {
         Ok(match tok.value.as_str() {
             "void" => Type::Unit,
             "sample" => Type::Sample,
-            "num" => Type::Number,
-            "time" => Type::Time,
-            "pitch" => Type::Pitch,
+            "num" => Type::Number(Dimensionless),
+            s if Units::from_name(s).is_some() => Type::Number(Units::from_name(s).unwrap()),
             s => Err(tok.span().err(format!("unknown type: '{}'", s)))?,
         })
     }
@@ -563,7 +639,7 @@ impl Compiler {
                     self.compile_call(ib, ce, None)?;
                 }
                 Stmt::For {
-                    name, iter, block, ..
+                    name, iter, block, hint, ..
                 } => {
                     let iter_reg = self.compile_expr(ib, iter)?;
                     let component = match &ib.func[iter_reg.clone()] {
@@ -574,6 +650,7 @@ impl Compiler {
                             .note(NoteKind::Note, "for loop target must be an array"))?,
                     };
                     ib.scopes.push();
+                    let component_reg = ib.func.new_register(component.clone());
                     let bound =
                         ib.scopes
                             .top()
@@ -611,10 +688,18 @@ impl Compiler {
 
                     ib.set_block(body_block);
                     ib.block().insns.push(Insn::Call {
-                        out: bound,
+                        out: component_reg,
                         callee: Callee::Builtin(Builtin::ArrayRef),
                         args: vec![iter_reg, loop_var],
                     });
+                    if let Some(hinted) = hint.as_ref().map(|tok| self.parse_type(tok)).transpose()? {
+                        let mut coerced_reg = component_reg;
+                        self.coerce(ib, "type hint was", &hinted, &mut coerced_reg, iter)?;
+                        ib.block().insns.push(Insn::Move {
+                            out: bound,
+                            from: coerced_reg
+                        });
+                    }
                     self.compile_block(ib, block)?;
                     ib.block().insns.push(Insn::Call {
                         out: loop_var,
@@ -733,6 +818,9 @@ impl Compiler {
             ($t:ty) => {
                 <$t as LocalTypable>::TYPE
             };
+            ($t:ty:$units:expr) => {
+                Type::Number($units)
+            };
         }
         macro_rules! is_present {
             () => {
@@ -743,10 +831,10 @@ impl Compiler {
             };
         }
         macro_rules! builtins {
-            ($(fn $(($recv:ty))? $name:ident($($arg_ty:ty),*) -> $ret:ty),*$(,)?) => {
+            ($(fn $(($recv:ty))? $name:ident($($arg_ty:ty$(:$units:expr)?),*) -> $ret:ty$(:$ret_units:expr)?),*$(,)?) => {
                 if let Some(foreign) = match name { $(
                     concat!(stringify!($name)) => Some(Foreign {
-                        local_ty: (local_ty!($ret), &[$(local_ty!($arg_ty),)*]),
+                        local_ty: (local_ty!($ret$(:$ret_units)?), vec![$(local_ty!($arg_ty$(:$units)?),)*]),
                         llvm_ty: HideDbg(llvm::get_llvm_ty::<extern "C" fn($(*mut $recv,)? $($arg_ty),*) -> $ret>()),
                         name: concat!("yhim_", stringify!($name)),
                         has_sound_receiver: is_present!($($recv)?)
@@ -762,12 +850,12 @@ impl Compiler {
                             args.len()
                         )))?
                     }
-                    for ((reg, &ty), arg) in args
+                    for ((reg, ty), arg) in args
                         .iter_mut()
                         .zip(foreign.local_ty.1.iter())
                         .zip(ce.args.iter())
                     {
-                        self.coerce(ib, "function argument requires", ty, reg, arg)?;
+                        self.coerce(ib, "function argument requires", &ty, reg, arg)?;
                     }
                     if foreign.has_sound_receiver && ib.func.ty != FuncType::Sound {
                         Err(ce
@@ -797,12 +885,17 @@ impl Compiler {
                         ce.args.len()
                     )))?;
                 }
-                return Ok((Type::Number, Callee::Builtin(Builtin::Phase), false));
+                return Ok((
+                    Type::Number(Dimensionless),
+                    Callee::Builtin(Builtin::Phase),
+                    false,
+                ));
             }
             _ => {}
         }
+        use Units::*;
         builtins!(
-            fn time_phase(f64, f64) -> f64,
+            fn time_phase(f64:Seconds, f64:Hertz) -> f64,
 
             fn sin(f64) -> f64,
             fn cos(f64) -> f64,
@@ -813,7 +906,6 @@ impl Compiler {
             fn pow(f64, f64) -> f64,
 
             fn pan(SampleTy, f64) -> SampleTy,
-            fn semitones(f64) -> f64,
 
             fn (SoundRecvTy) mix(SampleTy) -> (),
             fn (SoundRecvTy) next() -> (),
@@ -858,12 +950,12 @@ impl Compiler {
         ty: &Type,
         reg: &mut Register,
         span: impl Into<Span>,
-    ) -> anyhow::Result<()> {
+    ) -> Result<(), SourcedError> {
         let src_ty = &ib.func[reg.clone()];
         use Type::*;
         match (src_ty, ty) {
             (lhs, rhs) if lhs == rhs => Ok(()),
-            (Number, Sample) => {
+            (Number(Dimensionless), Sample) => {
                 let out = ib.func.new_register(Sample);
                 ib.block().insns.push(Insn::Call {
                     out: out.clone(),
@@ -873,7 +965,7 @@ impl Compiler {
                 *reg = out;
                 Ok(())
             }
-            (Number | Time | Pitch, Number | Time | Pitch) => Ok(()),
+            (Number(Dimensionless), Number(_)) | (Number(_), Number(Dimensionless)) => Ok(()), // what can we do
             (src_ty, ty) => Err(span.into().err(format!(
                 "type mismatch, {}: {}, but expression has type: {}",
                 name, ty, src_ty
@@ -907,7 +999,7 @@ impl Compiler {
                     fn apply(
                         s: &Compiler,
                         ib: &mut IRBuilder,
-                        op: Builtin,
+                        mut op: Builtin,
                         mut lhs: (Register, Span),
                         mut rhs: (Register, Span),
                     ) -> anyhow::Result<(Register, Span)> {
@@ -916,9 +1008,27 @@ impl Compiler {
                         let l_ty = ib.func[lhs.0].clone();
                         let r_ty = ib.func[rhs.0].clone();
                         let new_span = lhs.1.but_end(rhs.1);
-                        let common_ty = match (l_ty, r_ty) {
-                            (t @ Number, Number) | (t @ Sample, Sample) | (t @ Time, Time) => t,
-                            (Number, r @ (Sample | Time)) => {
+                        // hack to allow for subtracting dB right off the samples...
+                        if l_ty.is_sample()
+                            && matches!(r_ty, Number(Units::Decibels))
+                            && matches!(op, Op2(BinOp::Add | BinOp::Sub))
+                        {
+                            let one = ib.func.new_register(Number(Dimensionless));
+                            ib.block().insns.push(Insn::Const {
+                                out: one,
+                                value: DynamicValue::Number(1.),
+                            });
+                            let new_rhs = ib.func.new_register(Number(Dimensionless));
+                            ib.block().insns.push(Insn::Call {
+                                out: new_rhs,
+                                callee: Callee::Builtin(op),
+                                args: vec![one, rhs.0],
+                            });
+                            op = Op2(BinOp::Mul);
+                            rhs.0 = new_rhs;
+                        }
+                        let result_ty = match (l_ty, r_ty) {
+                            (Number(_), r @ Sample) => {
                                 s.coerce(
                                     ib,
                                     "right value has type",
@@ -928,7 +1038,7 @@ impl Compiler {
                                 )?;
                                 r
                             }
-                            (l @ (Sample | Time), Number) => {
+                            (l @ Sample, Number(_)) => {
                                 s.coerce(
                                     ib,
                                     "left value has type",
@@ -938,8 +1048,32 @@ impl Compiler {
                                 )?;
                                 l
                             }
+                            (Number(l), Number(r)) => match op {
+                                Op2(op) => {
+                                    if let Some(res) = l.apply(op, r) {
+                                        Number(res)
+                                    } else {
+                                        Err(new_span.clone().err("operation does not have a meaningful result for the given units")
+                                                .note(NoteKind::Note, format!("left hand side has units: {}", l))
+                                                .note(NoteKind::Note, format!("right hand side has units: {}", r))
+                                                .note(NoteKind::Hint, "you can always divide by one of a unit to remove it"))?
+                                    }
+                                }
+                                Cmp(_) => {
+                                    if l != r {
+                                        Err(new_span.clone().err("numbers with unrelated units cannot be compared")
+                                                .note(NoteKind::Note, format!("left hand side has units: {}", l))
+                                                .note(NoteKind::Note, format!("right hand side has units: {}", r))
+                                                .note(NoteKind::Hint, "you can always divide by one of a unit to remove it")
+                                            )?
+                                    }
+                                    Boolean
+                                }
+                                _ => unreachable!(),
+                            },
                             (l_ty, r_ty) => {
                                 return Err(new_span
+                                    .clone()
                                     .err(format!(
                                         "operator not applicable to types '{}' and '{}'",
                                         l_ty, r_ty
@@ -947,16 +1081,7 @@ impl Compiler {
                                     .into())
                             }
                         };
-                        let out_ty = match (common_ty, &op) {
-                            (t, Op2(_)) => t,
-                            (Number | Time, Cmp(_)) => Boolean,
-                            (common_ty, _) => {
-                                return Err(new_span
-                                    .err(format!("operator not applicable to type '{}'", common_ty))
-                                    .into())
-                            }
-                        };
-                        let out = ib.func.new_register(out_ty.clone());
+                        let out = ib.func.new_register(result_ty);
                         ib.block().insns.push(Insn::Call {
                             out,
                             callee: Callee::Builtin(op),
@@ -1001,12 +1126,10 @@ impl Compiler {
                     let expr_reg = self.compile_expr(ib, &**arg)?;
                     let ty = ib.func[expr_reg].clone();
                     let permitted: &[&str] = match ty {
-                        Type::Number => &["+", "-"],
+                        Type::Number(_) => &["+", "-"],
                         Type::Sample => &["+", "-"],
                         Type::Integer => &["+"],
                         Type::Boolean => &["!"],
-                        Type::Time => &["+"],
-                        Type::Pitch => &["+"],
                         Type::Unit => &[],
                         Type::Array(_) => &[],
                     };
@@ -1034,9 +1157,13 @@ impl Compiler {
                     use DynamicValue::*;
                     let float_val = f64::from_str(value.value.as_str())?;
                     let (value, ty) = match units.as_ref().map(|tok| (tok, tok.value.as_str())) {
-                        None => (Number(float_val), Type::Number),
+                        None => (Number(float_val), Type::Number(Dimensionless)),
                         Some((tok, name)) => {
-                            Err(tok.span().err(format!("unrecognised units: '{}'", name)))?
+                            if let Some(units) = Units::from_name(name) {
+                                (Number(float_val), Type::Number(units))
+                            } else {
+                                Err(tok.span().err(format!("unrecognised units: '{}'", name)))?
+                            }
                         }
                     };
                     let out = ib.func.new_register(ty);
@@ -1048,9 +1175,16 @@ impl Compiler {
                 }
                 Expr::Variable { name } => {
                     use std::f64::consts::*;
+                    let mut units = Dimensionless;
                     if let Some(value) = match name.value.as_str() {
-                        "SAMPLE_RATE" => Some(DynamicValue::Number(SAMPLE_RATE as f64)),
-                        "SAMPLE_PERIOD" => Some(DynamicValue::Number(1. / SAMPLE_RATE as f64)),
+                        "SAMPLE_RATE" => {
+                            units = Units::Hertz;
+                            Some(DynamicValue::Number(SAMPLE_RATE as f64))
+                        }
+                        "SAMPLE_PERIOD" => {
+                            units = Units::Seconds;
+                            Some(DynamicValue::Number(1. / SAMPLE_RATE as f64))
+                        }
                         "E" => Some(DynamicValue::Number(E)),
                         "PI" => Some(DynamicValue::Number(PI)),
                         "TAU" => Some(DynamicValue::Number(TAU)),
@@ -1077,11 +1211,12 @@ impl Compiler {
                             let octave_offset = octave.to_digit(10).unwrap() as i32 - 4;
                             let delta_from_a4 = octave_offset * 12 + note_semitones + sharp_offset;
                             let freq = 440.0 * 2.0_f64.powf(delta_from_a4 as f64 / 12.0);
+                            units = Units::Hertz;
                             Some(DynamicValue::Number(freq))
                         }
                         _ => None,
                     } {
-                        let out = ib.func.new_register(Type::Number);
+                        let out = ib.func.new_register(Type::Number(units));
                         ib.block().insns.push(Insn::Const { out, value });
                         out
                     } else {
@@ -1104,7 +1239,13 @@ impl Compiler {
                         (ib.func[c_regs[0]].clone(), c_regs)
                     };
                     for (reg, expr) in child_regs.iter_mut().zip(children) {
-                        self.coerce(ib, "array component type is", &c_ty, reg, expr)?;
+                        self.coerce(ib, "array component type is", &c_ty, reg, expr)
+                            .map_err(|it| {
+                                it.note(
+                                    NoteKind::Note,
+                                    "array component type is decided from the first element",
+                                )
+                            })?;
                     }
                     let arr = ib.func.new_register(Type::Array(Box::new(c_ty.clone())));
                     ib.block().insns.push(Insn::Call {
@@ -1121,11 +1262,12 @@ impl Compiler {
 
 pub mod llvm {
     use crate::compile::{
-        BinOp, Callee, Comparison, DynamicValue, Func, FuncType, Insn, JumpInsn, Type, UnOp,
+        BinOp, Callee, Comparison, DynamicValue, Func, FuncType, Insn, JumpInsn, Type, UnOp, Units,
     };
     use anyhow::anyhow;
 
     use inkwell::builder::Builder;
+    use inkwell::intrinsics::Intrinsic;
     use inkwell::types::{AnyType, VoidType};
     use inkwell::values::{FloatValue, IntValue};
     use inkwell::{
@@ -1281,8 +1423,6 @@ pub mod llvm {
         integer: TypeCell<'m, i64>,
         boolean: TypeCell<'m, bool>,
         sample: TypeCell<'m, SampleTy>,
-        time: TypeCell<'m, f64>,
-        pitch: TypeCell<'m, f64>,
         array: TypeCell<'m, ArrayTy>,
 
         sound_recv: TypeCell<'m, SoundRecvTy>,
@@ -1320,9 +1460,7 @@ pub mod llvm {
                 Type::Unit => self.c.unit.get_basic(self.ctx()),
                 Type::Integer => self.c.integer.get_basic(self.ctx()),
                 Type::Boolean => self.c.boolean.get_basic(self.ctx()),
-                Type::Number => self.c.number.get_basic(self.ctx()),
-                Type::Time => self.c.time.get_basic(self.ctx()),
-                Type::Pitch => self.c.pitch.get_basic(self.ctx()),
+                Type::Number(_) => self.c.number.get_basic(self.ctx()),
                 Type::Sample => self.c.sample.get_basic(self.ctx()),
                 Type::Array(_) => self.c.array.get_basic(self.ctx()),
             }
@@ -1697,10 +1835,66 @@ pub mod llvm {
                                                     _ => panic!(),
                                                 }
                                             }
-                                            Op2(op) => {
-                                                let arg_ty = &func[args[0]];
-                                                let is_float = arg_ty.is_float().unwrap();
+                                            Op2(mut op) => {
+                                                let left_ty = &func[args[0]];
+                                                let right_ty = &func[args[1]];
+                                                let is_float = left_ty.is_float().unwrap();
                                                 if is_float {
+                                                    fn rval_sf<
+                                                        'a,
+                                                        const BASE: i32,
+                                                        const COEFF: i32,
+                                                    >(
+                                                        s: &LLVMCompiler<'_, 'a>,
+                                                        ib: &Builder<'a>,
+                                                        fv: FloatValue<'a>,
+                                                    ) -> FloatValue<'a>
+                                                    {
+                                                        let pow =
+                                                            Intrinsic::find("llvm.pow").unwrap();
+                                                        let ty = fv.get_type();
+                                                        let pow = pow
+                                                            .get_declaration(
+                                                                s.module,
+                                                                &[ty.into(), ty.into()],
+                                                            )
+                                                            .unwrap();
+                                                        ib.build_call(
+                                                            pow,
+                                                            &[
+                                                                ty.const_float(BASE as f64).into(),
+                                                                ib.build_float_div(
+                                                                    fv,
+                                                                    ty.const_float(COEFF as f64),
+                                                                    "exp",
+                                                                )
+                                                                .into(),
+                                                            ],
+                                                            "sf",
+                                                        )
+                                                        .try_as_basic_value()
+                                                        .unwrap_left()
+                                                        .into_float_value()
+                                                    }
+                                                    let right_val = match (left_ty, right_ty) {
+                                                        (
+                                                            Type::Number(Units::Dimensionless)
+                                                            | Type::Sample,
+                                                            Type::Number(Units::Decibels),
+                                                        ) => {
+                                                            op = op.logarithmise();
+                                                            |s, b, f| rval_sf::<10, 10>(s, b, f)
+                                                        }
+                                                        (
+                                                            Type::Number(Units::Hertz),
+                                                            Type::Number(Units::Semitones),
+                                                        ) => {
+                                                            op = op.logarithmise();
+                                                            |s, b, f| rval_sf::<2, 12>(s, b, f)
+                                                        }
+                                                        _ => |_s, _ib, fv| fv,
+                                                    };
+
                                                     let f: fn(_, _, _) -> _ = match op {
                                                         BinOp::Add => {
                                                             |ib: &Builder, l: FloatValue, r| {
@@ -1729,7 +1923,7 @@ pub mod llvm {
                                                         }
                                                     };
 
-                                                    if arg_ty.is_sample() {
+                                                    if left_ty.is_sample() {
                                                         let s_ptr = ll_registers[out.0];
                                                         let l_ptr = ll_registers[args[0].0];
                                                         let r_ptr = ll_registers[args[1].0];
@@ -1750,12 +1944,19 @@ pub mod llvm {
                                                                         "l"
                                                                     )
                                                                     .into_float_value(),
-                                                                    load!(
-                                                                        f_ty,
-                                                                        gep!(s_ty, r_ptr, i, "rp"),
-                                                                        "r"
-                                                                    )
-                                                                    .into_float_value(),
+                                                                    right_val(
+                                                                        self,
+                                                                        &ib,
+                                                                        load!(
+                                                                            f_ty,
+                                                                            gep!(
+                                                                                s_ty, r_ptr, i,
+                                                                                "rp"
+                                                                            ),
+                                                                            "r"
+                                                                        )
+                                                                        .into_float_value(),
+                                                                    ),
                                                                 ),
                                                             );
                                                         }
@@ -1765,7 +1966,11 @@ pub mod llvm {
                                                             f(
                                                                 &ib,
                                                                 arg_vec[0].into_float_value(),
-                                                                arg_vec[1].into_float_value(),
+                                                                right_val(
+                                                                    self,
+                                                                    &ib,
+                                                                    arg_vec[1].into_float_value(),
+                                                                ),
                                                             ),
                                                         );
                                                     }

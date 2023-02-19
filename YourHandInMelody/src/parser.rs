@@ -1,3 +1,4 @@
+use colored::Colorize;
 use std::collections::VecDeque;
 use std::error::Error;
 use std::fmt::{Arguments, Display, Formatter};
@@ -5,7 +6,6 @@ use std::io::{Bytes, Read};
 use std::iter::Peekable;
 use std::ops::AddAssign;
 use std::{fmt, io, mem};
-use colored::Colorize;
 use unicode_reader::CodePoints;
 
 pub struct Lexer<I>
@@ -408,7 +408,7 @@ where
                     'a'..='z' | 'A'..='Z' | '_' => {
                         let mut tok = collect_token!(
                             Ident,
-                            Ok('a'..='z' | 'A'..='Z' | '_' | '0'..='9' | '|' | '?')
+                            Ok('a'..='z' | 'A'..='Z' | '_' | '0'..='9' | '|' | '?' | '!')
                         );
                         let ty = match tok.value.as_str() {
                             "for" => KwFor,
@@ -525,6 +525,7 @@ pub enum Stmt {
         t_for: Token,
         t_in: Token,
         name: Token,
+        hint: Option<Token>,
         iter: Expr,
         block: Block,
     },
@@ -867,6 +868,7 @@ where
             KwFor => For {
                 t_for: tok,
                 name: self.lexer.expect_tok(Ident)??,
+                hint: self.parse_type_hint()?,
                 t_in: self.lexer.expect_tok(KwIn)??,
                 iter: self.parse_expr(Prec::Expr)?,
                 block: self.parse_block()?,

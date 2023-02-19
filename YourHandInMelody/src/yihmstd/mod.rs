@@ -14,11 +14,6 @@ extern "C" fn yhim_time_phase(time: f64, freq: f64) -> f64 {
 }
 
 #[no_mangle]
-extern "C" fn yhim_semitones(freq: f64, semitones: f64) -> f64 {
-    freq * 2.0_f64.powf(semitones / 12.0)
-}
-
-#[no_mangle]
 extern "C" fn yhim_sin(theta: f64) -> f64 {
     theta.sin()
 }
@@ -174,7 +169,6 @@ pub fn add_symbols() {
         yhim_newarray,
         yhim_duparray,
         yhim_droparray,
-        yhim_semitones,
         yhim_pan,
         yhim_mix,
         yhim_skip,

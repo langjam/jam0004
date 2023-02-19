@@ -2,10 +2,10 @@ oscillator sine(): sample {
     return sin(phase())
 }
 
-sound play(note: pitch, duration: time) {
-    do t = 0 ; t < duration ; t + SAMPLE_PERIOD {
-        let s = 0.3 * sine() at time_phase(t, note)
-        mix(pan(s, sin(t * TAU) * 0.5))
+sound play(note: hz, duration: secs) {
+    do t = 0s ; t < duration ; t + SAMPLE_PERIOD {
+        let s = sine() at time_phase(t, note)
+        mix(s - 3dB)
         next()
     }
 }
@@ -14,5 +14,14 @@ sound main() {
     for note in [C4, D4, E4, F4, G4, A4, B4, C5] {
         play(note, 1/4)
         skip(1 / 4 * SAMPLE_RATE)
+    }
+    let maj = [0st, 2st, 2st, 1st, 2st, 2st, 2st, 1st]
+    for root in [C4, D4, E4] {
+        let note = root
+        for interval: semitones in maj {
+            set! note = root + interval
+            play(note, 1/4)
+            skip(1 / 4 * SAMPLE_RATE)
+        }
     }
 }

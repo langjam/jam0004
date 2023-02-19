@@ -1,0 +1,11 @@
+oscillator sine(): sample {
+    return sin(phase())
+}
+
+sound main() {
+    do t = 0s ; t < 1s ; t + SAMPLE_PERIOD {
+        let s = sine() at time_phase(t, C4)
+        mix(s - 3dB)
+        next()
+    }
+}

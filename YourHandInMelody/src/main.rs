@@ -81,18 +81,23 @@ fn report_error(file: &Path, err: impl Into<anyhow::Error>) {
                                 "{} {} {}{}{}",
                                 format!("{: >4}", l_no).bright_blue(),
                                 "|".bright_blue(),
-                                codepoints.get(0..err.span.start.column as usize - 1)
+                                codepoints
+                                    .get(0..err.span.start.column as usize - 1)
                                     .ok_or_else(|| anyhow!(""))?
                                     .iter()
                                     .collect::<String>(),
-                                codepoints.get(err.span.start.column as usize - 1
-                                    ..err.span.end.column as usize - 1)
+                                codepoints
+                                    .get(
+                                        err.span.start.column as usize - 1
+                                            ..err.span.end.column as usize - 1
+                                    )
                                     .ok_or_else(|| anyhow!(""))?
                                     .iter()
                                     .collect::<String>()
                                     .underline()
                                     .red(),
-                                codepoints.get(err.span.end.column as usize - 1..)
+                                codepoints
+                                    .get(err.span.end.column as usize - 1..)
                                     .ok_or_else(|| anyhow!(""))?
                                     .iter()
                                     .collect::<String>()
@@ -110,12 +115,14 @@ fn report_error(file: &Path, err: impl Into<anyhow::Error>) {
                             };
                             let (lhs, rhs) = if at_start {
                                 (
-                                    codepoints.get(..loc.column as usize - 1)
+                                    codepoints
+                                        .get(..loc.column as usize - 1)
                                         .ok_or_else(|| anyhow!(""))?
                                         .iter()
                                         .collect::<String>()
                                         .normal(),
-                                    codepoints.get(loc.column as usize - 1..)
+                                    codepoints
+                                        .get(loc.column as usize - 1..)
                                         .ok_or_else(|| anyhow!(""))?
                                         .iter()
                                         .collect::<String>()
@@ -124,13 +131,15 @@ fn report_error(file: &Path, err: impl Into<anyhow::Error>) {
                                 )
                             } else {
                                 (
-                                    codepoints.get(..loc.column as usize - 2)
+                                    codepoints
+                                        .get(..loc.column as usize - 2)
                                         .ok_or_else(|| anyhow!(""))?
                                         .iter()
                                         .collect::<String>()
                                         .underline()
                                         .red(),
-                                    codepoints.get(loc.column as usize - 1..)
+                                    codepoints
+                                        .get(loc.column as usize - 1..)
                                         .ok_or_else(|| anyhow!(""))?
                                         .iter()
                                         .collect::<String>()
