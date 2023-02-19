@@ -14,7 +14,7 @@ class Env:
             *spl, name = word.split(',')
             for i in spl:
                 self.run(i)
-            self.defs[name] = self.stack.pop()
+            self.defs[name] = str(self.stack.pop())
         elif self.depth != 0:
             if word == ']':
                 self.depth -= 1
@@ -98,7 +98,7 @@ class Env:
         elif word == 'def' or word == 'is' or word == '=':
             n = self.stack.pop()
             o = self.stack.pop()
-            self.defs[n] = o
+            self.defs[n] = str(o)
         else:
             got = self.defs[word]
             for i in got.split(' '):
