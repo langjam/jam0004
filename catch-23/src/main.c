@@ -1,3 +1,6 @@
+
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "lexer/lexer.h"
@@ -20,7 +23,9 @@ int main(int argc, char* argv[])
 
     for(TokenList* tok = unit.tokens; tok != NULL; tok = tok->next)
     {
-        printf("%i %s\n", tok->token.type, tok->token.data.str ? tok->token.data.str : "NULL");
+        struct scanner_location loc = token_get_location(tok->token);
+
+        printf("%s:%zu:%zu %i %s\n", unit.filename, loc.line_num, loc.col_num, tok->token.type, tok->token.data.str ? tok->token.data.str : "NULL");
     }
     Parser p = parser_create(unit.tokens);
     Ast dest;

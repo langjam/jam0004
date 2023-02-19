@@ -9,15 +9,12 @@ Because the theme is interpreted as being nonsense, the language is full of ambi
 
 The language doesn't come with traditional types, instead it comes in three types:
 + Thing32, written as `#` and a Thing32 pointer/array by extension:  `#*` and `#[]`
-+ Boolean, written as `#?` and a Boolan pointer/array by extension: `#?*` and `#?[]`
 
 Those types can represent anything that is a floating point number, an integer number and a character.
 To declare a variable, type the variable name then the type following a colon. A variable name can only contain 2 characters which are alphanumeric.
 ```
 @in : #
-@db : ##
 @sr : #[]
-@bo : #?
 ```
 Respectively: int, double, string and boolean variables.
 
@@ -86,7 +83,7 @@ Operators are infix and there is no precedence, meaning the operators are evalua
 ## Control Flow
 
 catch-23, due to being contradiction-oriented, comes with statements that more or less don't do anything without a Goto, which is written as `~>`.
-Break, which is written as `<~`, can be used to break out of Dont, Never, Against. 
+Break, which is written as `<~`, can be used to break out of Dont, Never. 
 
 catch-23 is contradiction-oriented because it Donts and Never are basically if (false) and while (false) and no control flow can be exucted without being in either one or themselves, which also reflects the name of it being a catch-22. 
 
@@ -102,9 +99,6 @@ Unless, written as `?(<boolean expression>)` is the same as an inverted if state
 
 ### Until
 Until, written as `::(<boolean expression>)` is the same as an inverted while statement in C: `while (!(<boolean expression>))`. Until can only be used directly inside other loops. It cannot be used in a block of code that isn't a loop even if that block of code is inside one.
-
-### Against
-Against, written as `;;(<init>;<boolean expression>;<end of loop/counter stuff>)`, is the same as an inverted for statement in C: `for (<init>; !(<boolean expression>); <end of loop/counter stuff>)`. Against can only be used directly inside other loops. It cannot be used in a block of code that isn't a loop even if that block of code is inside one.
 
 ### Dont
 

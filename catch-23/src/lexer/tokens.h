@@ -80,6 +80,11 @@ typedef struct Token
     struct scanner_string data;
 } Token;
 
+static inline struct scanner_location token_get_location(Token token)
+{
+    return scanner_location_of(token.data.it);
+}
+
 typedef struct TokenList
 {
     Token token;
