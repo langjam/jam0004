@@ -1,6 +1,7 @@
 #include "lexer/lexer.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 void lex(Unit* unit)
 {
@@ -44,6 +45,11 @@ void lex(Unit* unit)
 
         if(!found_token)
         {
+            struct scanner_iterator it = scanner_current(&unit->scan);
+            struct scanner_location loc = scanner_location_of(it);
+
+            fprintf(stderr, "error %s:%i:%i unknown token '%c'\n", unit->filename, loc.line_num, loc.col_num, it.ch);
+
             // if no token was matched, then advance to prevent being caught in an infinite loop
             scanner_advance(&unit->scan);
 
