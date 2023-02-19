@@ -64,6 +64,40 @@ Ast *copy_ast(Parser *p, Ast ast)
     return result;
 }
 
+static bool is_prefix_operator_token_type(enum TokenType tt) {
+    return tt == TokenHyphen ||
+        tt == TokenTilde ||
+        tt == TokenIntToFloat ||
+        tt == TokenFloatToInt ||
+        tt == TokenFloatNegative ||
+        tt == TokenBoolNot;
+}
+
+static bool is_infix_operator_token_type(enum TokenType tt) {
+    return tt == TokenAdd ||
+        tt == TokenHyphen ||
+        tt == TokenStar ||
+        tt == TokenDiv ||
+        tt == TokenModulo ||
+        tt == TokenBitOr ||
+        tt == TokenBitAnd ||
+        tt == TokenShiftLeft ||
+        tt == TokenShiftRight ||
+        tt == TokenFloatSum ||
+        tt == TokenFloatDiff ||
+        tt == TokenFloatMul ||
+        tt == TokenFloatDiv ||
+        tt == TokenAngBrLeft ||
+        tt == TokenAngBrRight ||
+        tt == TokenEquals ||
+        tt == TokenNotEqual ||
+        tt == TokenFloatNotEqual ||
+        tt == TokenFloatLess ||
+        tt == TokenFloatEqual ||
+        tt == TokenBoolAnd ||
+        tt == TokenBoolOr;
+}
+
 static bool parse_type(Parser *p, Ast *dest)
 {
     Token t = peek_token(p);
@@ -104,6 +138,7 @@ static bool parse_definition(Parser *p, Ast *dest)
     return true;
 }
 
+bool parse_expression(Parser *p, Ast *left);
 bool parse_atomic(Parser *p, Ast *dest)
 {
     switch (peek_token(p).type) {
@@ -114,9 +149,59 @@ bool parse_atomic(Parser *p, Ast *dest)
             };
             next_token(p);
             return true;
+        case TokenParenLeft:
+            next_token(p);
+            checkout(parse_expression(p, dest));
+            checkout(expect_token_type(p, TokenParenRight));
+            next_token(p);
+            return true;
         default:
             return false;
     }
+}
+
+bool parse_prefix(Parser *p, Ast *dest)
+{
+
+    if (is_prefix_operator_token_type(peek_token(p).type)) {
+        Ast curr = (Ast){0}; 
+        curr.type = AST_PREFIX_OPERATOR;
+        curr.tok = peek_token(p);
+        curr.child = alloc_ast(p);
+        next_token(p);
+        checkout(parse_prefix(p, curr.child));
+        *dest = curr;
+    } else {
+        checkout(parse_atomic(p, dest));
+    }
+
+    return true;
+}
+
+bool parse_binary(Parser *p, Ast *dest)
+{
+    Ast *left = alloc_ast(p);
+    checkout(parse_prefix(p, left));
+
+    while (is_infix_operator_token_type(peek_token(p).type)) {
+        Ast *curr = alloc_ast(p); 
+        curr->type = AST_OPERATOR;
+        curr->tok = peek_token(p);
+        curr->child = left;
+        curr->child->sibling = alloc_ast(p);
+        next_token(p);
+        checkout(parse_prefix(p, curr->child->sibling));
+        left = curr;
+    }
+
+    *dest = *left;
+
+    return true;
+}
+
+bool parse_expression(Parser *p, Ast *left)
+{
+    return parse_binary(p, left);
 }
 
 struct {
@@ -129,6 +214,7 @@ Tail create_tail()
 {
     return (Tail){0};
 }
+
 
 void append_tail(Tail *t, Parser *p)
 {
@@ -156,7 +242,7 @@ static bool parse_assignment(Parser *p, Ast *dest)
     while (peek_token(p).type != TokenSqBrRight) {
         append_tail(&t, p);
 
-        checkout(parse_atomic(p, t.current));
+        checkout(parse_expression(p, t.current));
 
         if (peek_token(p).type == TokenSqBrRight) {
             break;
@@ -183,7 +269,7 @@ bool parser_decide_toplevel(Parser *p, Ast *dest)
         case TokenDollar: 
             return parse_assignment(p, dest);
         default:
-            return parse_atomic(p, dest);
+            return parse_expression(p, dest);
     }
 }
 
