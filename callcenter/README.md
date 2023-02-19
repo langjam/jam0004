@@ -11,6 +11,7 @@ Build
     - `cat examples/math.call | yarn callcenter`
 
     You can also pass `-q` or `--quiet` in the CLI argument to only show evaluation results.
+4. Run the CLI as REPL: `yarn callcenter`
 
 Online Demo
 ----
