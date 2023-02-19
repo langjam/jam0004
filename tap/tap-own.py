@@ -42,7 +42,8 @@ class Keyword:
                 "pinky",
                 "soft",
                 "medium",
-                "loud"
+                "hard",
+                "end"
                 ]
 
 

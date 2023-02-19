@@ -5,6 +5,7 @@ In tap there are 5 basic commands:
 3. Middle
 4. Ring
 5. Pinky
+6. End
 
 Each of these commands correspond with a finger on your hand.
 
