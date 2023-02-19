@@ -8,7 +8,8 @@ CREATE_DIRS = mkdir -p $(@D)
 
 CFLAGS := \
 		-I $(SRC_DIRECTORY) \
-		-std=c11
+		-std=c11 \
+		-g
 
 LFLAGS :=
 
@@ -26,7 +27,7 @@ EXECUTABLE := $(BIN_DIRECTORY)/catch23
 all: $(EXECUTABLE)
 
 run: all
-	$(BIN_DIRECTORY)/catch23
+	@$(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
 	@$(CREATE_DIRS)
