@@ -1,4 +1,4 @@
-// Circle around the user's head
+// add effect to audio source
 
 use audio;
 use math;
@@ -13,5 +13,6 @@ var source = #audio.microphone.new;
 
 #audio.bindsource handle, source;
 #audio.efx.pitch handle, 1.2;
+//#audio.efx.reverb handle;
 #audio.start handle;
 

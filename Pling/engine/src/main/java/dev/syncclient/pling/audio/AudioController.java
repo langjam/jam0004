@@ -19,6 +19,7 @@ import static org.lwjgl.openal.EXTThreadLocalContext.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class AudioController implements Builtin {
     private final HashMap<Double, Sound> sounds = new HashMap<>();
@@ -127,6 +128,13 @@ public class AudioController implements Builtin {
                 "Applies a pitch effect to the sound",
                 "#audio.efx.pitch [handle] [pitch]",
                 this::applyPitch
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.efx.reverb",
+                "Applies a reverb effect to the sound",
+                "#audio.efx.reverb [handle]",
+                (l) -> applyEffect(l, Effect::addReverb)
         ));
     }
 
@@ -326,9 +334,22 @@ public class AudioController implements Builtin {
             throw new IllegalStateException("Invalid handle");
         }
 
-        sounds.get(handle).getDescriptor().addApplyEffect((src) -> {
-            Effect.setPitch(src, pitch.floatValue());
-        });
+        sounds.get(handle).getDescriptor().addApplyEffect((src) -> Effect.setPitch(src, pitch.floatValue()));
+        return null;
+    }
+
+    private Object applyEffect(List<Object> objects, Consumer<Integer> effect) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = (Double) objects.get(0);
+
+        if (!sounds.containsKey(handle)) {
+            throw new IllegalStateException("Invalid handle");
+        }
+
+        sounds.get(handle).getDescriptor().addApplyEffect(effect::accept);
         return null;
     }
 
