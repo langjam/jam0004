@@ -330,6 +330,11 @@ class Interpreter {
         let listval = (await this.visitExpr(expr.value)) as JSValue[];
         return listval.length;
       }
+
+      case Token.CHRS: {
+        let listval = (await this.visitExpr(expr.value)) as number[];
+        return listval.map(c => String.fromCharCode(c)).join("");
+      }
     }
 
     // TODO:
@@ -499,6 +504,9 @@ class Parser{
 
       case Token.LEN:
         return this.parseLen();
+
+      case Token.CHRS:
+        return this.parseChrs();
     }
 
     await this.parseError(`unknown instruction ${instrTok}`);
@@ -732,6 +740,19 @@ class Parser{
     }
 
     return new Expr.Len(list);
+  }
+
+  async parseChrs() : Promise<Expr> {
+    await this.consumeStar();
+    let startPos = this.cursor;
+    let list = await this.parseExpression();
+
+    if (isListType(list.type) && list.type.elementType === BaseType.Int) {
+      return new Expr.Chrs(list);
+    }
+
+    await this.parseError(`unable to do chars operation for type ${typename(list.type)}`, startPos);
+    throw unreachable();
   }
 
   // arguments

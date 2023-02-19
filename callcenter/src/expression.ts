@@ -81,7 +81,7 @@ export enum Token {
 
 export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit |
                    Expr.TypeConversion | Expr.Unary | Expr.ListCons | Expr.Append | Expr.LSGet |
-                   Expr.LSSet | Expr.Len;
+                   Expr.LSSet | Expr.Len | Expr.Chrs;
 
 export namespace Expr {
   export class NumberExpr implements ExprLike {
@@ -140,6 +140,12 @@ export namespace Expr {
   export class Len implements ExprLike {
     kind: Token.LEN = Token.LEN
     type: CCType = BaseType.Int
+    constructor(public value: Expr){}
+  }
+
+  export class Chrs implements ExprLike {
+    kind: Token.CHRS = Token.CHRS
+    type: CCType = BaseType.String
     constructor(public value: Expr){}
   }
 }
