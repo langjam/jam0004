@@ -1,4 +1,4 @@
-import { BaseType, CCType } from "./types";
+import { BaseType, CCType, ListType } from "./types";
 
 export type JSValue = number | boolean | string | Function | JSValue[] | null;
 
@@ -45,7 +45,7 @@ export enum Token {
   // a [a] -> [a] | [a] a -> [a] | [a] -> [a] -> [a]
   // int string -> string | string int -> string | string string -> string
 
-  LIST = 5478, // *LIST * nn * a * a * a * ...
+  LIST = 5478, // *LIST * type * nn * a * a * a * ...
 
   APP = 277, // app a [a] / [a] a / [a] [a]
 
@@ -79,7 +79,8 @@ export enum Token {
   NUMBER = -1
 }
 
-export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit | Expr.TypeConversion | Expr.Unary;
+export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit |
+                   Expr.TypeConversion | Expr.Unary | Expr.ListCons;
 
 export namespace Expr {
   export class NumberExpr implements ExprLike {
@@ -116,5 +117,10 @@ export namespace Expr {
   export type UnaryToken = Token.NEG | Token.NOT;
   export class Unary implements ExprLike {
     constructor(public kind: UnaryToken, public type: CCType, public expr: Expr) {}
+  }
+
+  export class ListCons implements ExprLike {
+    kind: Token.LIST = Token.LIST
+    constructor(public type: ListType, public elements: Expr[]){}
   }
 }

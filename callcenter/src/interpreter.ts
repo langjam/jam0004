@@ -1,4 +1,4 @@
-import { BaseType, CCType, isBaseType, isFunctionType, isTypeEqual, typename } from "./types";
+import { BaseType, CCType, coversType, FunctionType, isBaseType, isFunctionType, isTypeEqual, ListType, OptionType, TupleType, TypeKind, typename } from "./types";
 import {Expr, JSValue, Token} from "./expression";
 
 export interface Stream {
@@ -13,10 +13,13 @@ export interface Output {
   err (e: any) : Promise<void>
 }
 
-const UNREACHABLE = -999;
 const EOF_STREAM = 1000;
 const PARSE_ERROR = 1001;
 const RUNTIME_ERROR = 1002;
+
+function unreachable() : Error {
+  return new Error("unreachable");
+}
 
 export async function interpret(src: Stream, output: Output) {
   const interpreter = new Interpreter(src, output);
@@ -240,6 +243,16 @@ class Interpreter {
         let val = await this.visitExprAsNumber(expr.expr);
         return -val;
       }
+
+      case Token.LIST: {
+        let values = [];
+
+        for (let element of expr.elements) {
+          values.push(await this.visitExpr(element));
+        }
+
+        return values;
+      }
     }
 
     // TODO:
@@ -394,10 +407,127 @@ class Parser{
       case Token.NEG:
       case Token.NOT:
         return this.parseUnary(instr);
+
+      case Token.LIST:
+        return this.parseListCons();
     }
 
-    await this.parseError(`Unknown instruction ${instrTok}`);
-    throw UNREACHABLE;
+    await this.parseError(`unknown instruction ${instrTok}`);
+    throw unreachable();
+  }
+
+  // type expression
+  async parseType() : Promise<CCType> {
+    let token = await this.consumeDigit();
+
+    switch (token) {
+      case TypeKind.Int: return BaseType.Int;
+      case TypeKind.Float: return BaseType.Float;
+      case TypeKind.Bool: return BaseType.Bool;
+      case TypeKind.String: return BaseType.String;
+      case TypeKind.None: return BaseType.None;
+
+      case TypeKind.List: return this.parseTypeList();
+      case TypeKind.Tuple: return this.parseTypeTuple();
+      case TypeKind.Option: return this.parseTypeOption();
+
+      case TypeKind.Function: return this.parseTypeFunction();
+      case TypeKind.Custom: return this.parseTypeCustom();
+    }
+
+    throw unreachable();
+  }
+
+  async parseTypeList() : Promise<CCType> {
+    let elementType = await this.parseType();
+    return new ListType(elementType);
+  }
+
+  async parseTypeTuple() : Promise<CCType> {
+    let startPos = this.cursor;
+    let tens = await this.consumeDigit();
+    let units = await this.consumeDigit();
+    let n = tens * 10 + units;
+
+    if (n < 2) {
+      await this.parseError("tuple must have at least 2 element types.", startPos);
+    }
+
+    let types : CCType[] = [];
+    for (let i = 0; i < n; i++) {
+      types.push(await this.parseType());
+    }
+
+    return new TupleType(types);
+  }
+
+  async parseTypeOption() : Promise<CCType> {
+    let startPos = this.cursor;
+    let tens = await this.consumeDigit();
+    let units = await this.consumeDigit();
+    let n = tens * 10 + units;
+
+    if (n < 2) {
+      await this.parseError("options must have at least 2 choice types.", startPos);
+    }
+
+    let types : CCType[] = [];
+    for (let i = 0; i < n; i++) {
+      types.push(await this.parseType());
+    }
+
+    return new OptionType(types);
+  }
+
+  async parseTypeFunction() : Promise<CCType> {
+    let tens = await this.consumeDigit();
+    let units = await this.consumeDigit();
+    let n = tens * 10 + units;
+
+    let paramTypes : CCType[] = [];
+    for (let i = 0; i < n; i++) {
+      paramTypes.push(await this.parseType());
+    }
+
+    let returnType = await this.parseType();
+
+    return new FunctionType(returnType, paramTypes);
+  }
+
+  async parseTypeCustom() : Promise<CCType> {
+    //TODO: resolve custom type
+    return BaseType.None
+  }
+
+  // expression
+
+  async parseListCons() : Promise<Expr> {
+    await this.consumeStar();
+    let elementType = await this.parseType();
+    await this.consumeStar();
+    let numArgs = parseInt(await this.consumeNumber(), 10) || 0;
+
+    let startPos = this.cursor;
+    let elements = await this.parseArgs(numArgs);
+
+    // typecheck
+    for (let element of elements) {
+      if (!coversType(elementType, element.type)) {
+        await this.parseError(`type ${typename(element.type)} is not assignable to list of element type ${typename(elementType)}`, startPos);
+      }
+    }
+
+    return new Expr.ListCons(new ListType(elementType), elements);
+  }
+
+  async parseArgs(n: number) : Promise<Expr[]> {
+    let args = [];
+    for (let i = 0; i < n; i++) {
+      await this.consumeStar();
+      args.push(await this.parseExpression());
+    }
+
+    return args;
   }
 
   async parseBinaryMath(operator: Expr.BinaryMathToken) : Promise<Expr> {
@@ -527,6 +657,14 @@ class Parser{
     }
 
     await this.next();
+  }
+
+  async consumeDigit() : Promise<number> {
+    if (!/[0-9]/.test(await this.peek())) {
+      await this.parseError("expected digit.");
+    }
+
+    return parseInt(await this.next(), 10);
   }
 
   async consumeNumber() : Promise<string> {

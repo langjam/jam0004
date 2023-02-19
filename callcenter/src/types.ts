@@ -7,6 +7,7 @@ export enum TypeKind {
   Tuple = 8,
   Option = 6,
   Function = 9,
+  Custom = 1,
   None = 0,
 }
 
@@ -39,7 +40,7 @@ export class ListType implements TypeLike {
 }
 
 export class TupleType implements TypeLike {
-  kind: TypeKind
+  kind: TypeKind.Tuple
   typelabel: string
   typename: string
 
@@ -51,7 +52,7 @@ export class TupleType implements TypeLike {
 }
 
 export class OptionType implements TypeLike {
-  kind: TypeKind
+  kind: TypeKind.Option
   typelabel: string
   typename: string
 
@@ -63,7 +64,7 @@ export class OptionType implements TypeLike {
 }
 
 export class FunctionType implements TypeLike {
-  kind: TypeKind
+  kind: TypeKind.Function
   typelabel: string
   typename: string
 
