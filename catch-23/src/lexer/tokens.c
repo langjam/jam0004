@@ -23,7 +23,10 @@
 
 Token token_parse_comment(Unit* unit)
 {
-    if(!scanner_is_match(scanner_current(&unit->scan), match_lexeme("*\\")))
+    bool is_multiline = scanner_is_match(scanner_current(&unit->scan), match_lexeme("*\\"));
+
+    if(!is_multiline &&
+       !scanner_is_match(scanner_current(&unit->scan), match_lexeme("\\\\")))
     {
         return token_nil();
     }
@@ -32,7 +35,8 @@ Token token_parse_comment(Unit* unit)
 
     token.type = TokenComment;
 
-    struct scanner_string comment_text = scanner_split(&unit->scan, match_lexeme("*\\"), match_lexeme("\\*"));
+    struct scanner_string comment_text = is_multiline ? scanner_split(&unit->scan, match_lexeme("*\\"), match_lexeme("\\*")) :
+                                                        scanner_split(&unit->scan, match_lexeme("\\\\"), match_chars("\r\n"));
 
     if(comment_text.str == NULL)
     {

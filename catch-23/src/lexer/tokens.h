@@ -19,6 +19,11 @@
     X(TokenIntToFloat, "''", NULL) \
     X(TokenNotEqual, "<>", NULL) \
     X(TokenFloatNotEqual, "><", NULL) \
+    X(TokenArrowLeft, "<~", NULL) \
+    X(TokenArrowRight, "~>", NULL) \
+    X(TokenAgainst, ";;", NULL) \
+    X(TokenDont, ":;", NULL) \
+    X(TokenDoubleColon, "::", NULL) \
     X(TokenFloatToInt, "\"", NULL) \
     X(TokenSingleQuote, "'", NULL) \
     X(TokenThing32, "#", NULL) \
@@ -48,7 +53,9 @@
     X(TokenQuestMark, "?", NULL) \
     X(TokenEquals, "=", NULL) \
     X(TokenTilde, "~", NULL) \
-    X(TokenWhitespace, " ", NULL)
+    X(TokenWhitespace, " ", NULL) \
+    X(TokenNewline, "\n", NULL) \
+    X(TokenReturn, "\r", NULL)
 
 #define TOKEN_MACRO_ENUM(NAME_, SAMPLE_, HANDLER_) NAME_,
 
