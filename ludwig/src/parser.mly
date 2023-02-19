@@ -68,9 +68,9 @@ expr_leaf:
     | LIST expr2                            { Sequentialize($2) }
     | FAIL                                  { Fail }
     | NOTE                                  { Note(8,  $1,  4) } // default to "middle"
-    | NOTE INT                              { Note(8,  $1, $2) } // defaults to "1/8"
-    | INT NOTE                              { Note($1, $2,  4) } // defaults to "1/8"
-    | INT NOTE INT                          { Note($1, $2, $3) }
+    | NOTE "/" INT                          { Note(8,  $1, $3) } // defaults to "1/8"
+    | INT "/" NOTE                          { Note($1, $3,  4) } // defaults to "1/8"
+    | INT "/" NOTE "/" INT                  { Note($1, $3, $5) }
 
 // 1/2(A | B) : (C | D)
 
