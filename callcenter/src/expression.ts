@@ -1,4 +1,4 @@
-import { BaseType, CCType, ListType } from "./types";
+import { BaseType, CCType, ListType, TupleType } from "./types";
 
 export type JSValue = number | boolean | string | Function | JSValue[] | null;
 
@@ -65,8 +65,8 @@ export enum Token {
 
   // tuple
   TUP = 887, // TUP * nn e e ...
-  TGET = 8438, // 8438 * nn tuple int
-  TSET = 8738, // 8738 * nn tuple int e
+  TGET = 8438, // 8438 * tuple nn
+  TSET = 8738, // 8738 * tuple nn val
 
   IF = 43, // if * c * t * f
   IFL = 435, // ifl * nn * ty * e * et * ef
@@ -80,8 +80,8 @@ export enum Token {
 }
 
 export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit |
-                   Expr.TypeConversion | Expr.Unary | Expr.ListCons | Expr.Append | Expr.LSGet |
-                   Expr.LSSet | Expr.Len | Expr.Chrs;
+                   Expr.TypeConversion | Expr.Unary | Expr.ListCons | Expr.Append | Expr.Get |
+                   Expr.Set | Expr.Len | Expr.Chrs | Expr.Tuple;
 
 export namespace Expr {
   export class NumberExpr implements ExprLike {
@@ -129,12 +129,16 @@ export namespace Expr {
     constructor(public kind: Token.APP | Token.SAPP, public type: CCType, public left: Expr, public right: Expr) {}
   }
 
-  export class LSGet implements ExprLike {
-    constructor(public kind: Token.GET | Token.SGET, public type: CCType, public list: Expr, public index: Expr) {}
+  export type GetToken = Token.GET | Token.SGET | Token.TGET;
+
+  export class Get implements ExprLike {
+    constructor(public kind: GetToken , public type: CCType, public list: Expr, public index: Expr) {}
   }
 
-  export class LSSet implements ExprLike {
-    constructor(public kind: Token.SET | Token.SSET, public type: CCType, public list: Expr, public index: Expr, public value: Expr) {}
+  export type SetToken = Token.SET | Token.SSET| Token.TSET;
+
+  export class Set implements ExprLike {
+    constructor(public kind: SetToken, public type: CCType, public list: Expr, public index: Expr, public value: Expr) {}
   }
 
   export class Len implements ExprLike {
@@ -147,5 +151,10 @@ export namespace Expr {
     kind: Token.CHRS = Token.CHRS
     type: CCType = BaseType.String
     constructor(public value: Expr){}
+  }
+
+  export class Tuple implements ExprLike {
+    kind: Token.TUP = Token.TUP
+    constructor(public type: TupleType, public values: Expr[]){}
   }
 }

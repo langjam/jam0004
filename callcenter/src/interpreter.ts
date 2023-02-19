@@ -1,4 +1,4 @@
-import { BaseType, CCType, coversType, FunctionType, isBaseType, isFunctionType, isListType, isTypeEqual, ListType, OptionType, TupleType, TypeKind, typename } from "./types";
+import { BaseType, CCType, coversType, FunctionType, isBaseType, isFunctionType, isListType, isTupleType, isTypeEqual, ListType, OptionType, TupleType, TypeKind, typename } from "./types";
 import {Expr, JSValue, Token} from "./expression";
 
 export interface Stream {
@@ -286,7 +286,8 @@ class Interpreter {
       }
 
       case Token.GET:
-      case Token.SGET: {
+      case Token.SGET:
+      case Token.TGET: {
         let listval = (await this.visitExpr(expr.list)) as JSValue[];
         let index = await this.visitExprAsNumber(expr.index);
 
@@ -297,7 +298,8 @@ class Interpreter {
         return listval[index];
       }
 
-      case Token.SET: {
+      case Token.SET:
+      case Token.TSET: {
         let listval = (await this.visitExpr(expr.list)) as JSValue[];
         let index = await this.visitExprAsNumber(expr.index);
         let value = await this.visitExpr(expr.value);
@@ -334,6 +336,16 @@ class Interpreter {
       case Token.CHRS: {
         let listval = (await this.visitExpr(expr.value)) as number[];
         return listval.map(c => String.fromCharCode(c)).join("");
+      }
+
+      case Token.TUP: {
+        let values = [];
+
+        for (let value of expr.values) {
+          values.push(await this.visitExpr(value));
+        }
+
+        return values;
       }
     }
 
@@ -507,6 +519,15 @@ class Parser{
 
       case Token.CHRS:
         return this.parseChrs();
+
+      case Token.TUP:
+        return this.parseTup();
+
+      case Token.TGET:
+        return this.parseTget();
+
+      case Token.TSET:
+        return this.parseTset();
     }
 
     await this.parseError(`unknown instruction ${instrTok}`);
@@ -597,6 +618,82 @@ class Parser{
   }
 
   // expression
+
+  // tuple
+  async parseTup() : Promise<Expr> {
+    // TUP * nn e e ...
+    await this.consumeStar();
+    let startpos = this.cursor;
+    let numArgs = parseInt(await this.consumeNumber(), 10) || 0;
+
+    if (numArgs < 2 || numArgs > 99) {
+      await this.parseError("tuple size must be between 2-99 elements.", startpos);
+    }
+
+    let elements = await this.parseArgs(numArgs);
+    let tupleType = new TupleType(elements.map(e => e.type));
+
+    return new Expr.Tuple(tupleType, elements);
+  }
+
+  async parseTget() : Promise<Expr> {
+    // tget tuple nn
+    await this.consumeStar();
+    let startPos = this.cursor;
+    let tuple = await this.parseExpression();
+
+    if (!isTupleType(tuple.type)) {
+      await this.parseError(`unable to do tuple get operation for type ${typename(tuple.type)}`, startPos);
+      throw unreachable();
+    }
+
+    await this.consumeStar();
+    startPos = this.cursor;
+    let index = parseInt(await this.consumeNumber(), 10);
+
+    if (index < 0 || index >= tuple.type.productTypes.length) {
+      await this.parseError(`invalid tuple index ${index}`, startPos);
+    }
+
+    let type = tuple.type.productTypes[index];
+    let indexExpr = new Expr.NumberExpr(index);
+
+    return new Expr.Get(Token.TGET, type, tuple, indexExpr);
+  }
+
+  async parseTset() : Promise<Expr> {
+    // tset tuple nn value
+    await this.consumeStar();
+    let startPos = this.cursor;
+    let tuple = await this.parseExpression();
+
+    if (!isTupleType(tuple.type)) {
+      await this.parseError(`unable to do tuple get operation for type ${typename(tuple.type)}`, startPos);
+      throw unreachable();
+    }
+
+    await this.consumeStar();
+    startPos = this.cursor;
+    let index = parseInt(await this.consumeNumber(), 10);
+
+    if (index < 0 || index >= tuple.type.productTypes.length) {
+      await this.parseError(`invalid tuple index ${index}`, startPos);
+    }
+
+    let elementType = tuple.type.productTypes[index];
+
+    await this.consumeStar();
+    startPos = this.cursor;
+    let value = await this.parseExpression();
+
+    if (!coversType(elementType, value.type)) {
+      await this.parseError(`unable to do set tuple operation between types ${typename(elementType)} and ${typename(value.type)}.`);
+    }
+
+    let indexExpr = new Expr.NumberExpr(index);
+
+    return new Expr.Set(Token.TSET, tuple.type, tuple, indexExpr, value);
+  }
 
   // list & strings
   async parseListCons() : Promise<Expr> {
@@ -694,7 +791,7 @@ class Parser{
       await this.parseError(`unable to do get operation for type ${typename(list.type)}`, startPos);
     }
 
-    return new Expr.LSGet(operator, type, list, index);
+    return new Expr.Get(operator, type, list, index);
   }
 
   async parseLSSet() : Promise<Expr> {
@@ -727,7 +824,7 @@ class Parser{
       await this.parseError(`unable to do set operation for types ${typename(list.type)} and ${typename(value.type)}`, startPos);
     }
 
-    return new Expr.LSSet(operator, type, list, index, value);
+    return new Expr.Set(operator, type, list, index, value);
   }
 
   async parseLen() : Promise <Expr> {
