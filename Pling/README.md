@@ -48,11 +48,5 @@ java -jar target/engine-1.0-SNAPSHOT.jar [file] [args]
 ```
 
 ### Usage
-TODO
 
-```
-fun sine #amplitude #frequency [
-    // code to generate a sine wave
-    ret sinewave; // returns the sine wave
-]
-```
+To start using Pling, you can 
