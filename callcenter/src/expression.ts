@@ -1,13 +1,28 @@
-import { BaseType, CCType, FunctionType, ListType, TupleType } from "./types";
+import { BaseType, CCType, FunctionType, ListType, NonOptionType, OptionType, TupleType } from "./types";
 
-export type JSValue = number | boolean | string | Function | JSValue[] | null;
+export type JSNonOption = number | boolean | string | Function | JSValue[] | null;
+export type JSValue = JSNonOption | OptionVal;
 
-export class Value {
-  constructor(public type: CCType, value: JSValue){}
+export class OptionVal {
+  constructor(public type: OptionType, public originalType: NonOptionType, public value: JSNonOption){}
+
+  toString() : string {
+    return stringify(this.value);
+  }
 }
+
+
 
 export class FunctionObj {
   constructor(public name: number, public type: FunctionType, public body: Expr) {}
+  toString() : string {
+    return "[Function]";
+  }
+}
+
+export function stringify(t: JSValue) : string {
+  if (t == null) return "None";
+  return t.toString();
 }
 
 interface ExprLike {
@@ -84,13 +99,14 @@ export enum Token {
   LET = 538, // *LET * nn * v * e
   IFL = 435, // ifl * nn * ty * e * et * ef
 
-  NUMBER = -1
+  NUMBER = -1,
+  TRANSFORM_OPT = -2, // for nonoption type -> option type value transform
 }
 
 export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit |
                    Expr.TypeConversion | Expr.Unary | Expr.ListCons | Expr.Append | Expr.Get |
                    Expr.Set | Expr.Len | Expr.Chrs | Expr.Tuple | Expr.IfExpr | Expr.FunCall |
-                   Expr.GetVar | Expr.Let;
+                   Expr.GetVar | Expr.Let | Expr.OptTransform;
 
 export namespace Expr {
   export class NumberExpr implements ExprLike {
@@ -185,5 +201,10 @@ export namespace Expr {
   export class Let implements ExprLike {
     kind: Token.LET = Token.LET
     constructor(public type: CCType, public id: number, public value: Expr, public inExpr: Expr){}
+  }
+
+  export class OptTransform implements ExprLike {
+    kind: Token.TRANSFORM_OPT = Token.TRANSFORM_OPT
+    constructor(public type: OptionType, public originalType: NonOptionType, public value: Expr){}
   }
 }

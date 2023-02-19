@@ -1,5 +1,5 @@
-import { BaseType, CCType, coversType, FunctionType, isBaseType, isFunctionType, isListType, isTupleType, isTypeEqual, ListType, OptionType, TupleType, TypeKind, typename } from "./types";
-import {Expr, FunctionObj, JSValue, Token} from "./expression";
+import { BaseType, CCType, coversType, FunctionType, isBaseType, isFunctionType, isListType, isOptionType, isTupleType, isTypeEqual, ListType, OptionType, TupleType, TypeKind, typename } from "./types";
+import {Expr, FunctionObj, JSValue, OptionVal, stringify, Token} from "./expression";
 
 export interface Stream {
   next () : Promise<string | null>;
@@ -147,7 +147,7 @@ class Interpreter {
 
       if (value != null) {
         this.log("The expression is evaluated to: ");
-        this.output.out(value);
+        this.output.out(print(value));
       }
 
     } catch (e) {
@@ -496,9 +496,16 @@ class Interpreter {
   }
 }
 
-function stringify(t: JSValue) : string {
-  if (t == null) return "None";
-  return t.toString();
+
+export function print(t: JSValue) : string {
+  if (typeof t === "string") return `"${t}"`;
+  if (t instanceof OptionVal) return print(t.value);
+  if (Array.isArray(t)) {
+    let str = t.map(print).join(",")
+    return `[${str}]`;
+  }
+
+  return stringify(t);
 }
 
 type ComparableBase = number | boolean | string
@@ -748,6 +755,8 @@ class Parser{
         await this.parseError(`unable to assign type ${typename(body.type)} for return type ${typename(returnType)}.`);
       }
 
+      body = this.transformOpt(returnType, body);
+
       func.body = body;
 
       // add to parent (which should be global env) when all is successful
@@ -896,9 +905,13 @@ class Parser{
 
     // typecheck
     for (let i = 0; i < numParams; i++) {
-      if (!coversType(func.type.paramTypes[i], args[i].type)) {
-        await this.parseError(`unable to assign argument with type ${typename(args[i].type)} to parameter of type ${typename(func.type.paramTypes[i])}`, startpos);
+      let parType = func.type.paramTypes[i];
+      let arg = args[i];
+      if (!coversType(parType, arg.type)) {
+        await this.parseError(`unable to assign argument with type ${typename(arg.type)} to parameter of type ${typename(parType)}`, startpos);
       }
+
+      args[i] = this.transformOpt(parType, arg);
     }
 
     return new Expr.FunCall(func.type.returnType, func, args);
@@ -1019,6 +1032,8 @@ class Parser{
       await this.parseError(`unable to do set tuple operation between types ${typename(elementType)} and ${typename(value.type)}.`);
     }
 
+    value = this.transformOpt(elementType, value);
+
     let indexExpr = new Expr.NumberExpr(index);
 
     return new Expr.Set(Token.TSET, tuple.type, tuple, indexExpr, value);
@@ -1035,10 +1050,13 @@ class Parser{
     let elements = await this.parseArgs(numArgs);
 
     // typecheck
-    for (let element of elements) {
+    for (let i = 0; i < elements.length; i++) {
+      let element = elements[i];
       if (!coversType(elementType, element.type)) {
         await this.parseError(`type ${typename(element.type)} is not assignable to list of element type ${typename(elementType)}`, startPos);
       }
+
+      elements[i] = this.transformOpt(elementType, element);
     }
 
     return new Expr.ListCons(new ListType(elementType), elements);
@@ -1063,9 +1081,15 @@ class Parser{
 
     if (isListType(left.type)) {
       if (isTypeEqual(left.type, right.type)) type = left.type;
-      else if (coversType((left.type as ListType).elementType, right.type)) type = left.type;
+      else if (coversType(left.type.elementType, right.type)) {
+        type = left.type;
+        right = this.transformOpt(type.elementType, right);
+      }
     } else if (isListType(right.type)) {
-      if (coversType((right.type as ListType).elementType, left.type)) type = right.type;
+      if (coversType(right.type.elementType, left.type)){
+        type = right.type;
+        left = this.transformOpt(type.elementType, left);
+      }
     }
 
     if (type === BaseType.None) {
@@ -1147,6 +1171,7 @@ class Parser{
       operator = Token.SSET;
     } else if (isListType(list.type) && coversType(list.type.elementType, value.type)) {
       type = list.type;
+      value = this.transformOpt(type.elementType, value);
     }
 
     if (type === BaseType.None) {
@@ -1299,6 +1324,15 @@ class Parser{
     }
 
     return new Expr.Unary(operation, type, expr);
+  }
+
+  transformOpt(target: CCType, sourceExpr: Expr) : Expr {
+    // assumption: target `coversType` sourceExpr.type
+    if (isOptionType(target) && !isOptionType(sourceExpr.type)) {
+      return new Expr.OptTransform(target, sourceExpr.type, sourceExpr);
+    }
+
+    return sourceExpr;
   }
 
   async parseNumber() : Promise<Expr> {

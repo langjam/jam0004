@@ -19,7 +19,7 @@ export enum BaseType {
   None = TypeKind.None
 }
 
-type NonOptionType = BaseType | ListType | TupleType | FunctionType
+export type NonOptionType = BaseType | ListType | TupleType | FunctionType
 export type CCType =  NonOptionType | OptionType
 
 interface TypeLike {
