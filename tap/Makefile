@@ -1,5 +1,5 @@
 run:
-	python tap-own.py
+	python tap.py
 
 install:
-	pip install -r requirements.txt
+	pip3 install -r requirements.txt
