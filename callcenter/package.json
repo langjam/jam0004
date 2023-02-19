@@ -11,13 +11,14 @@
     "cmd": {
       "context": "node",
       "source": [
-        "src/index.ts"
+        "src-cmd/index.ts"
       ],
       "outputFormat": "commonjs",
       "sourceMap": false
     }
   },
   "devDependencies": {
+    "@types/node": "^18.14.0",
     "parcel": "^2.8.3",
     "typescript": "^4.9.5"
   }
