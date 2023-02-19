@@ -50,6 +50,8 @@ Float operators treat both operands as if they were valid floats without casting
 Integer operators treat both operands as if they were valid integers without casting the values to integer.
 One cannot mix types with operators, so you couldn't write 2 + 2.1 for example. Well it isn't forbidden, but it will assume that 2.1 is an integer.
 
+Operators are infix and there is no precedence, meaning the operators are evaluated in order of appearance, so 2 + 1 * 2 would return 6 for example.
+
 |operator|input type|output type|params qty|desc
 |-|-|-|-|-|
 |\+|Integer|Integer|2|Returns the sum of two integers|
@@ -93,7 +95,7 @@ catch-23 is contradiction-oriented because it Donts and Never are basically if (
 
 Unless, written as `?(<boolean expression>)` is the same as an inverted if statement in C: `if (!(<boolean expression>))`. Unless can only be used directly inside Dont or another Unless/Else Unless/Else. It cannot be used in a block of code that isn't any of those cases even if that block of code is inside one of those.
 ```
-?)!($vr > 0)(
+?(!($vr > 0))
 {
   \\ code here 
 }
@@ -130,12 +132,12 @@ A Never, written as `::`, is a loop that is never executed. However, if it is be
 ```
 
 ## Functions
-Functions use don't use inverted brackets.
+Functions can't have parameters due to time constraints. Instead they have access to the global state
 Functions have the same two-character name limit as variables.
 Return, for returning values and which is written as `=>`, breaks from functions.
-`fn : <return type> (<args>) { *\ code here \* }`
+`fn : <return type> () { *\ code here \* }`
 ```
-mn : ? (as : #[])
+mn : ? ()
 {
   @hw : #[12]
   $hw[100, 150, 154, 154, 157, 40, 127, 157, 162, 154, 144]
