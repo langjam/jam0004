@@ -79,7 +79,7 @@ Token token_parse_number(Unit* unit)
     return token;
 }
 
-Token token_parse_var_identifier(Unit* unit)
+Token token_parse_identifier(Unit* unit)
 {
     if(!scanner_is_match(scanner_current(&unit->scan), match_chars(ALPHA)))
     {
@@ -88,7 +88,7 @@ Token token_parse_var_identifier(Unit* unit)
 
     Token token;
 
-    token.type = TokenVarIndent;
+    token.type = TokenIdentifier;
 
     struct scanner_string identifier_text = scanner_split_exclusively(&unit->scan, match_chars(ALPHA NUMERICAL));
 
