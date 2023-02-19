@@ -476,10 +476,18 @@ class Interpreter:
         elif value[0] == "then":
             if self._if_value is None:
                 return UnexpectedTokenError((self.filename, 0, 0), "need 'IF' before 'THEN'")
+            elif self._if_value is True:
+                new_values = value[1:]
+                for v in new_values:
+                    self.check_todo(v)
 
-            new_values = value[1:]
-            for v in new_values:
-                self.check_todo(v)
+        elif value[0] == "else":
+            if self._if_value is None:
+                return UnexpectedTokenError((self.filename, 0, 0), "need 'IF' before 'THEN'")
+            elif self._if_value is False:
+                new_values = value[1:]
+                for v in new_values:
+                    self.check_todo(v)
 
         else:
             return None
