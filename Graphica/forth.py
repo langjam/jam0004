@@ -14,22 +14,24 @@ class Env:
             *spl, name = word.split(',')
             for i in spl:
                 self.run(i)
-            self.defs[name] = [self.stack.pop()]
+            self.defs[name] = self.stack.pop()
         elif self.depth != 0:
             if word == ']':
                 self.depth -= 1
             if word == '[':
                 self.depth += 1
-            if self.depth != 0:
+            if self.depth == 0:
+                self.stack[-1] = ' '.join(self.stack[-1])
+            else:
                 if word in self.defs:
-                    self.stack[-1].extend(self.defs[word])
+                    self.stack[-1].extend(word.split(' '))
                 else:
                     self.stack[-1].append(word)
         elif word == '[':
             self.stack.append([])
             self.depth += 1
         elif word == ']':
-            raise Exception("unexpected `]`")
+            raise Exception('unexpected `]`')
         elif word[0] == '#':
             if self.depth == math.inf:
                 self.dpeth = 0
@@ -74,22 +76,14 @@ class Env:
             self.stack.append(b % a)
         elif word == 'do':
             f = self.stack.pop()
-            for thing in f:
+            for thing in f.split(' '):
                 self.run(thing)
-        elif word == 'exa':
-            n = self.stack.pop()
-            o = self.stack.pop()
-            self.defs[n].extend(n)
         elif word == 'when':
             c = self.stack.pop()
             f = self.stack.pop()
             if c:
-                for thing in f:
+                for thing in f.split(' '):
                     self.run(thing)
-        elif word == 'ex':
-            n = self.stack.pop()
-            o = self.stack.pop()
-            self.defs[n].append(n)
         elif word == 'swap':
             a = self.stack.pop()
             b = self.stack.pop()
@@ -101,20 +95,14 @@ class Env:
             v = self.stack.pop()
             self.stack.append(v)
             self.stack.append(v)
-        elif word == 'fn' or word == 'fun':
-            n = self.stack.pop()
-            o = self.stack.pop()
-            self.defs[n] = o
         elif word == 'def' or word == 'is' or word == '=':
             n = self.stack.pop()
             o = self.stack.pop()
-            self.defs[n] = [o]
+            self.defs[n] = o
         else:
-            if word not in self.defs:
-                self.stack.append(0)
-            else:
-                got = self.defs[word]
-                self.stack.extend(got)
+            got = self.defs[word]
+            for i in got.split(' '):
+                self.run(i)
 
 env = Env()
 
@@ -129,8 +117,7 @@ def run(node):
     env.depth = 0
     for arg in args:
         env.args.extend(arg)
-    if '?' not in words:
-        env.stack.extend(env.args)
+    env.stack.extend(env.args)
     for word in words:
         try:
             env.run(word)

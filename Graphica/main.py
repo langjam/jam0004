@@ -76,15 +76,10 @@ class Handler:
             if len(self.selected) == 1:
                 if chr(key) == '\r':
                     name = ''.join(self.src)
-                    env.run('[')
-                    for i in str(self.selected[0]).split(" "):
-                        env.run(i)
-                    env.run(']')
-                    env.stack.append(name)
-                    env.run('fn')
+                    self.src = []
+                    env.defs[name] = str(self.selected[0]).strip()
                     self.selected[0].text = name
                     self.selected[0].list[:] = []
-                    self.str = []
                 elif chr(key).isprintable():
                     self.selected[0].text += chr(key)
                 elif key == 127:
@@ -113,7 +108,7 @@ class Handler:
             pt = self.get(8)
             if len(self.node.list) == 0:
                 size = self.img.shape[:2]
-                self.node.add(self.make_node([150, size[0]//2], 50, '?'))
+                self.node.add(self.make_node([150, size[0]//2], 50, ''))
             if len(pt) == 1:
                 self.handle(pt[0])
             else:
@@ -144,16 +139,7 @@ class Handler:
         return math.nan
 
 def main():
-    parser = argparse.ArgumentParser(
-        prog = 'graphica',
-        description = 'start a graphica environment',
-    )
-    parser.add_argument('--camera', type=bool)
-
-    args = parser.parse_args()
-
-    h = Handler(one_hand = args.camera)
-    # h = Handler(one_hand=True)
+    h = Handler(one_hand=False)
     h.loop()
 
 if __name__ == '__main__':
