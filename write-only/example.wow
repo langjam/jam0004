@@ -1,0 +1,72 @@
+b 23
+b write_acc
+b terminate
+r
+c
+set INS.v.value = 0xAB00
+c
+set ACC.v.value = 0
+c
+set ACC.v.value = 1
+c
+set ACC.v.value = 1000
+c
+set ACC.v.value = 0xBB04
+c
+set ACC.v.value = 0xA000
+c
+set ACC.v.value = 0xBB06
+c
+set ACC.v.value = 0xA100
+c
+set ACC.v.value = 0xBB08
+c
+set ACC.v.value = 0xA101
+c
+set ACC.v.value = 0xBB0A
+c
+set ACC.v.value = 0xAA00
+c
+set ACC.v.value = 0xBB0C
+c
+set ACC.v.value = 0xA000
+c
+set ACC.v.value = 0xBB0E
+c
+set ACC.v.value = 0xA101
+c
+set ACC.v.value = 0xBB10
+c
+set ACC.v.value = 0xA001
+c
+set ACC.v.value = 0xBB12
+c
+set ACC.v.value = 0xA001
+c
+set ACC.v.value = 0xBB14
+c
+set ACC.v.value = 0xAA01
+c
+set ACC.v.value = 0xC316
+c
+# termination value
+set ACC.v.value = 100
+c
+set ACC.v.value = 0xBA05
+c
+set ACC.v.value = 0xBB19
+c
+set ACC.v.value = 0xA000
+c
+set ACC.v.value = 0xBB1B
+c
+set ACC.v.value = 0xA100
+c
+set ACC.v.value = 0xFFFF
+c
+cl write_acc
+c
+set INS.v.value = 0xBA03
+cl 23
+c
+print ACC.v.value
