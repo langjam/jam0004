@@ -3,6 +3,7 @@ package dev.syncclient.pling.docs;
 import dev.syncclient.pling.executor.FunctionStateNode;
 import dev.syncclient.pling.executor.StateNode;
 import dev.syncclient.pling.executor.StateTree;
+import dev.syncclient.pling.executor.VarStateNode;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -44,13 +45,14 @@ public class SingularLazyLoadedStaticDocumentationGeneratorServiceProvider imple
         builder.append("--------\n\n");
 
         for (StateNode child : node.children()) {
-            if (!(child instanceof FunctionStateNode fsn)) {
-                continue;
+            if (child instanceof FunctionStateNode fsn) {
+                builder.append(fsn.name()).append("\n");
+                builder.append(fsn.getUsage()).append("\n");
+                builder.append(fsn.docs()).append("\n\n");
+            } else if (child instanceof VarStateNode vsn){
+                builder.append(vsn.name()).append(" = ").append(vsn.getValue()).append("\n");
+                builder.append(vsn.docs()).append("\n\n");
             }
-
-            builder.append(fsn.name()).append("\n");
-            builder.append(fsn.getUsage()).append("\n");
-            builder.append(fsn.docs()).append("\n\n");
         }
 
         // Write to file
