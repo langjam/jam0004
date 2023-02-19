@@ -208,6 +208,16 @@ class Interpreter {
         let compared = compare(leftval as ComparableTypes, rightval as ComparableTypes);
         return compared >= 0;
       }
+
+      // logic circuit
+      case Token.AND:
+      case Token.OR: {
+        let leftval = await this.visitExprAsBool(expr.left);
+        if (expr.kind === Token.AND && !leftval) return false;
+        if (expr.kind === Token.OR && leftval) return true;
+
+        return await this.visitExprAsBool(expr.right);
+      }
     }
 
     // TODO:
@@ -216,6 +226,10 @@ class Interpreter {
 
   async visitExprAsNumber (expr: Expr) : Promise<number> {
     return await this.visitExpr(expr) as number;
+  }
+
+  async visitExprAsBool (expr: Expr) : Promise<boolean> {
+    return await this.visitExpr(expr) as boolean;
   }
 }
 
@@ -336,6 +350,10 @@ class Parser{
       case Token.LTE:
       case Token.GTE:
         return this.parseCompare(instr);
+
+      case Token.AND:
+      case Token.OR:
+        return this.parseLogic(instr);
     }
 
     await this.parseError(`Unknown instruction ${instrTok}`);
@@ -384,6 +402,19 @@ class Parser{
     }
 
     return new Expr.Comparison(operator, left, right);
+  }
+
+  async parseLogic(operator: Token.AND | Token.OR): Promise<Expr> {
+    await this.consumeStar();
+    let left = await this.parseExpression();
+    await this.consumeStar();
+    let right = await this.parseExpression();
+
+    if (left.type !== BaseType.Bool || right.type !== BaseType.Bool) {
+      await this.parseError(`unable to do logic operator between types ${typename(left.type)} and ${typename(right.type)}`);
+    }
+
+    return new Expr.LogicCircuit(operator, left, right);
   }
 
   async parseNumber() : Promise<Expr> {

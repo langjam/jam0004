@@ -81,7 +81,7 @@ export enum Token {
   NUMBER = -1
 }
 
-export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison;
+export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit;
 
 export namespace Expr {
   export class NumberExpr implements ExprLike {
@@ -103,5 +103,10 @@ export namespace Expr {
     type: CCType = BaseType.Bool;
 
     constructor(public kind: CompareToken, public left: Expr, public right: Expr) {}
+  }
+
+  export class LogicCircuit implements ExprLike {
+    type: CCType = BaseType.Bool;
+    constructor(public kind: Token.AND | Token.OR, public left: Expr, public right: Expr) {}
   }
 }
