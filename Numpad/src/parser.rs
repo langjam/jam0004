@@ -1,33 +1,30 @@
-/**/
+//
+// Part of Numpad
+// Copyright (c) 2023 Remy Pierre Bushnell Clarke & Sander in 't Veld
+// License: MIT
+//
 
 use crate::common::*;
 use crate::lexer::LabelPass1;
 use crate::lexer::TokenTreePass1;
 
 use itertools::Itertools;
+use log::*;
 
 pub fn parse(
     labels: Vec<LabelPass1>,
-    verbose: bool,
 ) -> Result<Vec<Instruction>, anyhow::Error> {
-    if verbose {
-        println!();
-        println!();
-    }
+    trace!("");
     labels
         .into_iter()
         .filter(|LabelPass1(tokens)| !tokens.is_empty())
-        .map(|LabelPass1(tokens)| parse_instruction(tokens, verbose))
+        .map(|LabelPass1(tokens)| parse_instruction(tokens))
         .collect()
 }
 
 fn parse_instruction(
     tokens: Vec<TokenTreePass1>,
-    verbose: bool,
 ) -> Result<Instruction, anyhow::Error> {
-    //if verbose {
-    //    println!("{:?} =>", tokens);
-    //}
     let mut tokens = tokens.into_iter().peekable();
     let label = match tokens.next() {
         Some(TokenTreePass1::Int(label)) => label,
@@ -43,7 +40,7 @@ fn parse_instruction(
         let tokens = tokens
             .by_ref()
             .peeking_take_while(|token| !is_separator(token));
-        let expression = parse_expression(tokens, verbose)?;
+        let expression = parse_expression(tokens)?;
         intermediates.push(expression);
     }
     let expression = if intermediates.len() > 1 {
@@ -53,16 +50,13 @@ fn parse_instruction(
             .pop()
             .ok_or_else(|| Error::ExpectedExpression)?
     };
-    if verbose {
-        println!("{}:\t{:?}", label, expression);
-    }
+    trace!("{}:\t{}", label, expression);
     let instruction = Instruction { label, expression };
     Ok(instruction)
 }
 
 fn parse_expression(
     mut tokens: impl std::iter::Iterator<Item = TokenTreePass1>,
-    verbose: bool,
 ) -> Result<Expression, anyhow::Error> {
     let mut expression = None;
     let mut stacked_unaries = Vec::new();
@@ -74,7 +68,7 @@ fn parse_expression(
             TokenTreePass1::Binary(binary) => {
                 let left = expression
                     .ok_or_else(|| Error::ExpectedExpressionBeforeBinary)?;
-                let right = parse_expression(tokens, verbose)?;
+                let right = parse_expression(tokens)?;
                 expression = Some(Expression::Binary {
                     operator: binary,
                     left: Box::new(left),
@@ -96,16 +90,14 @@ fn parse_expression(
                             .split_mut(is_separator)
                             .filter(|tokens| !tokens.is_empty())
                             .map(|tokens| {
-                                // TODO avoid unnecessary clone here
-                                let tokens: Vec<TokenTreePass1> =
-                                    tokens.to_vec();
-                                parse_expression(tokens.into_iter(), verbose)
+                                let tokens = tokens.to_vec();
+                                parse_expression(tokens.into_iter())
                             })
                             .collect();
                     let elements = elements?;
                     expression = Some(Expression::List(elements));
                 } else {
-                    let inner = parse_expression(tokens.into_iter(), verbose)?;
+                    let inner = parse_expression(tokens.into_iter())?;
                     expression = Some(inner);
                 }
             }
