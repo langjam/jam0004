@@ -1,0 +1,31 @@
+// token consists of a type and a value
+
+func parser(self, filename, tokens):
+	token_idx = 0
+
+	ast = [] // ast = abstract syntax tree
+
+
+	expected_tokens = None
+	previous_token = None
+	while token_idx < len(tokens):
+		if expected_tokens is not None and token.value not in expected_tokens:
+			raise Error unexpected token
+
+		elif expect_token is not None:
+			merged = previous_token + token.value
+			merged = merged.replace(" ", "")
+			match merged:
+				case "thumbsoft":
+					ast.append[["set_variable"]]
+				case "thumbmedium":
+					ast.append[["get_variable_value"]]
+				case "thumbhard":
+					ast.append[["create_variable"]]
+					// REPEAT FOR REST
+				case other:
+					raise Error unexpected token	
+
+		if token.type == KEYWORD and token.value in ("thumb", "index", "middle", "ring", "pinky"):
+			expected_tokens = ("soft", "medium", "loud")
+			previous_token = token.value
