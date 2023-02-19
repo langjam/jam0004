@@ -50,6 +50,8 @@ Float operators treat both operands as if they were valid floats without casting
 Integer operators treat both operands as if they were valid integers without casting the values to integer.
 One cannot mix types with operators, so you couldn't write 2 + 2.1 for example. Well it isn't forbidden, but it will assume that 2.1 is an integer.
 
+Operators are infix and there is no precedence.
+
 |operator|input type|output type|params qty|desc
 |-|-|-|-|-|
 |\+|Integer|Integer|2|Returns the sum of two integers|
