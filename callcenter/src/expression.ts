@@ -56,12 +56,10 @@ export enum Token {
 
   // string | [a], int, int | string | a -> string | [a]
   SET = 738, // set list index value
+  SSET = -738, // string version
 
   // string | [a] -> int
-  LEN = 536, // len list
-
-  // string | [a], int -> string | [a]
-  REM = 736, // rem list index
+  LEN = 536, // len list / string
 
   CHRS = 2488, // [int] -> str
 
@@ -82,7 +80,8 @@ export enum Token {
 }
 
 export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit |
-                   Expr.TypeConversion | Expr.Unary | Expr.ListCons | Expr.Append | Expr.LSGet;
+                   Expr.TypeConversion | Expr.Unary | Expr.ListCons | Expr.Append | Expr.LSGet |
+                   Expr.LSSet | Expr.Len;
 
 export namespace Expr {
   export class NumberExpr implements ExprLike {
@@ -132,5 +131,15 @@ export namespace Expr {
 
   export class LSGet implements ExprLike {
     constructor(public kind: Token.GET | Token.SGET, public type: CCType, public list: Expr, public index: Expr) {}
+  }
+
+  export class LSSet implements ExprLike {
+    constructor(public kind: Token.SET | Token.SSET, public type: CCType, public list: Expr, public index: Expr, public value: Expr) {}
+  }
+
+  export class Len implements ExprLike {
+    kind: Token.LEN = Token.LEN
+    type: CCType = BaseType.Int
+    constructor(public value: Expr){}
   }
 }

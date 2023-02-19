@@ -296,6 +296,40 @@ class Interpreter {
 
         return listval[index];
       }
+
+      case Token.SET: {
+        let listval = (await this.visitExpr(expr.list)) as JSValue[];
+        let index = await this.visitExprAsNumber(expr.index);
+        let value = await this.visitExpr(expr.value);
+
+        if (index < 0 || index >= listval.length) {
+          await this.runtimeError("index out of bound");
+        }
+
+        listval[index] = value;
+        return listval;
+      }
+
+      case Token.SSET: {
+        let strval = (await this.visitExpr(expr.list)) as string;
+        let index = await this.visitExprAsNumber(expr.index);
+        let value = await this.visitExpr(expr.value);
+
+        if (index < 0 || index >= strval.length) {
+          await this.runtimeError("index out of bound");
+        }
+
+        if (expr.value.type === BaseType.Int) {
+          value = String.fromCharCode(value as number);
+        }
+
+        return strval.substring(0, index) + (value as string)[0] + strval.substring(index + 1);
+      }
+
+      case Token.LEN: {
+        let listval = (await this.visitExpr(expr.value)) as JSValue[];
+        return listval.length;
+      }
     }
 
     // TODO:
@@ -459,6 +493,12 @@ class Parser{
 
       case Token.GET:
         return this.parseLSGet();
+
+      case Token.SET:
+        return this.parseLSSet();
+
+      case Token.LEN:
+        return this.parseLen();
     }
 
     await this.parseError(`unknown instruction ${instrTok}`);
@@ -639,7 +679,7 @@ class Parser{
       type = BaseType.String;
       operator = Token.SGET;
     } else if (isListType(list.type)) {
-      type = list.type;
+      type = list.type.elementType;
     }
 
     if (type === BaseType.None) {
@@ -647,6 +687,51 @@ class Parser{
     }
 
     return new Expr.LSGet(operator, type, list, index);
+  }
+
+  async parseLSSet() : Promise<Expr> {
+    await this.consumeStar();
+    let startPos = this.cursor;
+    let list = await this.parseExpression();
+
+    await this.consumeStar();
+    let idxPos = this.cursor
+    let index = await this.parseExpression();
+
+    if (index.type !== BaseType.Int) {
+      await this.parseError(`index in get operation must be of type ${typename(BaseType.Int)}, instead of ${typename(index.type)}`, idxPos);
+    }
+
+    await this.consumeStar();
+    let value = await this.parseExpression();
+
+    let type : CCType = BaseType.None;
+    let operator = Token.SET;
+
+    if (list.type === BaseType.String && (value.type === BaseType.String || value.type === BaseType.Int)) {
+      type = BaseType.String;
+      operator = Token.SSET;
+    } else if (isListType(list.type) && coversType(list.type.elementType, value.type)) {
+      type = list.type;
+    }
+
+    if (type === BaseType.None) {
+      await this.parseError(`unable to do set operation for types ${typename(list.type)} and ${typename(value.type)}`, startPos);
+    }
+
+    return new Expr.LSSet(operator, type, list, index, value);
+  }
+
+  async parseLen() : Promise <Expr> {
+    await this.consumeStar();
+    let startPos = this.cursor;
+    let list = await this.parseExpression();
+
+    if (list.type !== BaseType.String && !isListType(list.type)) {
+      await this.parseError(`unable to do len operation for type ${typename(list.type)}`, startPos);
+    }
+
+    return new Expr.Len(list);
   }
 
   // arguments
