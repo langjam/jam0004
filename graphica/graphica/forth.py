@@ -10,11 +10,6 @@ class Env:
     def run(self, word):
         if word == '' or word == 'root':
             pass
-        elif (word[0] == ',' and ',' in word[1:]) or (word[0] != ',' and ',' in word):
-            *spl, name = word.split(',')
-            for i in spl:
-                self.run(i)
-            self.defs[name] = str(self.stack.pop())
         elif self.depth != 0:
             if word == ']':
                 self.depth -= 1
@@ -24,9 +19,14 @@ class Env:
                 self.stack[-1] = ' '.join(self.stack[-1])
             else:
                 if word in self.defs:
-                    self.stack[-1].extend(word.split(' '))
+                    self.stack[-1].append(word)
                 else:
                     self.stack[-1].append(word)
+        elif (word[0] == ',' and ',' in word[1:]) or (word[0] != ',' and ',' in word):
+            *spl, name = word.split(',')
+            for i in spl:
+                self.run(i)
+            self.defs[name] = str(self.stack.pop())
         elif word == '[':
             self.stack.append([])
             self.depth += 1
@@ -44,6 +44,8 @@ class Env:
                 self.stack.append(float(word))
             else:
                 self.stack.append(int(word))
+        elif word == 'id':
+            pass
         elif word == 'inc' or word == '+1':
             a = self.stack.pop()
             self.stack.append(a + 1)
@@ -53,7 +55,34 @@ class Env:
         elif word == 'cat' or word == '~':
             a = self.stack.pop()
             b = self.stack.pop()
-            self.stack.append(str(b) + str(a))
+            self.stack.append(str(b) + ' ' + str(a))
+        elif word == 'not' or word == '!':
+            a = self.stack.pop()
+            self.stack.append(not a)
+        elif word == 'lt' or word == '=' or word == '==':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(b < a)
+        elif word == 'ne' or word == 'neq' or word == '!=' or word == '~=':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(b > a)
+        elif word == 'lt' or word == '<':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(b < a)
+        elif word == 'gt' or word == '>':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(b > a)
+        elif word == 'le' or word == 'lte' or word == '<=':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(b <= a)
+        elif word == 'ge' or word == 'gte' or word == '>=':
+            a = self.stack.pop()
+            b = self.stack.pop()
+            self.stack.append(b >= a)
         elif word == 'add' or word == '+':
             a = self.stack.pop()
             b = self.stack.pop()
@@ -105,6 +134,10 @@ class Env:
                 self.run(i)
 
 def run(env, node):
+    if  hasattr(node, 'text') and (node.text == 'quo' or node.text == 'quote'):
+        txt = ' '.join(str(i) for i in node.list if not isinstance(i, SelectorOption)).strip()
+        node.value = txt
+        return [txt]
     args = [run(env, i) for i in node.list if not isinstance(i, SelectorOption)]
     if not hasattr(node, 'text'):
         return []

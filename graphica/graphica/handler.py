@@ -27,7 +27,7 @@ class Handler:
         if one_hand:
             self.cap = cv2.VideoCapture(0)
             if "FindHands" not in globals():
-                from hands import FindHands
+                from graphica.hands import FindHands
                 globals()["FindHands"] = FindHands
                 self.hands = FindHands()
             else:
