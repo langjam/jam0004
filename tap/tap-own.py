@@ -392,6 +392,7 @@ class Interpreter:
         self.filename = filename
         self.ast = ast
         self.variables = {}
+        self._if_value = None
 
     def parse(self):
         for value in self.ast:
@@ -457,6 +458,21 @@ class Interpreter:
         elif value[0] == "show_error":
             self.print_func(value, "error")
 
+        elif value[0] == "if":
+            idx += 1
+            if not idx+1 < len(value):
+                return InvalidArgumentNumberError(self.filename,
+                                                  "Invalid number of args for create variable")
+            self._if_value = self._if(value[idx], value[idx+1])
+
+        elif value[0] == "then":
+            if self._if_value is None:
+                return UnexpectedTokenError((self.filename, 0, 0), "need 'IF' before 'THEN'")
+
+            new_values = value[1:]
+            for v in new_values:
+                self.check_todo(v)
+
         else:
             return None
 
@@ -493,6 +509,12 @@ class Interpreter:
     def _middle(self, type_, to_print):
         for item in to_print:
             print(f"{type_}: ", item)
+
+    def _if(self, part1, part2):
+        if part1 == part2:
+            return True
+        else:
+            return False
 
 
 file_name = "examples/variable.tap"

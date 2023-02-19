@@ -55,3 +55,14 @@ end
 middle hard:
 	"This is an error"
 end
+
+pinky soft:
+	2
+	2
+end
+
+pinky medium:
+	middle soft:
+		"2 is equals to 2"
+	end
+end
