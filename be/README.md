@@ -48,3 +48,11 @@ hello_world var1=? ?;
 # world
 # hello world
 ```
+
+## Nexts
+
+Keeping that language very minimalistic, I would like to add a feature to call
+subprocesses. A very neat feature would be to extract the expression `print`
+from the compiler, and move it into a standard library. But doing this imply
+to define some macro sublanguage and it seem more difficult to me in a short
+time.
