@@ -147,6 +147,12 @@ unsafe extern "C" fn yhim_mix(this: &mut SoundRecv, sample: Sample) {
 }
 
 #[no_mangle]
+extern "C" fn yhim_dbg(f: f64) -> f64 {
+    println!("{}", f);
+    f
+}
+
+#[no_mangle]
 extern "C" fn yhim_skip(this: &mut SoundRecv, by: f64) {
     this.pos += by as u64;
 }
@@ -166,6 +172,7 @@ pub fn add_symbols() {
         yhim_cos,
         yhim_exp,
         yhim_sqrt,
+        yhim_dbg,
         yhim_newarray,
         yhim_duparray,
         yhim_droparray,

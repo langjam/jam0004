@@ -5,7 +5,7 @@ oscillator sine(): sample {
 sound play(note: hz, duration: secs) {
     do t = 0s ; t < duration ; t + SAMPLE_PERIOD {
         let s = sine() at time_phase(t, note)
-        mix(s - 3dB)
+        mix(s - 6dB)
         next()
     }
 }
@@ -19,7 +19,7 @@ sound main() {
     for root in [C4, D4, E4] {
         let note = root
         for interval: semitones in maj {
-            set! note = root + interval
+            set! note = note + interval
             play(note, 1/4)
             skip(1 / 4 * SAMPLE_RATE)
         }

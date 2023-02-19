@@ -16,6 +16,7 @@ use crate::yihmstd::{add_symbols, SoundRecv, SAMPLE_RATE};
 use clap::{Parser, ValueEnum};
 use colored::Colorize;
 use hound::WavSpec;
+use inkwell::debug_info::{DWARFEmissionKind, DWARFSourceLanguage};
 use inkwell::execution_engine::JitFunction;
 use inkwell::OptimizationLevel;
 
@@ -240,12 +241,39 @@ fn main() {
             .unwrap_or_else(|| Cow::from("unknown")),
     );
     module.set_source_file_name(&main_file.to_string_lossy());
-    let ll_cc = LLVMCompiler::new(cc, &module);
+    let main_file_dbg = main_file.canonicalize().unwrap_or_else(|_| main_file.clone());
+    let mut ll_cc = LLVMCompiler::new(cc, &module);
+    let di = ll_cc.module.create_debug_info_builder(
+        true,
+        DWARFSourceLanguage::C,
+        main_file_dbg
+            .file_name()
+            .map(|it| it.to_string_lossy().to_string())
+            .unwrap_or_else(|| "unknown.mel".to_owned())
+            .as_str(),
+        main_file_dbg
+            .parent()
+            .map(|it| it.to_string_lossy().to_string())
+            .unwrap_or_else(|| "/".to_owned())
+            .as_str(),
+        "yhim",
+        true,
+        "",
+        0,
+        "",
+        DWARFEmissionKind::Full,
+        0,
+        false,
+        false,
+        "/",
+        "yhim",
+    );
+    ll_cc.dib = Some(di);
     ll_cc.compile().unwrap();
 
     match args.emit {
         Emit::Llvm => {
-            report_any_errors(main_file, || {
+            report_any_errors(&main_file, || {
                 let mut buf = main_file.clone();
                 if !buf.set_extension("ll") {
                     bail!("could not decide on output file, please specify manually");
@@ -262,7 +290,7 @@ fn main() {
             });
         }
         Emit::Sound => {
-            report_any_errors(main_file, || {
+            report_any_errors(&main_file, || {
                 let mut file = main_file.clone();
                 if !file.set_extension("wav") {
                     bail!("could not decide on output file, please specify manually");

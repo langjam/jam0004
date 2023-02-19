@@ -1,6 +1,6 @@
 use crate::compile::llvm::{SampleTy, SoundRecvTy};
 use crate::compile::Units::Dimensionless;
-use crate::parser::{Block, CallExpr, Expr, Item, NoteKind, Program, Span, Stmt, Token};
+use crate::parser::{Block, CallExpr, Expr, Item, NoteKind, Program, Span, SrcLoc, Stmt, Token};
 use crate::yihmstd::SAMPLE_RATE;
 use crate::SourcedError;
 use anyhow::anyhow;
@@ -139,6 +139,9 @@ enum Insn {
     Const {
         out: Register,
         value: DynamicValue,
+    },
+    DebugInfo {
+        loc: SrcLoc,
     },
 }
 
@@ -583,6 +586,9 @@ impl Compiler {
             if is_unreachable {
                 Err(stmt.span().err("statement is unreachable"))?
             }
+            ib.block().insns.push(Insn::DebugInfo {
+                loc: stmt.span().start,
+            });
             match stmt {
                 Stmt::Let { name, val, ty, .. } => {
                     let mut expr_reg = self.compile_expr(ib, val)?;
@@ -639,7 +645,11 @@ impl Compiler {
                     self.compile_call(ib, ce, None)?;
                 }
                 Stmt::For {
-                    name, iter, block, hint, ..
+                    name,
+                    iter,
+                    block,
+                    hint,
+                    ..
                 } => {
                     let iter_reg = self.compile_expr(ib, iter)?;
                     let component = match &ib.func[iter_reg.clone()] {
@@ -692,14 +702,16 @@ impl Compiler {
                         callee: Callee::Builtin(Builtin::ArrayRef),
                         args: vec![iter_reg, loop_var],
                     });
-                    if let Some(hinted) = hint.as_ref().map(|tok| self.parse_type(tok)).transpose()? {
-                        let mut coerced_reg = component_reg;
+                    let mut coerced_reg = component_reg;
+                    if let Some(hinted) =
+                        hint.as_ref().map(|tok| self.parse_type(tok)).transpose()?
+                    {
                         self.coerce(ib, "type hint was", &hinted, &mut coerced_reg, iter)?;
-                        ib.block().insns.push(Insn::Move {
-                            out: bound,
-                            from: coerced_reg
-                        });
                     }
+                    ib.block().insns.push(Insn::Move {
+                        out: bound,
+                        from: coerced_reg,
+                    });
                     self.compile_block(ib, block)?;
                     ib.block().insns.push(Insn::Call {
                         out: loop_var,
@@ -897,6 +909,8 @@ impl Compiler {
         builtins!(
             fn time_phase(f64:Seconds, f64:Hertz) -> f64,
 
+            fn dbg(f64) -> f64,
+
             fn sin(f64) -> f64,
             fn cos(f64) -> f64,
             fn exp(f64) -> f64,
@@ -1028,7 +1042,7 @@ impl Compiler {
                             rhs.0 = new_rhs;
                         }
                         let result_ty = match (l_ty, r_ty) {
-                            (Number(_), r @ Sample) => {
+                            (Number(_), r @ Type::Sample) => {
                                 s.coerce(
                                     ib,
                                     "right value has type",
@@ -1038,7 +1052,7 @@ impl Compiler {
                                 )?;
                                 r
                             }
-                            (l @ Sample, Number(_)) => {
+                            (l @ Type::Sample, Number(_)) => {
                                 s.coerce(
                                     ib,
                                     "left value has type",
@@ -1267,6 +1281,7 @@ pub mod llvm {
     use anyhow::anyhow;
 
     use inkwell::builder::Builder;
+    use inkwell::debug_info::{AsDIScope, DICompileUnit, DebugInfoBuilder};
     use inkwell::intrinsics::Intrinsic;
     use inkwell::types::{AnyType, VoidType};
     use inkwell::values::{FloatValue, IntValue};
@@ -1282,6 +1297,7 @@ pub mod llvm {
     pub struct LLVMCompiler<'a, 'm> {
         pub cc: super::Compiler,
         pub module: &'a Module<'m>,
+        pub dib: Option<(DebugInfoBuilder<'m>, DICompileUnit<'m>)>,
         c: Consts<'m>,
     }
 
@@ -1433,6 +1449,7 @@ pub mod llvm {
             Self {
                 cc,
                 module,
+                dib: None,
                 c: Consts::default(),
             }
         }
@@ -2038,6 +2055,17 @@ pub mod llvm {
                                         );
                                     }
                                 }
+                            }
+                            Insn::DebugInfo { loc } => {
+                                self.dib.as_ref().map(|(db, sc)| {
+                                    ib.set_current_debug_location(db.create_debug_location(
+                                        self.ctx(),
+                                        loc.line,
+                                        loc.column,
+                                        sc.as_debug_info_scope(),
+                                        None,
+                                    ));
+                                });
                             }
                         }
                     }
