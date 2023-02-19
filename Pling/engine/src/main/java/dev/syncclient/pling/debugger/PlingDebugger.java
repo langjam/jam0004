@@ -95,6 +95,7 @@ public class PlingDebugger extends Thread {
                                         shell.println("  tokens  Display the tokens");
                                         shell.println("  ast     Display the abstract syntax tree");
                                         shell.println("  msg     Display compiler messages");
+                                        shell.println("  use     include module");
                                     }
                                     case "info" -> {
                                         shell.println("Interpreter information:");
@@ -132,6 +133,14 @@ public class PlingDebugger extends Thread {
                                         }
 
                                         ipc.messages.clear();
+                                    }
+
+                                    case "use" -> {
+                                        String mod = line.split(" ")[1];
+
+                                        StateTree.getInstance().include(mod);
+
+                                        shell.println("included module");
                                     }
                                 }
 
