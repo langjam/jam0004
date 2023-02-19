@@ -1,6 +1,6 @@
 Call Center Lang
 ================
-A functional language that mimics calling a call center service from an old brick phone.
+A strongly-typed functional language that mimics calling a call center service from an old brick phone.
 
 Build
 -----
