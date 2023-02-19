@@ -446,7 +446,7 @@ class Interpreter:
                 return input()
 
         elif value[0] == "mathematical_operation":
-            print("Not yet implemented")
+            print("Mathemtical operations not yet implemented")
             return None
 
         elif value[0] == "show_info":
@@ -457,6 +457,14 @@ class Interpreter:
 
         elif value[0] == "show_error":
             self.print_func(value, "error")
+
+        elif value[0] == "loop":
+            print("Loop is not yet implemented")
+            return None
+
+        elif value[0] == "break":
+            print("Break is not yet implemented")
+            return None
 
         elif value[0] == "if":
             idx += 1
@@ -483,7 +491,7 @@ class Interpreter:
 
         elif value[0] == "else":
             if self._if_value is None:
-                return UnexpectedTokenError((self.filename, 0, 0), "need 'IF' before 'THEN'")
+                return UnexpectedTokenError((self.filename, 0, 0), "need 'IF' before 'ELSE'")
             elif self._if_value is False:
                 new_values = value[1:]
                 for v in new_values:
