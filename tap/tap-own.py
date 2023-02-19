@@ -1,6 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
 from typing import Optional
+import numpy
 
 
 # Show the line on which the error happens and then point with arrows
@@ -407,14 +408,14 @@ class Interpreter:
             idx += 1
             if not idx < len(value):
                 return InvalidArgumentNumberError(self.filename,
-                                                  "Invalid number of args for create variable")
+                                                  "Invalid number of args for thumb hard")
             return self.create_variable(value[idx])
 
         elif value[0] == "set_variable":
             idx += 1
             if not idx+1 < len(value):
                 return InvalidArgumentNumberError(self.filename,
-                                                  "Invalid number of args for set variable")
+                                                  "Invalid number of args for thumb soft")
             new_values = value[2:]
             # to_merge = []
             set_value = None
@@ -433,7 +434,7 @@ class Interpreter:
             idx += 1
             if not idx < len(value):
                 return InvalidArgumentNumberError(self.filename,
-                                                  "Invalid number of args for create variable")
+                                                  "Invalid number of args for thumb medium")
             # print(self.get_variable(value[idx]))
             return self.get_variable(value[idx])
 
@@ -446,8 +447,32 @@ class Interpreter:
                 return input()
 
         elif value[0] == "mathematical_operation":
-            print("Mathemtical operations not yet implemented")
-            return None
+            if len(value) < 3:
+                return InvalidArgumentNumberError(self.filename,
+                                                  "Invalid number of args for index hard")
+            operator = value[1]
+            new_values = value[2:]
+            print(new_values)
+            nums = []
+            for v in new_values:
+                if isinstance(v, list):
+                    nums.append(v)
+                else:
+                    nums.append(v)
+
+            match operator:
+                case "add":
+                    return sum(nums)
+                case "mul":
+                    return numpy.prod(nums)
+                case "div":
+                    answer = nums[0]
+                    rest = nums[1:]
+                    for i in rest:
+                        answer = answer/i
+                    return answer
+                case "other":
+                    return InvalidOperatorNameError(self.filename, f"'{operator}'")
 
         elif value[0] == "show_info":
             self.print_func(value, "info")

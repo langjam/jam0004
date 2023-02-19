@@ -41,6 +41,8 @@ end
 
 index hard:
 	"add"
+	2
+	2
 end
 
 
