@@ -48,6 +48,8 @@ fn main() -> Result<()> {
         }
     }
 
+    data.run();
+
     if let Some(query) = args.query {
         cli_query(query, data)
     } else {
@@ -62,9 +64,7 @@ fn cli_query(query: String, mut data: DataSet) -> Result<()> {
             Report::from(Error::from(errors)).with_source_code(NamedSource::new("--query", query))
         })?;
 
-    for result in data.run_query(&query)? {
-        println!("{:?}", result);
-    }
+    data.run_query(&query)?;
     Ok(())
 }
 
@@ -120,13 +120,7 @@ fn repl_step(input: &str, data: &mut DataSet) -> Result<(), Error> {
 
     match syntax {
         Repl::Program(p) => data.add_program(&p),
-        Repl::Query(q) => {
-            for result in data.run_query(&q)? {
-                println!("{:?}", result);
-            }
-
-            Ok(())
-        }
+        Repl::Query(q) => data.run_query(&q),
     }
 }
 

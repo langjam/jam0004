@@ -20,7 +20,7 @@ pub enum Repl {
 
 // Things like `parent(padme, luke).`
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct Fact(pub Relation, pub Vec<Constant>);
+pub struct Fact(pub Relation, pub Vec<Const>);
 
 // ancestor(X, Y) :- parent(X, Z), ancestor(Z, Y).
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -36,18 +36,18 @@ pub struct Query(pub Vec<Atom>);
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Term {
-    Const(Constant),
-    Var(Variable),
+    Const(Const),
+    Var(Var),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Relation(pub String);
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Constant(pub String);
+pub struct Const(pub String);
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Variable(pub String);
+pub struct Var(pub String);
 
 pub fn repl() -> impl Parser<char, Repl, Error = Simple<char>> {
     program()
@@ -78,14 +78,14 @@ fn name() -> impl Parser<char, String, Error = Simple<char>> {
 fn term() -> impl Parser<char, Term, Error = Simple<char>> {
     name().map(|n| {
         if is_constant_name(&n) {
-            Term::Const(Constant(n))
+            Term::Const(Const(n))
         } else {
-            Term::Var(Variable(n))
+            Term::Var(Var(n))
         }
     })
 }
 
-fn constant() -> impl Parser<char, Constant, Error = Simple<char>> {
+fn constant() -> impl Parser<char, Const, Error = Simple<char>> {
     name().validate(|n, span, emit| {
         if !is_constant_name(&n) {
             emit(Simple::custom(
@@ -93,7 +93,7 @@ fn constant() -> impl Parser<char, Constant, Error = Simple<char>> {
                 format!("expected a constant but found variable `{n}`"),
             ))
         }
-        Constant(n)
+        Const(n)
     })
 }
 
@@ -191,8 +191,8 @@ impl fmt::Display for Atom {
 impl fmt::Display for Term {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Term::Const(Constant(s)) => write!(f, "{s}"),
-            Term::Var(Variable(s)) => write!(f, "{s}"),
+            Term::Const(Const(s)) => write!(f, "{s}"),
+            Term::Var(Var(s)) => write!(f, "{s}"),
         }
     }
 }
@@ -224,11 +224,7 @@ mod parser_tests {
             syntax,
             Fact(
                 Relation("fact".into()),
-                vec![
-                    Constant("a".into()),
-                    Constant("b".into()),
-                    Constant("c".into()),
-                ]
+                vec![Const("a".into()), Const("b".into()), Const("c".into()),]
             )
         )
     }
@@ -243,25 +239,16 @@ mod parser_tests {
             Rule(
                 Atom(
                     Relation("ancestor".into()),
-                    vec![
-                        Term::Var(Variable("X".into())),
-                        Term::Var(Variable("Y".into()))
-                    ]
+                    vec![Term::Var(Var("X".into())), Term::Var(Var("Y".into()))]
                 ),
                 vec![
                     Atom(
                         Relation("parent".into()),
-                        vec![
-                            Term::Var(Variable("X".into())),
-                            Term::Var(Variable("Z".into()))
-                        ]
+                        vec![Term::Var(Var("X".into())), Term::Var(Var("Z".into()))]
                     ),
                     Atom(
                         Relation("ancestor".into()),
-                        vec![
-                            Term::Var(Variable("Z".into())),
-                            Term::Var(Variable("Y".into()))
-                        ]
+                        vec![Term::Var(Var("Z".into())), Term::Var(Var("Y".into()))]
                     ),
                 ]
             ),
@@ -278,25 +265,16 @@ mod parser_tests {
             Rule(
                 Atom(
                     Relation("ancestor".into()),
-                    vec![
-                        Term::Var(Variable("X".into())),
-                        Term::Var(Variable("Y".into()))
-                    ]
+                    vec![Term::Var(Var("X".into())), Term::Var(Var("Y".into()))]
                 ),
                 vec![
                     Atom(
                         Relation("parent".into()),
-                        vec![
-                            Term::Var(Variable("X".into())),
-                            Term::Var(Variable("Z".into()))
-                        ]
+                        vec![Term::Var(Var("X".into())), Term::Var(Var("Z".into()))]
                     ),
                     Atom(
                         Relation("ancestor".into()),
-                        vec![
-                            Term::Var(Variable("Z".into())),
-                            Term::Var(Variable("Y".into()))
-                        ]
+                        vec![Term::Var(Var("Z".into())), Term::Var(Var("Y".into()))]
                     ),
                 ]
             ),
