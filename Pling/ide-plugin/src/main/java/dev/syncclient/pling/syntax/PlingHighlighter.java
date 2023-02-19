@@ -19,6 +19,7 @@ public class PlingHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey[] CALL = { DefaultLanguageHighlighterColors.CONSTANT };
     public static final TextAttributesKey[] BRACKETS = { DefaultLanguageHighlighterColors.BRACKETS };
     public static final TextAttributesKey[] MODULES = { DefaultLanguageHighlighterColors.GLOBAL_VARIABLE };
+    public static final TextAttributesKey[] NUMBER = { DefaultLanguageHighlighterColors.NUMBER };
 
     @NotNull
     @Override
@@ -53,6 +54,8 @@ public class PlingHighlighter extends SyntaxHighlighterBase {
                     return BRACKETS;
                 case MODULES:
                     return MODULES;
+                case NUMBER:
+                    return NUMBER;
             }
         }
 

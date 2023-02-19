@@ -21,10 +21,11 @@ public class PlingLexer extends LexerBase {
     public static final Pattern SPACE = Pattern.compile("\\s+");
     public static final Pattern COMMENTS = Pattern.compile("//.*");
     public static final Pattern FUNCTION = Pattern.compile("fun\\b|if\\b|eif\\b|else\\b|while\\b");
-    public static final Pattern CALL = Pattern.compile("#[^\\s]+");
+    public static final Pattern CALL = Pattern.compile("#[^\\s.]+");
     public static final Pattern BRACKETS = Pattern.compile("[\\[\\]]");
     public static final Pattern PUNCTUATION = Pattern.compile("[,;]");
     public static final Pattern MODULES = Pattern.compile("audio\\b");
+    public static final Pattern NUMBER = Pattern.compile("[\\d.]+");
 
     private boolean tryMatch(Pattern pattern) {
         Matcher matcher = pattern.matcher(buffer).region(firstTokenEnd, bufferEnd);
@@ -45,6 +46,8 @@ public class PlingLexer extends LexerBase {
     public void advance() {
         if (firstTokenEnd == bufferEnd)
             firstToken = null;
+        else if (tryMatch(NUMBER))
+            firstToken = PlingTokenType.NUMBER;
         else if (tryMatch(VAR))
             firstToken = PlingTokenType.VAR;
         else if (tryMatch(FUNCTION))

@@ -17,7 +17,8 @@ public class PlingTokenType extends IElementType {
         CALL,
         BRACKETS,
         PUNCTUATION,
-        MODULES
+        MODULES,
+        NUMBER
     }
 
     public static final PlingTokenType VAR = new PlingTokenType(Type.VAR);
@@ -32,6 +33,7 @@ public class PlingTokenType extends IElementType {
     public static final PlingTokenType BRACKETS = new PlingTokenType(Type.BRACKETS);
     public static final PlingTokenType PUNCTUATION = new PlingTokenType(Type.PUNCTUATION);
     public static final PlingTokenType MODULES = new PlingTokenType(Type.MODULES);
+    public static final PlingTokenType NUMBER = new PlingTokenType(Type.NUMBER);
 
     public static final TokenSet WHITE_SPACE_TYPES = TokenSet.create(SPACE);
     public static final TokenSet COMMENT_TYPES = TokenSet.create(COMMENTS);

@@ -106,7 +106,7 @@ public class BasicBuiltins implements Builtin {
         }));
 
 
-        root.children().add(new FunctionStateNode("sleep", "Sleeps for a specified amount of time", "#sleep [time]", (args) -> {
+        root.children().add(new FunctionStateNode("sleep", "Sleeps for a specified amount of time (in ms)", "#sleep [time]", (args) -> {
             if (args.size() != 1)
                 throw new IllegalArgumentException("sleep takes exactly 1 argument");
 

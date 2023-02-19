@@ -1,5 +1,7 @@
 package dev.syncclient.pling.audio;
 
+import dev.syncclient.pling.audio.source.MicrophoneSource;
+import dev.syncclient.pling.audio.source.SilenceSource;
 import dev.syncclient.pling.executor.Builtin;
 import dev.syncclient.pling.executor.FunctionStateNode;
 import dev.syncclient.pling.executor.StateNode;
@@ -18,6 +20,8 @@ import java.util.List;
 
 public class AudioController implements Builtin {
     private final HashMap<Double, Sound> sounds = new HashMap<>();
+    private final HashMap<Double, MicrophoneSource> microphones = new HashMap<>();
+    private final HashMap<Double, SilenceSource> silences = new HashMap<>();
     private double nextHandle = 0;
     private long device;
     private long context;
@@ -53,10 +57,10 @@ public class AudioController implements Builtin {
         ));
 
         root.children().add(new FunctionStateNode(
-                "audio.sine",
-                "Generate a sine wave",
-                "#audio.sine [handle] [frequency] [volume]",
-                this::sineWave
+                "audio.start",
+                "Plays the sound",
+                "#audio.start [handle]",
+                this::start
         ));
 
         root.children().add(new FunctionStateNode(
@@ -64,6 +68,34 @@ public class AudioController implements Builtin {
                 "Stops the sound",
                 "#audio.stop [handle]",
                 this::stop
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.microphone.new",
+                "Creates a new microphone handle (number)",
+                "#audio.microphone.new -> [handle]",
+                this::newMicrophone
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.silence.new",
+                "Creates a new silence handle (number)",
+                "#audio.silence.new -> [handle]",
+                this::newSilence
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.bindsource",
+                "Binds a source to a sound for playback",
+                "#audio.bindsource [handle] [source]",
+                this::bindSource
+        ));
+
+        root.children().add(new FunctionStateNode(
+                "audio.xyz",
+                "Sets the position of the sound",
+                "#audio.xyz [handle] [x] [y] [z]",
+                this::setLocation
         ));
     }
 
@@ -111,23 +143,6 @@ public class AudioController implements Builtin {
         return sounds.get(handle).toString();
     }
 
-    private Object sineWave(List<Object> objects) {
-        if (device == NULL || context == NULL) {
-            throw new IllegalStateException("Audio system not initialized");
-        }
-
-        Double handle = (Double) objects.get(0);
-        float freq = ((Double) objects.get(1)).floatValue();
-        float volume = ((Double) objects.get(2)).floatValue();
-
-        if (!sounds.containsKey(handle)) {
-            throw new IllegalStateException("Invalid handle");
-        }
-
-        sounds.get(handle).sineWave(freq, volume);
-        return null;
-    }
-
     private Object stop(List<Object> objects) {
         if (device == NULL || context == NULL) {
             throw new IllegalStateException("Audio system not initialized");
@@ -139,7 +154,87 @@ public class AudioController implements Builtin {
             throw new IllegalStateException("Invalid handle");
         }
 
-        sounds.get(handle).stop();
+        sounds.get(handle).close();
+        return null;
+    }
+
+    private Object start(List<Object> objects) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = (Double) objects.get(0);
+
+        if (!sounds.containsKey(handle)) {
+            throw new IllegalStateException("Invalid handle");
+        }
+
+        sounds.get(handle).start();
+        return null;
+    }
+
+    private Object newMicrophone(List<Object> objects) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = nextHandle++;
+        microphones.put(handle, new MicrophoneSource());
+
+        return handle;
+    }
+
+    private Object newSilence(List<Object> objects) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = nextHandle++;
+        silences.put(handle, new SilenceSource());
+
+        return handle;
+    }
+
+    private Object bindSource(List<Object> objects) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = (Double) objects.get(0);
+        Double sourceHandle = (Double) objects.get(1);
+
+        if (!sounds.containsKey(handle)) {
+            throw new IllegalStateException("Invalid handle");
+        }
+
+        if (!microphones.containsKey(sourceHandle) && !silences.containsKey(sourceHandle)) {
+            throw new IllegalStateException("Invalid source handle");
+        }
+
+        if (microphones.containsKey(sourceHandle)) {
+            sounds.get(handle).getDescriptor().source(microphones.get(sourceHandle));
+        } else {
+            sounds.get(handle).getDescriptor().source(silences.get(sourceHandle));
+        }
+
+        return null;
+    }
+
+    private Object setLocation(List<Object> objects) {
+        if (device == NULL || context == NULL) {
+            throw new IllegalStateException("Audio system not initialized");
+        }
+
+        Double handle = (Double) objects.get(0);
+        Double x = (Double) objects.get(1);
+        Double y = (Double) objects.get(2);
+        Double z = (Double) objects.get(3);
+
+        if (!sounds.containsKey(handle)) {
+            throw new IllegalStateException("Invalid handle");
+        }
+
+        sounds.get(handle).getDescriptor().xyz(x.floatValue(), y.floatValue(), z.floatValue());
         return null;
     }
 
