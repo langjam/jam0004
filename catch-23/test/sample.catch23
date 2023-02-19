@@ -1,14 +1,1 @@
-*\
-this is
-a multiline
-comment
-\*
-
-\\ this is a single line comment
-
-~> my_never
-::
-{
-  |> my_never
-  \\ code here
-}
+$hw[100, 150, 154, 154, 157, 40, 127, 157, 162, 154, 144] print($hw)

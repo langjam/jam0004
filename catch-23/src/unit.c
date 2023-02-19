@@ -20,7 +20,7 @@ void unit_destroy(Unit* unit)
 
 bool unit_load_from_file(const char *path, Unit* destination, DestroyList dl)
 {
-    FILE *f = fopen(path, "r");
+    FILE *f = fopen(path, "rb");
     if (f == NULL) 
         return false;
     fseek(f, 0, SEEK_END);
