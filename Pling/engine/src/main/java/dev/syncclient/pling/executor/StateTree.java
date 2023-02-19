@@ -5,7 +5,6 @@ import dev.syncclient.pling.executor.builtins.BasicBuiltins;
 import dev.syncclient.pling.executor.builtins.HttpBuiltins;
 import dev.syncclient.pling.executor.builtins.MathBuiltins;
 import dev.syncclient.pling.executor.builtins.FsBuiltins;
-import dev.syncclient.pling.executor.builtins.MathBuiltin;
 import dev.syncclient.pling.executor.builtins.NoteBuiltins;
 import dev.syncclient.pling.parser.AbstractSyntaxTree;
 
