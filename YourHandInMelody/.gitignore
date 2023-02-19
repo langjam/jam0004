@@ -1,0 +1,7 @@
+/target
+/.idea
+*.ll
+*.bc
+*.wav
+*.opus
+*.flac
