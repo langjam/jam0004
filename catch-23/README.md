@@ -16,7 +16,7 @@ To declare a variable, type the variable name then the type following a colon. A
 @in : #
 @sr : #[]
 ```
-Respectively: int, double, string and boolean variables.
+Respectively: int/float and string.
 
 To assign it a value, you need to reference it first by using the `$` and then you can type the value using octal numbers inside brackets. Boolean variables use ! for false instead.
 ```
