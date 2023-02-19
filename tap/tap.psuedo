@@ -1,13 +1,17 @@
 // Variables are availabel everywhere in the function and sub functions
 // | default:None means that the default value is None and that that value is not mandetory to give
 
+class Keyword:
+	keywords = ["thumb", "index", "soft","medium"]
+
 Enum TokenType:
 	INT
 	FLOAT
 	STR
 	ADD
-	THUMB
-	SOFT
+	KEYWORD
+	TAB
+	COLON
 
 struct Token:
 	type: TokenType
@@ -26,11 +30,12 @@ func tokenizer(program):
 		elif program[cursor] == "+":
 			tokens.append(Token(TokenType.ADD))
 			// Repeat for minus, multiply, divide, lparen and rparen
-		elif curr_str == "thumb"
-			tokens.append(Token(TokenType.THUMB))
-			// Repeat for other fingers
-		elif curr_str == "soft":
-			// Repeat for other 
+		elif program[cursor] == "\t":
+			tokens.append(Token(TokenType.TAB))
+		elif program[cursor] == ":":
+			tokens.append(Token(TokenType.COLON))
+		elif curr_str in keywords:
+			tokens.append(Token(TokenType.KEYWORD, curr_str))
 
 	return tokens
 
@@ -60,3 +65,13 @@ func tokenizer(program):
 			return Token(TokenType.FLOAT, float(number_str))
 
 		return Token(TokenType.INT, int(number_str))
+
+
+
+// I can accept that it does not automatically do the correct order of operations, and that it will only get implemented if the time allows it.
+func parser(tokens):
+	ast = []
+
+	while 
+
+	retrun ast
