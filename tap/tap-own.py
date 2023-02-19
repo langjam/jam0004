@@ -116,6 +116,7 @@ class Lexer:
                 self.advance()
             elif self.current_char.isalpha():
                 ret_value = self.identify()
+                print(tokens)
                 if isinstance(ret_value, Error):
                     return ret_value.show()
                 tokens.append(ret_value)
@@ -182,11 +183,10 @@ class Lexer:
                 # self.previous()
                 return Token(TokenType.KEYWORD, curr_str)
             elif self.current_char in " \t\n":
-                print(self.current_char)
                 return UnkownKeywordError((self.filename,
                                            self.line_number,
                                            self.column),
-                                          f"'{curr_str}'")
+                                          f" '{curr_str}'")
             else:
                 curr_str += self.current_char
                 self.advance()
@@ -215,9 +215,42 @@ class Lexer:
                            "unterminated string literal")
 
 
-with open("examples/test.tap", 'r') as f:
+# class Parser:
+#     def __init__(self, filename: str, tokens):
+#         self.filename: str = filename
+#         self.tokens = tokens
+#         self.token_index: int = -1
+#         self.current_token = None
+
+#         self.advance()
+
+#     def advance(self):
+#         self.token_index += 1
+#         if self.token_index < len(self.tokens):
+#             self.current_token = self.tokens[self.token_index]
+#         else:
+#             self.current_token = None
+#         return self.current_token
+
+#     def parse(self):
+#         ast = []
+
+#         while self.current_token is not None:
+#             print(self.current_token.Type)
+#             if self.current_token.Type == KEYWORD:
+                
+#             elif self.current_token.Type == "":
+#                 pass
+#             self.advance()
+#         return ast
+
+
+with open("examples/user_input.tap", 'r') as f:
     simple_program = f.read()
 
 print(simple_program)
 lexer = Lexer("none", simple_program)
-print(lexer.tokenize())
+tokens = lexer.tokenize()
+print(tokens)
+# parser = Parser("hello_world.tap", tokens)
+# print(parser.parse())
