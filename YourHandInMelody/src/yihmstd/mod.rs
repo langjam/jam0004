@@ -153,6 +153,25 @@ extern "C" fn yhim_dbg(f: f64) -> f64 {
 }
 
 #[no_mangle]
+extern "C" fn yhim_min(x: f64, y: f64) -> f64 {
+    x.min(y)
+}
+
+#[no_mangle]
+extern "C" fn yhim_max(x: f64, y: f64) -> f64 {
+    x.max(y)
+}
+
+#[no_mangle]
+extern "C" fn yhim_choose(p: bool, x: f64, y: f64) -> f64 {
+    if p {
+        x
+    } else {
+        y
+    }
+}
+
+#[no_mangle]
 extern "C" fn yhim_skip(this: &mut SoundRecv, by: f64) {
     this.pos += by as u64;
 }
@@ -176,6 +195,9 @@ pub fn add_symbols() {
         yhim_newarray,
         yhim_duparray,
         yhim_droparray,
+        yhim_min,
+        yhim_max,
+        yhim_choose,
         yhim_pan,
         yhim_mix,
         yhim_skip,

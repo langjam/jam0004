@@ -429,6 +429,10 @@ impl LocalTypable for f64 {
     const TYPE: Type = Type::Number(Dimensionless);
 }
 
+impl LocalTypable for bool {
+    const TYPE: Type = Type::Boolean;
+}
+
 impl LocalTypable for SampleTy {
     const TYPE: Type = Type::Sample;
 }
@@ -918,6 +922,10 @@ impl Compiler {
             fn ln(f64) -> f64,
             fn log(f64, f64) -> f64,
             fn pow(f64, f64) -> f64,
+
+            fn min(f64, f64) -> f64,
+            fn max(f64, f64) -> f64,
+            fn choose(bool, f64, f64) -> f64,
 
             fn pan(SampleTy, f64) -> SampleTy,
 
