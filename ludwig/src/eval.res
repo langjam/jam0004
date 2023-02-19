@@ -132,10 +132,10 @@ and unify : (value, value) => bool = (value1, value2) => switch (value1, value2)
     note1 == note2
   }
   | (Thunk(thunkEnv, thunkExpr), value) => {
-    unify(Thunk(thunkEnv, thunkExpr), value)
+    unify(eval(thunkEnv, thunkExpr), value)
   }
   | (value, Thunk(thunkEnv, thunkExpr)) => {
-    unify(value, Thunk(thunkEnv, thunkExpr))
+    unify(value, eval(thunkEnv, thunkExpr))
   }
   | (VFail, _) | (_, VFail) => false
   | _ => false
