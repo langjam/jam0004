@@ -65,7 +65,7 @@ class TokenType(Enum):
 @dataclass
 class Token:
     Type: TokenType
-    Position: (str, int, int)
+    Position: tuple[str, int, int]
     Value: Optional[str] = None
 
 
@@ -78,19 +78,24 @@ class Lexer:
         self.line_number: int = 1
         self.cursor: int = -1
         self.current_char: Optional[str] = None
+        self.new_line = False
 
         self.advance()
 
     def advance(self):
         self.cursor += 1
         self.column += 1
+        if self.new_line:
+            self.prev_column = self.column
+            self.column = 0
+            self.line_number += 1
+            self.new_line = False
+            self.advance()
+
         if self.cursor < len(self.code):
             self.current_char = self.code[self.cursor]
             if self.current_char == "\n":
-                self.prev_column = self.column
-                self.column = 0
-                self.line_number += 1
-                self.advance()
+                self.new_line = True
         else:
             self.current_char = None
 
@@ -140,7 +145,7 @@ class Lexer:
             # elif "n" in self.current_char:
             #     tokens.append(Token(TokenType.EOF))
             #     self.advance()
-            elif self.current_char in " \t":
+            elif self.current_char in " \t\n":
                 # tokens.append(Token(TokenType.INDENT))
                 self.advance()
             else:
@@ -154,6 +159,7 @@ class Lexer:
         dot_found = False
 
         while self.current_char is not None:
+            print(repr(self.current_char))
             if self.current_char == ".":
                 match dot_found:
                     case True:
@@ -286,6 +292,11 @@ class Parser:
 
         return cur_ast
 
+
+char = "\n"
+print(repr(char))
+if char in " \t\n":
+    print("Hello World Bitches")
 
 with open("examples/hello_world.tap", 'r') as f:
     simple_program = f.read()
