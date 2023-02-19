@@ -16,7 +16,7 @@
 
 [
 	["create_variable", "user value"],
-	["set_variable", "user value", ["get_user_value"]],
+	["set_variable_value", "user value", ["get_user_value"]],
 	["print_value", ["get_variable_value", "user_value"],
 	["print_value", ["mathematical_formula", ["add", 8, ["multiply", 9, 7]]]]
 ]

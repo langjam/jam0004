@@ -313,11 +313,18 @@ class Parser:
                                 break
                             if self.current_token.Type == TokenType.STRING:
                                 cur_ast.append(self.current_token.Value)
+                            elif self.current_token.Type == TokenType.INT or \
+                                 self.current_token.Type == TokenType.FLOAT:
+                                cur_ast.append(self.current_token.Value)
+                            elif self.current_token.Type == TokenType.KEYWORD:
+                                cur_ast.append(self.uncover())
                             self.advance()
-                        if not end_found:
+                        if not end_found and self.current_token is not None:
                             return SyntaxError(self.current_token.Position,
                                                "missing 'END' token")
-                        self.advance()
+                        else:
+                            # self.advance()
+                            break
                 else:
                     print("Error about to happen", self.current_token)
                     # This goes wrong with colons as colons have a value of None
@@ -328,24 +335,24 @@ class Parser:
                 keyword_value_pair = f"{previous_token.Value} {self.current_token.Value}"
                 match keyword_value_pair:
                     case "thumb soft":
-                        pass
+                        print("set variable value")
+                        cur_ast.append("set_variable_value")
                     case "thumb medium":
-                        pass
+                        cur_ast.append("get_variable_value")
                     case "thumb hard":
-                        pass
+                        cur_ast.append("create_variable")
                     case "index soft":
                         cur_ast.append("print_value")
-                        expected_token_type = TokenType.COLON
                     case "index medium":
-                        pass
+                        cur_ast.append("get_user_value")
                     case "index hard":
                         pass
                     case "middle soft":
-                        pass
+                        cur_ast.append("show_info")
                     case "middle medium":
-                        pass
+                        cur_ast.append("show_warning")
                     case "middle hard":
-                        pass
+                        cur_ast.append("show_error")
                     case "ring soft":
                         pass
                     case "ring medium":
@@ -361,6 +368,8 @@ class Parser:
                     case other:
                         return IllegalKeywordValuePairError(self.current_token.Position,
                                                             f"'{keyword_value_pair}'")
+
+                expected_token_type = TokenType.COLON
                 self.advance()
             else:
                 print(f"ELSE: {self.current_token}")
@@ -369,7 +378,7 @@ class Parser:
         return cur_ast
 
 
-with open("examples/hello_world.tap", 'r') as f:
+with open("examples/tree_test.tap", 'r') as f:
     simple_program = f.read()
     print(simple_program.split("\t"))
 

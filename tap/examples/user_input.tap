@@ -4,7 +4,7 @@ end
 
 thumb soft:
 	"number"
-	index medium end
+	index medium: end
 end
 
 index soft:
