@@ -86,7 +86,7 @@ Operators are infix and there is no precedence, meaning the operators are evalua
 ## Control Flow
 
 catch-23, due to being contradiction-oriented, comes with statements that more or less don't do anything without a Goto, which is written as `~>`.
-Break, which is written as `<~`, can be used to break out of Dont, Never, Against. 
+Break, which is written as `<~`, can be used to break out of Dont, Never. 
 
 catch-23 is contradiction-oriented because it Donts and Never are basically if (false) and while (false) and no control flow can be exucted without being in either one or themselves, which also reflects the name of it being a catch-22. 
 
