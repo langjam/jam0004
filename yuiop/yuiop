@@ -1,15 +1,15 @@
 #!/bin/sh
 # Copyright (C) 2023 Matthew "strager" Glazar
-# yoink is a programming language for right-handed developers.
+# yuiop is a programming language for right-handed developers.
 #
-# This file is part of yoink.
+# This file is part of yuiop.
 #
-# yoink is free software: you can redistribute it and/or modify it under the
+# yuiop is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later
 # version.
 #
-# yoink is distributed in the hope that it will be useful, but WITHOUT ANY
+# yuiop is distributed in the hope that it will be useful, but WITHOUT ANY
 # WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 # A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
