@@ -9,7 +9,8 @@
             <h1></h1>
             <ul>
                 <li><a href="#/">Home</a></li>
-                <li><a href="#/docs">Documentation</a></li>
+                <li><a href="#/intro">Introduction</a></li>
+                <li><a href="#/reference">Reference</a></li>
                 <li><a href="https://github.com/langjam/jam0004/tree/main/Pling">Github</a></li>
                 <li><a href="https://discord.gg/sink">Discord</a></li>
             </ul>

@@ -5,7 +5,7 @@
     </ul>
     <ul>
         <li><a href="#/">Home</a></li>
-        <li><a href="#/wild">wild</a></li>
+        <li><a href="#/intro">Introduction</a></li>
     </ul>
 </nav>
 

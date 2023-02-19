@@ -17,6 +17,7 @@
   --primary: #a6d189;
   --secondary: #85c1dc;
   --text: #c6d0f5;
+  --code: #aae58c;
 }
 
 html, body {
@@ -66,4 +67,23 @@ pre {
   background: var(--surface);
   padding: 1em;
   border-radius: 0.2em;
+  color: var(--code);
+
+}
+
+.other {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  background: var(--background2);
+  text-align: justify;
+  text-justify: inter-word;
+  padding: 3em;
+}
+
+.other > * {
+  max-width: 800px;
+  margin: 0 auto;
 }

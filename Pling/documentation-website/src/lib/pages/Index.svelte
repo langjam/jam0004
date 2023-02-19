@@ -116,20 +116,4 @@
       font-size: 2.5rem;
     }
   }
-
-  .other {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    background: var(--background2);
-
-    padding: 3em;
-  }
-
-  .other > * {
-    max-width: 800px;
-    margin: 0 auto;
-  }
 </style>
