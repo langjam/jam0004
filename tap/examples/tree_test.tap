@@ -17,6 +17,7 @@ middle soft:
 	"This is some info"
 	thumb medium:
 		"user value"
+	end
 end
 
 middle medium:

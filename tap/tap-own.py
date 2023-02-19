@@ -346,7 +346,7 @@ class Parser:
                     case "index medium":
                         cur_ast.append("get_user_value")
                     case "index hard":
-                        pass
+                        cur_ast.append("mathematical_operation")
                     case "middle soft":
                         cur_ast.append("show_info")
                     case "middle medium":
@@ -354,17 +354,17 @@ class Parser:
                     case "middle hard":
                         cur_ast.append("show_error")
                     case "ring soft":
-                        pass
+                        cur_ast.append("loop")
                     case "ring medium":
-                        pass
+                        cur_ast.append("break")
                     case "ring hard":
-                        pass
+                        print("OH THAT IS NOT ALLOWED. NU MAG JE NIET OP MIJN FEESTJE KOMEN!!")
                     case "pinky soft":
-                        pass
+                        cur_ast.append("if")
                     case "pinky medium":
-                        pass
+                        cur_ast.append("then")
                     case "pinky hard":
-                        pass
+                        cur_ast.append("else")
                     case other:
                         return IllegalKeywordValuePairError(self.current_token.Position,
                                                             f"'{keyword_value_pair}'")
@@ -378,7 +378,7 @@ class Parser:
         return cur_ast
 
 
-with open("examples/tree_test.tap", 'r') as f:
+with open("examples/complete_test.tap", 'r') as f:
     simple_program = f.read()
     print(simple_program.split("\t"))
 

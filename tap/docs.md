@@ -32,7 +32,20 @@ middle medium is equal to warning
 middle hard is equal to error
 
 ## Ring
-Ring is used for functions like mariage
+Ring is used for loops because a ring is a loop
+if:
+  this is ture
+then:
+  execute this
+else:
+  execute this
+
+ring soft:
+  this is true
+ring medium:
+  execute this
+ring hard:
+  execute this
 
 ## Pinky
 Pinky is used for if statements like pinky promise

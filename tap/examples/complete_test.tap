@@ -1,0 +1,51 @@
+// Create variable "my variable"
+thumb hard:
+	"my variable"
+end
+
+// Set "my variable" to 0
+thumb soft:
+	"my variable"
+	0
+end
+
+// Enter loop
+ring soft:
+	// If "my variable" equals 2
+	pinky soft:
+		thumb medium:
+			"my variable"
+		end
+		2
+	end
+	// Then show info "Exiting loop" and exit loop
+	pinky medium:
+		middle soft:
+			"Exiting loop"
+		end
+		ring medium: end
+	end
+	// Else show info value of "my variable" and add one to the value of "my variable"
+	pinky hard:
+		middle soft:
+			thumb medium:
+				"my variable"
+			end
+		end
+		thumb soft:
+			"my variable"
+			index hard:
+				"add"
+				thumb medium:
+					"my variable"
+				end
+				1
+			end
+		end
+	end
+end
+
+// Print "Loop is finished"
+index soft:
+	"Loop is finished"
+end
