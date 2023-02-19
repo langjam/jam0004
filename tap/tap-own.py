@@ -134,7 +134,7 @@ class Lexer:
             #     tokens.append(Token(TokenType.EOF))
             #     self.advance()
             elif self.current_char in " \t":
-                tokens.append(Token(TokenType.INDENT))
+            #     tokens.append(Token(TokenType.INDENT))
                 self.advance()
             else:
                 print(n)
