@@ -1,0 +1,15 @@
+index soft : 
+	"Does this function properly?"
+end
+
+index soft : "This is also valid"
+end
+
+index soft :"This is also valid -- but parser will reject me-"
+end
+
+index soft :
+	thumb hard:
+		"Printing variable"
+	end
+end

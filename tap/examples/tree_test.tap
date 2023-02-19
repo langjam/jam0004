@@ -1,0 +1,29 @@
+thumb hard:
+	"user value"
+end
+
+thumb soft:
+	"user value"
+	index medium: end
+end
+
+index soft:
+	thumb medium:
+		"user value"
+	end
+end
+
+middle soft:
+	"This is some info"
+	thumb medium:
+		"user value"
+	end
+end
+
+middle medium:
+	"This is a warning"
+end
+
+middle hard:
+	"This is an error"
+end

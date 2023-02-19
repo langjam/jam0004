@@ -1,0 +1,155 @@
+> The sound(ness) of one hand typing
+
+- sound (audio)
+- soundness (correctness)
+- one hand (literally one hand)
+- one hand (one side)
+- typing (writing)
+- typing (type system)
+
+   right
+   v
+(a b)
+ ^
+ left
+
+ one hand
+ (not sound?)
+ v
+(a)
+
+no hand
+(sound?)
+v
+()
+
+(left (a b)) = a
+(right (a b)) = b
+((lambda (f) (f (a b))) left) = a
+
+expr = left | right | (lambda (arg...) body) | (f x)
+
+```haskell
+data Hand a b = Left a | Right b -- Either
+
+swap :: Hand a b -> Hand b a
+swap = \case
+  Left x -> Right x
+  Right x -> Left x
+```
+
+```haskell
+data Hand a = Left a | Null -- Maybe
+```
+
+left
+(right a)
+
+(= or-default
+    (lambda (x default)
+        ((default <-> y y) x)))
+
+```
+((x <x y> y) x) = x
+((x <x y> y) y) = y
+
+((x <x y> y) 'x) = x
+((x <x y> y) y') = y
+
+((x <x y> y) 'x') = x, y
+```
+
+not:
+```
+   r
+r <-> l
+```
+=
+```
+l
+```
+
+two-handed type:
+a => b : x -> y
+takes a, returns b
+
+one-handed type:
+a : x -> y
+takes whatever, returns a
+
+no hands: ()
+one hand: (a)
+two hands: (a b)
+
+(a (b c))
+((a b) c)
+
+(left (left ((a b) c))) = a
+
+(): ()
+Nothing: ()
+Just a: (a)
+[]: ()
+[a]: (a)
+[a b c]: (a (b c))
+Left a: (a ())
+Right a: (() a)
+\x -> x: (x x)
+((\x -> x) ()): (apply (x x) ())
+
+(apply (x (y x)) a) = (y a)
+(apply (apply (x (y x)) a) b) = a
+
+(apply (x ()) a) = ()
+(left (x ())) = x
+(right (x ())) = ()
+
+[(a b) c] = b where a=c
+(a b) = (a b)
+
+Two-handed expressions are sound:
+(a b) = (a b)
+[(x x) a] = (a a)
+
+One-handed expressions are not:
+
+[a]
+^
+error: no right hand
+
+[(a) b]
+ ^
+ error: no right hand
+
+No-handed expressions:
+
+[]
+^
+error: no hands
+
+Need literals?
+:a
+
+symbol = :a
+(symbol symbol) = (:a :b)
+(a a) = (x x)
+(a (b a)) = (x (y x))
+
+[(x x) :a]
+^^     ^
+||     |
+||     symbol
+|(symbol symbol)
+symbol
+
+Need functions instead of applications
+
+[x x] = [x x]
+([x x] [x x]) = [x x]
+
+program = def...
+def = {var exp}
+exp = fun | app | var
+fun = [arg exp]
+app = (exp exp)
+var = x, where x is in scope

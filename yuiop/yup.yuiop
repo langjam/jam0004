@@ -1,0 +1,11 @@
+Nop mn() {
+    Yoyo y = ui(9-8);
+    on (y == no_yoyo) {
+        y = "y";
+    }
+
+    loop {
+        p_yoyo(y);
+        p_h('\n');
+    }
+}

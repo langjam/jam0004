@@ -1,0 +1,4 @@
+use os;
+
+#print `You are running,`, #os.getname;
+#os.runtime.exec `cmd /c type nul > pling.txt`;
