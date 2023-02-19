@@ -42,7 +42,7 @@ Token token_parse_comment(Unit* unit)
     {
         struct scanner_location loc = scanner_location_of(scanner_current(&unit->scan));
 
-        fprintf(stderr, "error: %s:%lli:%lli comment has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
+        fprintf(stderr, "error: %s:%zu:%zu comment has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
 
         scanner_advance_n(&unit->scan, comment_text.len); /* skip past the erroneous code */
         scanner_destroy_string(comment_text);
@@ -72,7 +72,7 @@ Token token_parse_number(Unit* unit)
     {
         struct scanner_location loc = scanner_location_of(scanner_current(&unit->scan));
 
-        fprintf(stderr, "error: %s:%lli:%lli number has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
+        fprintf(stderr, "error: %s:%zu:%zu number has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
 
         scanner_advance_n(&unit->scan, number_text.len); /* skip past the erroneous code */
         scanner_destroy_string(number_text);
@@ -102,7 +102,7 @@ Token token_parse_identifier(Unit* unit)
     {
         struct scanner_location loc = scanner_location_of(scanner_current(&unit->scan));
 
-        fprintf(stderr, "error: %s:%lli:%lli variable name has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
+        fprintf(stderr, "error: %s:%zu:%zu variable name has a syntax error\n", unit->filename, loc.line_num, loc.col_num);
 
         scanner_advance_n(&unit->scan, identifier_text.len); /* skip past the erroneous code */
         scanner_destroy_string(identifier_text);
