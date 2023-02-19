@@ -1,4 +1,4 @@
-import { BaseType, CCType, coversType, FunctionType, isBaseType, isFunctionType, isTypeEqual, ListType, OptionType, TupleType, TypeKind, typename } from "./types";
+import { BaseType, CCType, coversType, FunctionType, isBaseType, isFunctionType, isListType, isTypeEqual, ListType, OptionType, TupleType, TypeKind, typename } from "./types";
 import {Expr, JSValue, Token} from "./expression";
 
 export interface Stream {
@@ -253,6 +253,49 @@ class Interpreter {
 
         return values;
       }
+
+      case Token.APP: {
+        let leftval = await this.visitExpr(expr.left);
+        let rightval = await this.visitExpr(expr.right);
+
+        if (isListType(expr.left.type)) {
+          if (isListType(expr.right.type)) {
+            return (leftval as JSValue[]).concat(rightval as JSValue[]);
+          }
+
+          (leftval as JSValue[]).push(rightval);
+          return leftval;
+        }
+
+        // right must be a list
+        (rightval as JSValue[]).unshift(leftval);
+        return rightval;
+      }
+
+      case Token.SAPP: {
+        let leftval = await this.visitExpr(expr.left);
+        let rightval = await this.visitExpr(expr.right);
+
+        if (expr.left.type === BaseType.Int) {
+          leftval = String.fromCharCode((leftval as number) % 256);
+        } else if (expr.right.type === BaseType.Int) {
+          rightval = String.fromCharCode((rightval as number) % 256);
+        }
+
+        return (leftval as string) + (rightval as string);
+      }
+
+      case Token.GET:
+      case Token.SGET: {
+        let listval = (await this.visitExpr(expr.list)) as JSValue[];
+        let index = await this.visitExprAsNumber(expr.index);
+
+        if (index < 0 || index >= listval.length) {
+          await this.runtimeError("index out of bound");
+        }
+
+        return listval[index];
+      }
     }
 
     // TODO:
@@ -410,6 +453,12 @@ class Parser{
 
       case Token.LIST:
         return this.parseListCons();
+
+      case Token.APP:
+        return this.parseAppend();
+
+      case Token.GET:
+        return this.parseLSGet();
     }
 
     await this.parseError(`unknown instruction ${instrTok}`);
@@ -501,6 +550,7 @@ class Parser{
 
   // expression
 
+  // list & strings
   async parseListCons() : Promise<Expr> {
     await this.consumeStar();
     let elementType = await this.parseType();
@@ -519,6 +569,87 @@ class Parser{
 
     return new Expr.ListCons(new ListType(elementType), elements);
   }
+
+  async parseAppend() : Promise<Expr> {
+    await this.consumeStar();
+    let startPos = this.cursor;
+    let left = await this.parseExpression();
+    await this.consumeStar();
+    let right = await this.parseExpression();
+
+    if (isListType(left.type) || isListType(right.type)) {
+      return this.parseAppendList(startPos, left, right);
+    }
+
+    return this.parseAppendStr(startPos, left, right)
+  }
+
+  async parseAppendList(startPos: number, left: Expr, right: Expr) : Promise<Expr> {
+    let type : CCType = BaseType.None;
+
+    if (isListType(left.type)) {
+      if (isTypeEqual(left.type, right.type)) type = left.type;
+      else if (coversType((left.type as ListType).elementType, right.type)) type = left.type;
+    } else if (isListType(right.type)) {
+      if (coversType((right.type as ListType).elementType, left.type)) type = right.type;
+    }
+
+    if (type === BaseType.None) {
+      await this.parseError(`unable to do append list operation between types ${typename(left.type)} and ${typename(right.type)}`, startPos);
+    }
+
+    return new Expr.Append(Token.APP, type, left, right);
+  }
+
+  async parseAppendStr(startPos: number, left: Expr, right: Expr) : Promise<Expr> {
+    let type = BaseType.None;
+
+    if (left.type === BaseType.String && right.type === BaseType.String) {
+      type = BaseType.String;
+    } else if (left.type === BaseType.String && right.type === BaseType.Int) {
+      type = BaseType.String;
+    } else if (left.type === BaseType.Int && right.type === BaseType.String) {
+      type = BaseType.String;
+    }
+
+    if (type === BaseType.None) {
+      await this.parseError(`unable to do append operation between types ${typename(left.type)} and ${typename(right.type)}`, startPos);
+    }
+
+    return new Expr.Append(Token.SAPP, type, left, right);
+  }
+
+  async parseLSGet() : Promise<Expr> {
+    await this.consumeStar();
+    let startPos = this.cursor;
+    let list = await this.parseExpression();
+
+    await this.consumeStar();
+    let idxPos = this.cursor
+    let index = await this.parseExpression();
+
+    if (index.type !== BaseType.Int) {
+      await this.parseError(`index in get operation must be of type ${typename(BaseType.Int)}, instead of ${typename(index.type)}`, idxPos);
+    }
+
+    let type : CCType = BaseType.None;
+    let operator = Token.GET;
+
+    if (list.type === BaseType.String) {
+      type = BaseType.String;
+      operator = Token.SGET;
+    } else if (isListType(list.type)) {
+      type = list.type;
+    }
+
+    if (type === BaseType.None) {
+      await this.parseError(`unable to do get operation for type ${typename(list.type)}`, startPos);
+    }
+
+    return new Expr.LSGet(operator, type, list, index);
+  }
+
+  // arguments
 
   async parseArgs(n: number) : Promise<Expr[]> {
     let args = [];
