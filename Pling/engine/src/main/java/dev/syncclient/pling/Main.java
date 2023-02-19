@@ -15,12 +15,14 @@ import java.util.Scanner;
 
 public class Main {
     public static final PlingDebugger debugger = new PlingDebugger();
+    public static String relPath = "";
 
     public static void main(final String[] args) {
         CLI.handle(args);
 
         StringBuilder source = new StringBuilder();
         if(args.length > 0) {
+            relPath = args[0];
             File file = new File(args[0]);
             if (file.exists()) {
                 try {

@@ -2,6 +2,7 @@ package dev.syncclient.pling.executor;
 
 import dev.syncclient.pling.audio.AudioController;
 import dev.syncclient.pling.executor.builtins.BasicBuiltins;
+import dev.syncclient.pling.executor.builtins.FsBuiltins;
 import dev.syncclient.pling.executor.builtins.MathBuiltin;
 import dev.syncclient.pling.executor.builtins.NoteBuiltins;
 import dev.syncclient.pling.parser.AbstractSyntaxTree;
@@ -33,6 +34,7 @@ public class StateTree {
         modules.put("audio", new AudioController());
         modules.put("math", new MathBuiltin());
         modules.put("note", new NoteBuiltins());
+        modules.put("fs", new FsBuiltins());
     }
 
     private void reloadCurrentNode() {
