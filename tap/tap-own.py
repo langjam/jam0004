@@ -437,25 +437,46 @@ class Interpreter:
             return self.get_variable(value[idx])
 
         elif value[0] == "print":
-            new_values = value[1:]
-            to_print = []
-            for v in new_values:
-                # print(v)
-                if isinstance(v, list):
-                    to_print.append(self.check_todo(v))
-                else:
-                    to_print.append(v)
-
-            # print("To_print", to_print)
-            self._print(to_print)
+            self.print_func(value, "print")
         elif value[0] == "get_user_value":
             if len(value) > 1:
                 return input(value[1])
             else:
                 return input()
+
+        elif value[0] == "mathematical_operation":
+            print("Not yet implemented")
+            return None
+
+        elif value[0] == "show_info":
+            self.print_func(value, "info")
+
+        elif value[0] == "show_warning":
+            self.print_func(value, "warning")
+
+        elif value[0] == "show_error":
+            self.print_func(value, "error")
+
         else:
             return None
 
+    def print_func(self, value, type_):
+        new_values = value[1:]
+        to_print = []
+        for v in new_values:
+            # print(v)
+            if isinstance(v, list):
+                to_print.append(self.check_todo(v))
+            else:
+                to_print.append(v)
+
+        # print("To_print", to_print)
+        match type_:
+            case "print":
+                self._print(to_print)
+            case other:
+                self._middle(type_, to_print)
+        
     def create_variable(self, var_name):
         self.variables[var_name] = None
 
@@ -468,6 +489,10 @@ class Interpreter:
     def _print(self, to_print):
         for item in to_print:
             print(item)
+
+    def _middle(self, type_, to_print):
+        for item in to_print:
+            print(f"{type_}: ", item)
 
 
 file_name = "examples/variable.tap"

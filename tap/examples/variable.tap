@@ -8,9 +8,10 @@ end
 
 thumb soft:
 	"setter"
-	index medium:
-		">>"
-	end
+	// index medium:
+	//	">>"
+	//end
+	"No way"
 end
 
 thumb soft:
@@ -36,4 +37,21 @@ index soft:
 	// 8
 	// 8
 	// 9
+end
+
+index hard:
+	"add"
+end
+
+
+middle soft:
+	"This is some info"
+end
+
+middle medium:
+	"This is a warning"
+end
+
+middle hard:
+	"This is an error"
 end
