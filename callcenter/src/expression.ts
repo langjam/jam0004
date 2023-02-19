@@ -36,6 +36,8 @@ export enum Token {
   // UNARY
   INT = 468, // float -> int
   FLO = 356, // int -> float
+  STR = 787, // str any
+
   NEG = 634, // int | float -> int | float
 
   NOT = 668, // bool -> bool
@@ -60,9 +62,6 @@ export enum Token {
   // string | [a], int -> string | [a]
   REM = 736, // rem list index
 
-  // any -> string
-  STR = 787, // str any
-
   CHRS = 2488, // [int] -> str
 
   // tuple
@@ -81,7 +80,7 @@ export enum Token {
   NUMBER = -1
 }
 
-export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit;
+export type Expr = Expr.NumberExpr | Expr.BinaryMath | Expr.Comparison | Expr.LogicCircuit | Expr.TypeConversion;
 
 export namespace Expr {
   export class NumberExpr implements ExprLike {
@@ -108,5 +107,10 @@ export namespace Expr {
   export class LogicCircuit implements ExprLike {
     type: CCType = BaseType.Bool;
     constructor(public kind: Token.AND | Token.OR, public left: Expr, public right: Expr) {}
+  }
+
+  export type ConversionToken = Token.INT | Token.FLO | Token.STR;
+  export class TypeConversion implements ExprLike {
+    constructor(public kind: ConversionToken, public type: CCType, public expr: Expr) {}
   }
 }

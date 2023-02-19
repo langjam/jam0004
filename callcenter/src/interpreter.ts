@@ -218,6 +218,18 @@ class Interpreter {
 
         return await this.visitExprAsBool(expr.right);
       }
+
+      // type conversion
+      case Token.INT:
+      case Token.FLO: {
+        let val = await this.visitExprAsNumber(expr.expr);
+        return val;
+      }
+
+      case Token.STR: {
+        let val = await this.visitExpr(expr.expr);
+        return stringify(val);
+      }
     }
 
     // TODO:
@@ -231,6 +243,11 @@ class Interpreter {
   async visitExprAsBool (expr: Expr) : Promise<boolean> {
     return await this.visitExpr(expr) as boolean;
   }
+}
+
+function stringify(t: JSValue) : string {
+  if (t == null) return "None";
+  return t.toString();
 }
 
 type ComparableBase = number | boolean | string
@@ -354,6 +371,11 @@ class Parser{
       case Token.AND:
       case Token.OR:
         return this.parseLogic(instr);
+
+      case Token.INT:
+      case Token.FLO:
+      case Token.STR:
+        return this.parseConversion(instr);
     }
 
     await this.parseError(`Unknown instruction ${instrTok}`);
@@ -415,6 +437,33 @@ class Parser{
     }
 
     return new Expr.LogicCircuit(operator, left, right);
+  }
+
+  async parseConversion(operator: Expr.ConversionToken): Promise<Expr> {
+    await this.consumeStar();
+    let expr = await this.parseExpression();
+    let type = BaseType.None;
+    let target = BaseType.None;
+    switch (operator) {
+      case Token.INT: {
+        target = BaseType.Int;
+        if (expr.type === BaseType.Float) type = target;
+      } break;
+      case Token.FLO: {
+        target = BaseType.Float;
+        if (expr.type === BaseType.Int) type = target;
+      } break;
+      case Token.STR: {
+        target = BaseType.String;
+        type = target;
+      }
+    }
+
+    if (type === BaseType.None) {
+      await this.parseError(`unable to do conversion from type ${typename(expr.type)} into ${typename(target)}`);
+    }
+
+    return new Expr.TypeConversion(operator, type, expr);
   }
 
   async parseNumber() : Promise<Expr> {
