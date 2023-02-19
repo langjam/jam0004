@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 
     for(TokenList* tok = unit.tokens; tok != NULL; tok = tok->next)
     {
-        printf("%i %.*s\n", tok->token.type, tok->token.data.len, tok->token.data.str ? tok->token.data.str : "NULL");
+        printf("%i %s\n", tok->token.type, tok->token.data.str ? tok->token.data.str : "NULL");
     }
 
     unit_destroy(&unit);

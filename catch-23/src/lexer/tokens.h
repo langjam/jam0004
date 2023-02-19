@@ -80,5 +80,5 @@ Token token_parse_var_identifier(Unit* unit);
 
 static inline Token token_nil()
 {
-    return (Token) { TokenNill, {} };
+    return (Token) { TokenNill, {0} };
 }

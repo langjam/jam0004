@@ -154,7 +154,7 @@ struct scanner_string scanner_create_string(struct scanner_iterator it, const ch
 
     if(buff)
     {
-        strncpy(buff, str, len);
+        strncpy(buff, str, len + 1);
     }
 
     return (struct scanner_string) { it, buff, len };
