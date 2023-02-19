@@ -11,3 +11,4 @@ datafrog = "2.0.1"
 miette = { version = "5.5.0", features = ["fancy"] }
 rustyline = "10.1.1"
 thiserror = "1.0.38"
+clap = { version = "4.1.6", features = ["derive"] }

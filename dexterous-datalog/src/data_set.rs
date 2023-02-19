@@ -19,15 +19,21 @@ impl DataSet {
         for statement in program {
             match statement {
                 Statement::Fact(fact) => self.add_fact(fact)?,
-                Statement::Rule(rule) => println!("skipping rule {:?}", rule),
+                Statement::Rule(rule) => {
+                    eprintln!("ignoring rule `{}` as rules are not supported yet.", rule)
+                }
             }
         }
 
         Ok(())
     }
 
-    pub fn run_query(&mut self, _query: &Query) -> Result<(), Error> {
-        todo!()
+    pub fn run_query(&mut self, query: &Query) -> Result<Vec<Tuple>, Error> {
+        eprintln!(
+            "ignoring query `{}` as queries are not supported yet.",
+            query
+        );
+        Ok(vec![])
     }
 }
 

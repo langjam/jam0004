@@ -1,5 +1,7 @@
 //! The worlds dumbest parser for datalog!
 
+use core::fmt;
+
 use chumsky::prelude::*;
 
 pub type Program = Vec<Statement>;
@@ -142,12 +144,57 @@ fn statement() -> impl Parser<char, Statement, Error = Simple<char>> {
         .or(fact().map(|f| Statement::Fact(f)))
 }
 
-fn query() -> impl Parser<char, Query, Error = Simple<char>> {
-    just("?-")
-        .padded()
-        .then(atom().separated_by(just(',').padded()))
-        .map(|(_, atoms)| Query(atoms))
-        .then_ignore(end())
+pub fn query() -> impl Parser<char, Query, Error = Simple<char>> {
+    just("?-").padded().then(query_no_prompt()).map(|(_, q)| q)
+}
+
+pub fn query_no_prompt() -> impl Parser<char, Query, Error = Simple<char>> {
+    atom()
+        .separated_by(just(',').padded())
+        .map(|atoms| Query(atoms))
+        .then_ignore(end().or(just(".").ignored().then_ignore(end())))
+}
+
+impl fmt::Display for Rule {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let Rule(head, body) = self;
+        write!(f, "{} :-", head)?;
+        for clause in &body[..body.len() - 1] {
+            write!(f, " {},", clause)?;
+        }
+        write!(f, " {}.", body.last().unwrap())
+    }
+}
+
+impl fmt::Display for Query {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let Query(body) = self;
+        write!(f, "?- ")?;
+        for term in &body[..body.len() - 1] {
+            write!(f, "{}, ", term)?;
+        }
+        write!(f, "{}.", body.last().unwrap())
+    }
+}
+
+impl fmt::Display for Atom {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let Atom(Relation(name), body) = self;
+        write!(f, "{}(", name)?;
+        for term in &body[..body.len() - 1] {
+            write!(f, "{}, ", term)?;
+        }
+        write!(f, "{})", body.last().unwrap())
+    }
+}
+
+impl fmt::Display for Term {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Term::Const(Constant(s)) => write!(f, "{s}"),
+            Term::Var(Variable(s)) => write!(f, "{s}"),
+        }
+    }
 }
 
 #[cfg(test)]
