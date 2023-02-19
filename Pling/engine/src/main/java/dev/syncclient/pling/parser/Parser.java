@@ -98,7 +98,7 @@ public class Parser {
                 ) {
                     token = Token.END.createToken(";");
                 } else if (Flag.debug) {
-                    PlingDebugger.instance.debuggerIPC.messages.add("Skipped adding end token due to else of elseif token");
+                    PlingDebugger.instance.ipc.messages.add("Skipped adding end token due to else of elseif token");
                 }
             }
 
