@@ -11,7 +11,7 @@ Each of these commands correspond with a finger on your hand.
 Ontop of these 5 basic commands there are 3 modifiers.
 1. Soft
 2. Medium
-3. Loud
+3. Hard
 
 These modifiers specify how loudly you tapped your specified finger.
 
@@ -26,7 +26,7 @@ Index is used to print and retrieve data from user
 
 ## Middle
 Middle finger is used to indicate error (as a middle finger to the programmer the louder the tap the worse the error is)
-middle soft is equal to info
+middle silent is equal to info
 middle medium is equal to warning
 middle hard is equal to error
 
