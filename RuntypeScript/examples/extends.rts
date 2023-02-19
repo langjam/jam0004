@@ -1,0 +1,31 @@
+// `extends` operator checks if the left hand side is assignable to the right
+// hand side, if it was treated as a type. It can be useful for checking actual
+// types at runtime.
+//
+// For example:
+// - if `array extends any[]` is true, `array` is indexable by numbers
+// - if `object extends {}` is true, `object` is indexable by strings
+// - `n extends 0 | 1 | 2 | 3 | 4 | 5` can be a silly way of checking if `n` is
+//   one of the values
+
+const assign = fn (object: any, property: string, value: any) nil {
+	if (not (object extends {})) {
+		panic("Argument is not an object");
+	}
+
+	object[property] = value;
+};
+
+const obj: any = {};
+println(obj);
+assign(obj, "foo", "bar");
+println(obj);
+assign(obj, "baz", nil);
+println(obj);
+
+println("");
+
+const array = [1];
+println(array);
+println("Next line won't fail, but the panic function will be called");
+assign(array, "foo", 2);
