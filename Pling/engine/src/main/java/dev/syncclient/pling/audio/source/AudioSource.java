@@ -6,4 +6,8 @@ public interface AudioSource {
     void start();
     int sampleCap();
     void fillBuffer(Sound sound, short[] buffer);
+
+    default boolean isExhausted() {
+        return false;
+    }
 }

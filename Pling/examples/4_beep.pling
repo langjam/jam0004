@@ -6,14 +6,6 @@ use audio;
 
 #printnf `Audio initialized: `;
 #print #audio.initted;
-
-var handle = #audio.new;
-var sine = #audio.sine.new;
-
-#audio.sine.volume sine, 1;
-
-#audio.bindsource handle, sine;
-
 var NOTE_B0 = 31;
 var NOTE_C1 = 33;
 var NOTE_CS1 = 35;
@@ -104,6 +96,7 @@ var NOTE_CS8 = 4435;
 var NOTE_D8 = 4699;
 var NOTE_DS8 = 4978;
 
+
 // Time of a quarter note in ms (represented with a 4)
 var TIME4 = 500;
 
@@ -127,15 +120,23 @@ var TIME2 = 1000;
 
 
 fun playnote #note #duration [
-    #audio.sine.volume sine, 0;
-    #sleep 2;
+    // #audio.sine.volume sine, 0;
+    // #sleep 2;
+    // #audio.sine.volume sine, 1;
+    // #audio.sine.frequency sine, note;
+    // #sleep duration;
+    var handle = #audio.new;
+    var sine = #audio.sine.new;
     #audio.sine.volume sine, 1;
+    #audio.bindsource handle, sine;
     #audio.sine.frequency sine, note;
+    #audio.start handle;
     #sleep duration;
+    #audio.stop handle;
+    #sleep 10;
 ]
 
 
-#audio.start handle;
 
 // NOTE_A4,16
 #playnote NOTE_A4, TIME16;
@@ -219,5 +220,3 @@ fun playnote #note #duration [
 
 // NOTE_D5,2
 #playnote NOTE_D5, TIME2;
-
-#audio.stop handle;

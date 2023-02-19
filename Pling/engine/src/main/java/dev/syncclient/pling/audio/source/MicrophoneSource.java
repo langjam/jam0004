@@ -5,7 +5,7 @@ import dev.syncclient.pling.audio.Sound;
 import java.nio.ByteBuffer;
 
 import static dev.syncclient.pling.audio.Sound.CAP;
-import static dev.syncclient.pling.audio.Sound.FREQUENCY;
+import static dev.syncclient.pling.audio.Sound.DSAMPLE_RATE;
 import static org.lwjgl.openal.AL10.AL_FORMAT_MONO16;
 import static org.lwjgl.openal.ALC11.*;
 
@@ -14,7 +14,7 @@ public class MicrophoneSource implements AudioSource {
 
     @Override
     public void start() {
-        inputDevice = alcCaptureOpenDevice((ByteBuffer) null, FREQUENCY, AL_FORMAT_MONO16, FREQUENCY / 2);
+        inputDevice = alcCaptureOpenDevice((ByteBuffer) null, DSAMPLE_RATE, AL_FORMAT_MONO16, DSAMPLE_RATE / 2);
         alcCaptureStart(inputDevice);
     }
 

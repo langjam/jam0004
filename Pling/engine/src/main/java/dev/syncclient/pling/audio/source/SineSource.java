@@ -4,12 +4,14 @@ import dev.syncclient.pling.audio.Sound;
 import lombok.Getter;
 import lombok.Setter;
 
+import static dev.syncclient.pling.audio.Sound.CAP;
+
 @Getter
 @Setter
 public class SineSource implements AudioSource {
     private double frequency;
     private double volume;
-    private double lastOffset;
+    private double lastPhase;
 
     @Override
     public void start() {
@@ -18,22 +20,21 @@ public class SineSource implements AudioSource {
 
     @Override
     public int sampleCap() {
-        return 8192;
+        return CAP + 1;
     }
 
     @Override
     public void fillBuffer(Sound sound, short[] buffer) {
-        double realVolume = volume * 32767;
-        double offset = lastOffset;
-        double step = (2 * Math.PI * frequency) / Sound.FREQUENCY;
+        double phase = lastPhase;
 
-        for (int i = 0; i < buffer.length; ++i) {
-            buffer[i] = (short) (realVolume * Math.sin(offset));
-            offset += step;
+        var phaseShift = 2 * Math.PI * frequency / Sound.DSAMPLE_RATE;
+        for (int i = 0; i < CAP; i++) {
+            phase += phaseShift;
+
+            buffer[i] = (short) (volume * Math.sin(phase) * Short.MAX_VALUE);
         }
 
-        lastOffset = offset;
-        lastOffset %= 2 * Math.PI;
+        lastPhase = phase;
     }
 
     public void setVolume(double volume) {
@@ -42,5 +43,10 @@ public class SineSource implements AudioSource {
 
     public double getVolume() {
         return volume * 100;
+    }
+
+    public void setFrequency(double frequency) {
+        this.frequency = frequency;
+        this.lastPhase = 0;
     }
 }

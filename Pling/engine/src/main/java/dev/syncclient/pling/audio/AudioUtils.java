@@ -11,7 +11,7 @@ import static org.lwjgl.stb.STBVorbis.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class AudioUtils {
-    static ShortBuffer readVorbis(String resource, int bufferSize, STBVorbisInfo info) {
+    public static ShortBuffer readVorbis(String resource, int bufferSize, STBVorbisInfo info) {
         ByteBuffer vorbis;
         try {
             vorbis = ioResourceToByteBuffer(resource, bufferSize);

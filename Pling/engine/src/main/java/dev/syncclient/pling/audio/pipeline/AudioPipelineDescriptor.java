@@ -1,6 +1,7 @@
 package dev.syncclient.pling.audio.pipeline;
 
 import dev.syncclient.pling.audio.pipeline.fx.Fx;
+import dev.syncclient.pling.audio.pipeline.fx.LowPassFX;
 import dev.syncclient.pling.audio.source.AudioSource;
 import dev.syncclient.pling.audio.source.SilenceSource;
 import dev.syncclient.pling.utils.Location;
@@ -49,7 +50,11 @@ public final class AudioPipelineDescriptor {
 
 
     public static AudioPipelineDescriptor silence() {
-        return new AudioPipelineDescriptor(new SilenceSource(), new FVecArrayListImpl<>(), Location.ORIGIN);
+        var fx = new FVecArrayListImpl<Fx>();
+
+        fx.add(new LowPassFX(0.5));
+
+        return new AudioPipelineDescriptor(new SilenceSource(), fx, Location.ORIGIN);
     }
 
     public AudioSource source() {

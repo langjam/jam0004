@@ -1,5 +1,5 @@
 package dev.syncclient.pling.audio.pipeline.fx;
 
 public interface Fx {
-    void apply(short[] buffer);
+    void apply(short[] sample);
 }

@@ -1,13 +1,16 @@
 package dev.syncclient.pling.audio;
 
 import dev.syncclient.pling.audio.pipeline.AudioPipelineDescriptor;
+import dev.syncclient.pling.audio.pipeline.fx.Fx;
 import dev.syncclient.pling.audio.source.AudioSource;
+import dev.syncclient.pling.utils.fvec.FVec;
+
 import java.util.LinkedList;
 
 import static org.lwjgl.openal.AL10.*;
 
 public class Sound extends Thread {
-    public static final int FREQUENCY = 22050;
+    public static final int DSAMPLE_RATE = 22050;
     public static final int CAP = 1024;
     private final AudioPipelineDescriptor descriptor = AudioPipelineDescriptor.silence();
     private boolean running = false;
@@ -48,6 +51,7 @@ public class Sound extends Thread {
                     bufferQueue.add(buffHolder[i]);
                 }
             }
+            System.gc();
 
             // Do location stuff
             if (locationHash != descriptor.location().hashCode()) {
@@ -55,15 +59,28 @@ public class Sound extends Thread {
                 alSource3f(helloSource[0], AL_POSITION, (float) descriptor.location().x, (float) descriptor.location().y, (float) descriptor.location().z);
             }
 
+            if (src.isExhausted()) {
+                running = false;
+            }
+
+            System.gc();
+
             // Poll capture device
 
             samplesIn = src.sampleCap();
             if (samplesIn > CAP) {
                 src.fillBuffer(this, buffer);
 
+                // fx stuff
+                FVec<Fx> fxes = descriptor.directEffects();
+
+                for (Fx fx : fxes) {
+                    fx.apply(buffer);
+                }
+
                 if (!bufferQueue.isEmpty()) {
                     myBuff = bufferQueue.remove(0);
-                    alBufferData(myBuff, AL_FORMAT_MONO16, buffer, FREQUENCY);
+                    alBufferData(myBuff, AL_FORMAT_MONO16, buffer, DSAMPLE_RATE);
                     alSourceQueueBuffers(helloSource[0], myBuff);
 
                     int sState = alGetSourcei(helloSource[0], AL_SOURCE_STATE);
