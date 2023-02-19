@@ -4,17 +4,32 @@ import * as readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 
 class Console implements Stream, Output {
-  rl : readline.Interface;
-  buffer: string;
+  private rl : readline.Interface;
+  private buffer: string;
+  private resolv: () => void;
+
   constructor() {
     this.rl = readline.createInterface(input, output);
+    this.resolv = () => {};
     this.buffer = "";
+
+    this.rl.setPrompt("");
+    this.rl.pause();
+
+    this.rl.on("line", (line) => {
+      this.buffer = this.buffer + line + "\n";
+      this.resolv();
+    });
   }
 
   private async loadBuffer() {
-    try {
-      this.buffer = await this.rl.question("")
-    } catch (e) {}
+    this.rl.resume();
+    await new Promise<void>((resolv) => {
+      this.resolv = () => {
+        this.rl.pause();
+        resolv();
+      }
+    });
   }
 
   async next(): Promise<string | null> {
