@@ -335,7 +335,6 @@ class Parser:
                 keyword_value_pair = f"{previous_token.Value} {self.current_token.Value}"
                 match keyword_value_pair:
                     case "thumb soft":
-                        print("set variable value")
                         cur_ast.append("set_variable_value")
                     case "thumb medium":
                         cur_ast.append("get_variable_value")
@@ -378,18 +377,27 @@ class Parser:
         return cur_ast
 
 
+class Interpreter:
+    def __init__(self, ast):
+        self.ast = ast
+
+
 with open("examples/complete_test.tap", 'r') as f:
     simple_program = f.read()
-    print(simple_program.split("\t"))
+    # print(simple_program.split("\t"))
 
-print(simple_program)
+# print(simple_program)
 lexer = Lexer("none", simple_program)
 tokens = lexer.tokenize()
-print("#######TOKENIZING##########")
+# print("#######TOKENIZING##########")
 if not isinstance(tokens, Error):
-    print(tokens)
+    # print(tokens)
     parser = Parser("hello_world.tap", tokens)
-    print("#########PARSING###########")
-    print(parser.parse())
+    # print("#########PARSING###########")
+    ast = parser.parse()
+    if not isinstance(parser, Error):
+        print(ast)
+    else:
+        print(ast.show())
 else:
     print(tokens.show())
