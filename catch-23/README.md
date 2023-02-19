@@ -8,7 +8,7 @@ Because the theme is interpreted as being nonsense, the language is full of ambi
 ## Variables and Types
 
 The language doesn't come with traditional types, instead it comes in three types:
-+ Thing32, written as `#` and a Thing32 pointer/array by extension:  `#*` and `#[]`
++ Thing32, written as `#` and a Thing32 array by extension: `#[]`
 
 Those types can represent anything that is a floating point number, an integer number and a character.
 To declare a variable, type the variable name then the type following a colon. A variable name can only contain 2 characters which are alphanumeric.
@@ -16,7 +16,7 @@ To declare a variable, type the variable name then the type following a colon. A
 @in : #
 @sr : #[]
 ```
-Respectively: int, double, string and boolean variables.
+Respectively: int/float and string.
 
 To assign it a value, you need to reference it first by using the `$` and then you can type the value using octal numbers inside brackets. Boolean variables use ! for false instead.
 ```

@@ -1,0 +1,6 @@
+use http;
+
+#print #http.get ``;
+#print #http.put ``;
+#print #http.delete ``;
+#print #http.post ``;

@@ -1,0 +1,22 @@
+{
+  "name": "rescript-project-template",
+  "version": "0.0.1",
+  "scripts": {
+    "res:build": "rescript",
+    "res:clean": "rescript clean",
+    "res:dev": "rescript build -w",
+    "ludwig": "rescript && npx webpack"
+  },
+  "keywords": [
+    "rescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "html-webpack-plugin": "^5.5.0",
+    "rescript": "*",
+    "tone": "^14.7.77",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  }
+}

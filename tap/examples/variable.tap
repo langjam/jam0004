@@ -1,0 +1,82 @@
+thumb hard:
+	"this is a long var name"
+end
+
+thumb hard:
+	"setter"
+end
+
+thumb soft:
+	"setter"
+	// index medium:
+	//	">>"
+	//end
+	"No way"
+end
+
+thumb soft:
+	"this is a long var name"
+	thumb medium:
+		"setter"
+	end
+end
+
+index soft:
+	// 10.88668
+	thumb medium:
+		"this is a long var name"
+	end
+	// "No way that this is working"
+	// 1
+	// 2
+	// 3
+	// 4
+	// 5
+	// 6
+	// 7
+	// 8
+	// 8
+	// 9
+end
+
+middle soft:
+	index hard:
+		"ad"
+		2
+		3
+		3
+	end
+end
+
+
+middle soft:
+	"This is some info"
+end
+
+middle medium:
+	"This is a warning"
+end
+
+middle hard:
+	"This is an error"
+end
+
+pinky soft:
+	// thumb medium:
+	// 	"setter"
+	// end
+	// thumb medium:
+	// 	"this is a long var name"
+	// end
+	35.0
+	35
+end
+pinky medium:
+	middle soft:
+		"2 is equals to 2"
+	end
+end
+pinky hard:
+	middle soft:
+		"2 is not equals to 3"
+	end

@@ -1,0 +1,22 @@
+[package]
+name = "numpad"
+version = "0.1.0"
+authors = [
+	"Sander in 't Veld <sanderintveld@hotmail.com>",
+	"Remy Pierre Bushnell Clarke <clarke.remy@gmail.com>",
+]
+edition = "2021"
+license = "MIT"
+readme = "README.md"
+description = "A dynamically typed expression language that can be programmed using just one hand on the numpad."
+repository = "https://github.com/SLiV9/numpad"
+
+[dependencies]
+logos = "0.12.1"
+clap = { version = "4.0", features = ["derive"] }
+anyhow = "1.0"
+thiserror = "1.0"
+itertools = "0.10"
+rustyline = "11.0.0"
+log = "0.4"
+stderrlog = "0.5"

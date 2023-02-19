@@ -1,0 +1,13 @@
+Nop mn() {
+    I i = 9-8;
+    loop {
+        Yoyo yo = ui(i);
+        on (yo == no_yoyo) {
+            noloop;
+        }
+        p_yoyo(yo);
+        p_h(' ');
+        ++i;
+    }
+    p_h('\n');
+}

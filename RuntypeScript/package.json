@@ -1,0 +1,15 @@
+{
+	"name": "runtypescript",
+	"author": "Szymon Nowakowski <smnbdg13@gmail.com> (https://renati.me)",
+	"type": "module",
+	"license": "MIT",
+	"private": true,
+	"main": "./dist/index.js",
+	"dependencies": {
+		"@types/node": "^18.14.0",
+		"@types/prompt-sync": "^4.2.0",
+		"prompt-sync": "^4.2.0",
+		"tslib": "^2.5.0",
+		"typescript": "^5.0.0-beta"
+	}
+}

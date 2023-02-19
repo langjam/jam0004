@@ -1,0 +1,38 @@
+oscillator sine(): sample {
+    return sin(phase())
+}
+
+oscillator saw(): sample {
+    return phase() % TAU - 3dB
+}
+
+sound play(note: hz, duration: secs) {
+    let RELEASE_TIME = 0.3
+    let ATTACK_TIME = 0.3
+    do t = 0s ; t < duration + RELEASE_TIME * 1s ; t + SAMPLE_PERIOD {
+        let attack = min(t / ATTACK_TIME, 1)
+        let release = 1 - (max(t - duration, 0.0) / RELEASE_TIME)
+        for detune in [-0.1st, -0.05st, 0st, 0.05st, 0.1st] {
+            let s = saw() at time_phase(t, note + detune)
+            set! s = pan(s, detune / 1st)
+            mix(attack * release * (s - 10dB))
+        }
+        next()
+    }
+}
+
+sound main() {
+    for note in [C4, D4, E4, F4, G4, A4, B4, C5] {
+        play(note, 1/4)
+        skip(1 / 4 * SAMPLE_RATE)
+    }
+    let maj = [0st, 2st, 2st, 1st, 2st, 2st, 2st, 1st]
+    for root in [C4, D4, E4] {
+        let note = root
+        for interval: semitones in maj {
+            set! note = note + interval
+            play(note, 1/4)
+            skip(1 / 4 * SAMPLE_RATE)
+        }
+    }
+}
