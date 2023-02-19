@@ -57,7 +57,7 @@ where
             let e = errors.pop().unwrap();
             e.into()
         } else {
-            let mut error = Error::new("multiple errors!");
+            let mut error = errors.pop().unwrap().into();
             error.errors = errors.into_iter().map(Into::into).collect();
             error
         }

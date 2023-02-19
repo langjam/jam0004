@@ -34,8 +34,6 @@ impl Default for DataSet {
 }
 
 impl DataSet {
-    const MAX_VARS: usize = 8;
-
     pub fn add_program(&mut self, program: &Program) -> Result<(), Error> {
         for statement in program {
             match statement {
@@ -83,7 +81,7 @@ impl DataSet {
     }
 
     pub fn run_query(&mut self, query: &QuerySyntax) -> Result<(), Error> {
-        let QuerySyntax(sub_goals) = query;
+        let QuerySyntax(_sub_goals) = query;
         println!("I didn't quite get to this. :(");
         Ok(())
     }
@@ -281,10 +279,10 @@ impl Rule {
     }
 }
 
-pub struct Query {}
+pub struct _Query {}
 
-impl Query {
-    fn search(&self, data: &DataSet) -> Vec<Binding> {
+impl _Query {
+    fn _search(&self, _data: &DataSet) -> Vec<Binding> {
         todo!()
     }
 }

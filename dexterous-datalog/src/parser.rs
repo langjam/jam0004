@@ -72,7 +72,18 @@ fn is_constant_name(name: &str) -> bool {
 }
 
 fn name() -> impl Parser<char, String, Error = Simple<char>> {
-    text::ident().padded()
+    fn is_not_sinister(c: &char) -> bool {
+        !r#"qwertasdfgzxcvbQWERTASDFGZXCVB12345!@#$%~`"#.contains(*c)
+    }
+
+    text::ident().padded().map(|name: String| {
+        let left: String = name.chars().filter(is_not_sinister).collect();
+        if left.is_empty() {
+            "no".into()
+        } else {
+            left
+        }
+    })
 }
 
 fn term() -> impl Parser<char, Term, Error = Simple<char>> {

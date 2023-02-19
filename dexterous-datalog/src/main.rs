@@ -123,7 +123,3 @@ fn repl_step(input: &str, data: &mut DataSet) -> Result<(), Error> {
         Repl::Query(q) => data.run_query(&q),
     }
 }
-
-pub fn is_sinister(c: char) -> bool {
-    r#"qwertasdfgzxcvbQWERTASDFGZXCVB12345!@#$%~`"#.contains(c)
-}
