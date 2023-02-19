@@ -1,21 +1,8 @@
-# ReScript Project Template
+# Ludwig
 
-The only official ReScript starter template.
+A functional logic programming language for composing music.
 
-## Installation
+*Type* programs to Compose music for each *hand* and merge them with logical choice
 
-```sh
-npm install
-```
+Documentation: [https://ludwig.prophetlabs.de](https://ludwig.prophetlabs.de)
 
-## Build
-
-- Build: `npm run res:build`
-- Clean: `npm run res:clean`
-- Build & watch: `npm run res:dev`
-
-## Run
-
-```sh
-node src/Demo.bs.js
-```
