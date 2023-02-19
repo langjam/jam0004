@@ -1,0 +1,27 @@
+{nil [_ [x x]]}
+
+{cons [x [xs
+  [f [_ ((f x) xs)]]]]}
+
+{map [f [xs
+  ((xs
+    [x [xs ((cons (f x)) ((map f) xs))]])
+    nil)]]}
+
+{last [xs
+  ((xs
+    [x [xs
+      ((xs
+        [_ [_ (last xs)]])
+        x)]])
+    nil)]}
+
+{true [x [y x]]}
+
+{false [x [y y]]}
+
+{not [x ((x false) true)]}
+
+{trues ((cons true) ((cons true) nil))}
+
+{main (last ((map not) trues))}
