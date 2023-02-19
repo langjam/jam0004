@@ -93,7 +93,7 @@ catch-23 is contradiction-oriented because it Donts and Never are basically if (
 
 Unless, written as `?(<boolean expression>)` is the same as an inverted if statement in C: `if (!(<boolean expression>))`. Unless can only be used directly inside Dont or another Unless/Else Unless/Else. It cannot be used in a block of code that isn't any of those cases even if that block of code is inside one of those.
 ```
-?)!($vr > 0)(
+?(!($vr > 0))
 {
   \\ code here 
 }
