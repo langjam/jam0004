@@ -1,0 +1,116 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+body {
+  font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.4em;
+  color: #4d4d4d;
+  min-width: 230px;
+  max-width: 1000px;
+  min-height: 100%;
+  margin: 0 auto;
+  -webkit-font-smoothing: antialiased;
+  -moz-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+  font-weight: 300;
+  background-color: #000000;
+}
+
+a {
+  text-decoration: none;
+}
+
+.app-title {
+  font-size: 3em;
+  width: 100%;
+  font-weight: 100;
+  text-align: center;
+  -webkit-text-rendering: optimizeLegibility;
+  -moz-text-rendering: optimizeLegibility;
+  text-rendering: optimizeLegibility;
+}
+
+.app-subtitle {
+  font-size: 1.5em;
+  width: 100%;
+  font-weight: 100;
+  text-align: center;
+  -webkit-text-rendering: optimizeLegibility;
+  -moz-text-rendering: optimizeLegibility;
+  text-rendering: optimizeLegibility;
+}
+
+.app-header {
+  height: 50px;
+}
+
+
+.memory-container {
+  background: #000000;
+  margin: 4em 0 0px 0;
+}
+
+.memory-header {
+  background-color: #000;
+  height: 3em;
+  color: aliceblue;
+}
+
+.memory-title {
+  font-size: 24px;
+  width: 100%;
+  font-weight: 100;
+  text-align: center;
+}
+
+.memory-footer {
+  background-color: #000000;
+  height: 30px;
+  padding: 10px;
+}
+
+.memory-footer-text {
+  color: aliceblue;
+  padding-left: 20px;
+  font-size: 14px;
+}
+
+.memory-area {
+  width: 94%;
+  margin: 0px auto;
+}
+
+.memory {
+  display: inline-block;
+  background-color: aliceblue;
+  width: max-content;
+  overflow: hidden;
+}
+
+.memory-row {
+  line-height: 0;
+}
+
+.memory-cell {
+  display: inline-block;
+  vertical-align: middle;
+  width: 4em;
+  height: 4em;
+  line-height: 400%;
+  border: 0.5em solid #000;
+}
+
+.app-footer {
+  clear: both;
+  position: relative;
+  height 8em;
+  margin-top: 8em;
+}
+
+.app-footer-text {
+  display: center;
+}
