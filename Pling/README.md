@@ -21,7 +21,7 @@ and has a very simple syntax. Since it is developed in [48h](https://github.com/
 
 If you have never attempted to program with one hand, let us tell you that it is not easy
 since you constantly have to press modifier keys while typing. Pling has a token set that
-can be typed without any modifier keys (assuming you have a US keyboard layout).
+can be typed without any modifier keys (assuming you have a UK keyboard layout).
 
 ## Why though?
 
