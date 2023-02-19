@@ -1,11 +1,7 @@
 package dev.syncclient.pling.executor;
 
 import dev.syncclient.pling.audio.AudioController;
-import dev.syncclient.pling.executor.builtins.BasicBuiltins;
-import dev.syncclient.pling.executor.builtins.HttpBuiltins;
-import dev.syncclient.pling.executor.builtins.MathBuiltins;
-import dev.syncclient.pling.executor.builtins.FsBuiltins;
-import dev.syncclient.pling.executor.builtins.NoteBuiltins;
+import dev.syncclient.pling.executor.builtins.*;
 import dev.syncclient.pling.parser.AbstractSyntaxTree;
 
 import java.util.ArrayList;
@@ -37,6 +33,7 @@ public class StateTree {
         modules.put("note", new NoteBuiltins());
         modules.put("fs", new FsBuiltins());
         modules.put("http", new HttpBuiltins());
+        modules.put("string", new StringBuiltins());
     }
 
     private void reloadCurrentNode() {
