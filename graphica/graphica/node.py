@@ -1,6 +1,6 @@
 import random
 import cv2
-from v2math import *
+from graphica.v2math import *
 
 class Node:
     def __init__(self, *args):
@@ -116,6 +116,7 @@ class Selector(Node):
         self.opts = init[-1]
         self.into = None
         Node.__init__(self, *init[:-2])
+        self.then = lambda obj: None
     
     def __str__(self):
         names = []
@@ -123,14 +124,14 @@ class Selector(Node):
         names.append(self.text)
         return ' '.join(names)
 
-    def make_cb(self, n, k):
+    def make_cb(self, n):
         def ret(pos):
             next = []
             for l in self.list:
                 if not isinstance(l, SelectorOption):
                     next.append(l)
             self.list = next
-            return k({
+            return self.then({
                 'name': n,
                 'pos': pos,
                 'angle': self.angle,
@@ -143,10 +144,10 @@ class Selector(Node):
         self.color = tuple((i + 255) / 2 for i in self.color)
         angle = math.atan2(*v2sub(pos, self.pos))
         self.angle = angle + math.pi
-        for (v, c, n, k) in self.opts:
+        for (v, c, n) in self.opts:
             x = math.sin(angle + math.pi * v) * self.size * 1.25 + self.pos[0]
             y = math.cos(angle + math.pi * v) * self.size * 1.25 + self.pos[1]
-            case = SelectorOption([x, y], self.size / 2, n, self.make_cb(n, k))
+            case = SelectorOption([x, y], self.size / 2, n, self.make_cb(n))
             case.color = c
             self.add(case)
         if isinstance(self.into, list):

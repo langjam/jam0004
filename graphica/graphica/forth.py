@@ -1,4 +1,4 @@
-from node import SelectorOption
+from graphica.node import SelectorOption
 
 import math
 
@@ -104,10 +104,8 @@ class Env:
             for i in got.split(' '):
                 self.run(i)
 
-env = Env()
-
-def run(node):
-    args = [run(i) for i in node.list if not isinstance(i, SelectorOption)]
+def run(env, node):
+    args = [run(env, i) for i in node.list if not isinstance(i, SelectorOption)]
     if not hasattr(node, 'text'):
         return []
     words = node.text.split(' ')

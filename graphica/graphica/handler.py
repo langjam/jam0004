@@ -1,13 +1,12 @@
-#!/usr/bin/env python3
 
 import math
-import argparse
+import json
 import cv2
 import numpy as np
-from hands import FindHands
-from node import Node, Selector
-from v2math import *
-from forth import run, env
+from graphica.node import Node, Selector
+from graphica.v2math import *
+from graphica.forth import run, Env
+import graphica.save as save
 
 class Handler:
     def __init__(self, one_hand=True):
@@ -23,18 +22,50 @@ class Handler:
         self.src = []
         self.selected = []
         self.mouse_xy = [0, 0]
+        self.env = Env()
         if one_hand:
             self.cap = cv2.VideoCapture(0)
-            self.hands = FindHands()
+            if "FindHands" not in globals():
+                from hands import FindHands
+                globals()["FindHands"] = FindHands
+                self.hands = FindHands()
+            else:
+                self.hands = globals()["FindHands"]()
+
+    def data_load(self, src):
+        self.env.defs = json.loads(src)
+
+    def code_loads(self, src):
+        self.node = save.load_post(json.loads(src))
+        self.node.root = True
+
+    def data_save(self):
+        return json.dumps(self.env.defs)
+
+    def code_save(self):
+        return json.dumps(save.save_pre(self.node))
+
+    def full_save(self):
+        return json.dumps({
+            "node": save.save_pre(self.node),
+            "env": save.save_pre(self.env),
+        })
 
     def make_node(self, pos, size, name):
         options = [
-                (0.7, (64, 255, 64), 'new', self.node_on_add),
-                (1.3, (255, 64, 64), 'del', self.node_remove),
+                (0.7, (64, 255, 64), 'add'),
+                (1.3, (255, 64, 64), 'del'),
         ]
         ret = Selector(pos, size, name, options)
+        ret.then = self.then
         ret.into = self.selected
         return ret
+
+    def then(self, data):
+        if data['name'] == 'add':
+            self.node_on_add(data)
+        if data['name'] == 'del':
+            self.node_remove(data)
 
     def node_on_add(self, data):
         size = data['self'].size
@@ -68,7 +99,6 @@ class Handler:
                 for i in range(int(substeps)):
                     self.handle1(v2lerp(self.pt, pt, i/substeps))
         self.pt = pt
-        run(self.node)
         self.node.draw(self.img)
 
     def on_key(self, key):
@@ -77,7 +107,7 @@ class Handler:
                 if chr(key) == '\r':
                     name = ''.join(self.src)
                     self.src = []
-                    env.defs[name] = str(self.selected[0]).strip()
+                    self.env.defs[name] = str(self.selected[0]).strip()
                     self.selected[0].text = name
                     self.selected[0].list[:] = []
                 elif chr(key).isprintable():
@@ -98,6 +128,7 @@ class Handler:
 
     def loop(self):
         n = 0
+        last_state = None
         while True:
             if self.one_hand:
                 succeed, ximg = self.cap.read()
@@ -113,6 +144,10 @@ class Handler:
                 self.handle(pt[0])
             else:
                 self.handle(self.pt)
+            next_state = self.code_save()
+            if next_state != last_state:
+                run(self.env, self.node)
+                last_state = next_state
             if self.pt is not None:
                 cv2.circle(self.img, self.pt, 5, (0,255,0), cv2.FILLED)
             cv2.putText(
@@ -137,10 +172,3 @@ class Handler:
             vb = vb[0]
             return v2dist(va, vb)
         return math.nan
-
-def main():
-    h = Handler(one_hand=False)
-    h.loop()
-
-if __name__ == '__main__':
-    main()
