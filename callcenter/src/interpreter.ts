@@ -336,7 +336,11 @@ class Parser{
     }
   }
 
-  async parseError(message: string) {
+  async parseError(message: string, pos?: number) {
+    if (pos != null) {
+      this.cursor = pos;
+    }
+
     await this.output.err(`Sorry, we found an error at character ${this.cursor+1} while parsing: ${message}`);
     throw PARSE_ERROR;
   }
@@ -398,6 +402,7 @@ class Parser{
 
   async parseBinaryMath(operator: Expr.BinaryMathToken) : Promise<Expr> {
     await this.consumeStar();
+    let startPos = this.cursor;
     let left = await this.parseExpression();
     await this.consumeStar();
     let right = await this.parseExpression();
@@ -420,7 +425,7 @@ class Parser{
     }
 
     if (type === BaseType.None) {
-      await this.parseError(`unable to do math operation between types ${typename(left.type)} and ${typename(right.type)}`);
+      await this.parseError(`unable to do math operation between types ${typename(left.type)} and ${typename(right.type)}`, startPos);
     }
 
     return new Expr.BinaryMath(operator, type, left, right);
@@ -428,13 +433,14 @@ class Parser{
 
   async parseCompare(operator: Expr.CompareToken) : Promise<Expr> {
     await this.consumeStar();
+    let startPos = this.cursor;
     let left = await this.parseExpression();
     await this.consumeStar();
     let right = await this.parseExpression();
 
     // type check
     if (isFunctionType(left.type) || isFunctionType(right.type) || !isTypeEqual(left.type, right.type)) {
-      await this.parseError(`unable to do comparison between types ${typename(left.type)} and ${typename(right.type)}`);
+      await this.parseError(`unable to do comparison between types ${typename(left.type)} and ${typename(right.type)}`, startPos);
     }
 
     return new Expr.Comparison(operator, left, right);
@@ -442,12 +448,13 @@ class Parser{
 
   async parseLogic(operator: Token.AND | Token.OR): Promise<Expr> {
     await this.consumeStar();
+    let startPos = this.cursor;
     let left = await this.parseExpression();
     await this.consumeStar();
     let right = await this.parseExpression();
 
     if (left.type !== BaseType.Bool || right.type !== BaseType.Bool) {
-      await this.parseError(`unable to do logic operator between types ${typename(left.type)} and ${typename(right.type)}`);
+      await this.parseError(`unable to do logic operator between types ${typename(left.type)} and ${typename(right.type)}`, startPos);
     }
 
     return new Expr.LogicCircuit(operator, left, right);
@@ -455,6 +462,7 @@ class Parser{
 
   async parseConversion(operator: Expr.ConversionToken): Promise<Expr> {
     await this.consumeStar();
+    let startPos = this.cursor;
     let expr = await this.parseExpression();
 
     let type = BaseType.None;
@@ -475,7 +483,7 @@ class Parser{
     }
 
     if (type === BaseType.None) {
-      await this.parseError(`unable to do conversion from type ${typename(expr.type)} into ${typename(target)}`);
+      await this.parseError(`unable to do conversion from type ${typename(expr.type)} into ${typename(target)}`, startPos);
     }
 
     return new Expr.TypeConversion(operator, type, expr);
@@ -483,6 +491,7 @@ class Parser{
 
   async parseUnary(operation: Expr.UnaryToken): Promise<Expr> {
     await this.consumeStar();
+    let startPos = this.cursor;
     let expr = await this.parseExpression();
 
     let type = BaseType.None
@@ -493,7 +502,7 @@ class Parser{
     }
 
     if (type === BaseType.None) {
-      await this.parseError(`invalid operation for type ${typename(expr.type)}`);
+      await this.parseError(`invalid operation for type ${typename(expr.type)}`, startPos);
     }
 
     return new Expr.Unary(operation, type, expr);
