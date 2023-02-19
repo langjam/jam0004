@@ -50,7 +50,7 @@ Float operators treat both operands as if they were valid floats without casting
 Integer operators treat both operands as if they were valid integers without casting the values to integer.
 One cannot mix types with operators, so you couldn't write 2 + 2.1 for example. Well it isn't forbidden, but it will assume that 2.1 is an integer.
 
-Operators are infix and there is no precedence.
+Operators are infix and there is no precedence, meaning the operators are evaluated in order of appearance, so 2 + 1 * 2 would return 6 for example.
 
 |operator|input type|output type|params qty|desc
 |-|-|-|-|-|
