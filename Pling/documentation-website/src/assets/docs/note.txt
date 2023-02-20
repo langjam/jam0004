@@ -1,0 +1,272 @@
+note
+Notes
+--------
+
+
+note.b0 = 31.0
+Note
+
+note.c1 = 33.0
+Note
+
+note.cs1 = 35.0
+Note
+
+note.d1 = 37.0
+Note
+
+note.ds1 = 39.0
+Note
+
+note.e1 = 41.0
+Note
+
+note.f1 = 44.0
+Note
+
+note.fs1 = 46.0
+Note
+
+note.g1 = 49.0
+Note
+
+note.gs1 = 52.0
+Note
+
+note.a1 = 55.0
+Note
+
+note.as1 = 58.0
+Note
+
+note.b1 = 62.0
+Note
+
+note.c2 = 65.0
+Note
+
+note.cs2 = 69.0
+Note
+
+note.d2 = 73.0
+Note
+
+note.ds2 = 78.0
+Note
+
+note.e2 = 82.0
+Note
+
+note.f2 = 87.0
+Note
+
+note.fs2 = 93.0
+Note
+
+note.g2 = 98.0
+Note
+
+note.gs2 = 104.0
+Note
+
+note.a2 = 110.0
+Note
+
+note.as2 = 117.0
+Note
+
+note.b2 = 123.0
+Note
+
+note.c3 = 131.0
+Note
+
+note.cs3 = 139.0
+Note
+
+note.d3 = 147.0
+Note
+
+note.ds3 = 156.0
+Note
+
+note.e3 = 165.0
+Note
+
+note.f3 = 175.0
+Note
+
+note.fs3 = 185.0
+Note
+
+note.g3 = 196.0
+Note
+
+note.gs3 = 208.0
+Note
+
+note.a3 = 220.0
+Note
+
+note.as3 = 233.0
+Note
+
+note.b3 = 247.0
+Note
+
+note.c4 = 262.0
+Note
+
+note.cs4 = 277.0
+Note
+
+note.d4 = 294.0
+Note
+
+note.ds4 = 311.0
+Note
+
+note.e4 = 330.0
+Note
+
+note.f4 = 349.0
+Note
+
+note.fs4 = 370.0
+Note
+
+note.g4 = 392.0
+Note
+
+note.gs4 = 415.0
+Note
+
+note.a4 = 440.0
+Note
+
+note.as4 = 466.0
+Note
+
+note.b4 = 494.0
+Note
+
+note.c5 = 523.0
+Note
+
+note.cs5 = 554.0
+Note
+
+note.d5 = 587.0
+Note
+
+note.ds5 = 622.0
+Note
+
+note.e5 = 659.0
+Note
+
+note.f5 = 698.0
+Note
+
+note.fs5 = 740.0
+Note
+
+note.g5 = 784.0
+Note
+
+note.gs5 = 831.0
+Note
+
+note.a5 = 880.0
+Note
+
+note.as5 = 932.0
+Note
+
+note.b5 = 988.0
+Note
+
+note.c6 = 1047.0
+Note
+
+note.cs6 = 1109.0
+Note
+
+note.d6 = 1175.0
+Note
+
+note.ds6 = 1245.0
+Note
+
+note.e6 = 1319.0
+Note
+
+note.f6 = 1397.0
+Note
+
+note.fs6 = 1480.0
+Note
+
+note.g6 = 1568.0
+Note
+
+note.gs6 = 1661.0
+Note
+
+note.a6 = 1760.0
+Note
+
+note.as6 = 1865.0
+Note
+
+note.b6 = 1976.0
+Note
+
+note.c7 = 2093.0
+Note
+
+note.cs7 = 2217.0
+Note
+
+note.d7 = 2349.0
+Note
+
+note.ds7 = 2489.0
+Note
+
+note.e7 = 2637.0
+Note
+
+note.f7 = 2794.0
+Note
+
+note.fs7 = 2960.0
+Note
+
+note.g7 = 3136.0
+Note
+
+note.gs7 = 3322.0
+Note
+
+note.a7 = 3520.0
+Note
+
+note.as7 = 3729.0
+Note
+
+note.b7 = 3951.0
+Note
+
+note.c8 = 4186.0
+Note
+
+note.cs8 = 4435.0
+Note
+
+note.d8 = 4699.0
+Note
+
+note.ds8 = 4978.0
+Note
+
