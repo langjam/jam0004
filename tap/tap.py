@@ -52,6 +52,11 @@ class InvalidOperatorNameError(Error):
         super().__init__((filename, 0, 0), "InvalidOperatorNameError", details)
 
 
+class UnkownVariableNameError(Error):
+    def __init__(self, filename: str, details):
+        super().__init__((filename, 0, 0), "UnkownVariableNameError", details)
+
+
 class Keyword:
     keywords = ["thumb",
                 "index",
@@ -536,10 +541,16 @@ class Interpreter:
         self.variables[var_name] = None
 
     def set_variable(self, var_name, value):
-        self.variables[var_name] = value
+        if var_name in self.variables:
+            self.variables[var_name] = value
+        else:
+            return UnkownVariableNameError(self.filename, f"'{var_name}'")
 
     def get_variable(self, var_name):
-        return self.variables[var_name]
+        if var_name in self.variables:
+            return self.variables[var_name]
+        else:
+            return UnkownVariableNameError(self.filename, f"'{var_name}'")
 
     def _print(self, to_print):
         for item in to_print:
