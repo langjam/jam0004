@@ -6,6 +6,7 @@
     <ul>
         <li><a href="#/">Home</a></li>
         <li><a href="#/intro">Introduction</a></li>
+        <li><a href="#/ide">IDE Support</a></li>
     </ul>
 </nav>
 
