@@ -7,6 +7,9 @@ does not report data to the user.
 In order to extract VC money, it is also to note that it is made with 100% safe rust.
 This means that there is a five order of magnitude increase in safety.
 
+There's a handy-dandy in-depth retrospective, available [[retrospective.org][here]]. It's probably a better
+starting point than this file. It will also be published as a post on my website, eventually.
+
 * Features!
 
 ** Custom-built virtual machine with optimized instruction set
@@ -49,7 +52,7 @@ with rust-gdb.
 
 Put a breakpoint at the start of the loop.
 
-~(gdb) b 19~
+~(gdb) b 23~
 
 Then run the program and advance to the breakpoint.
 
