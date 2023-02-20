@@ -10,12 +10,16 @@
 Left Hand Side
 by: xiuxiu62
 
+===========
+= Summary =
+===========
+
 A five digit state machine utilizing only the left half of your keyboard.
 LHS runs on a state machine comprized of an N-sized two dimensional memory and
 an M-sized stack.  Numerical values in the fifth radix are combined with
 character encoded instructions into expression blocks, seperated by whitspace.
 
-Your program may look like this
+Your program may look like this:
 355e d15e d 2e g2a br15q
 
 It may also look like this:
@@ -34,10 +38,32 @@ or even this:
 You're limited only by where your left hand can take you.
 On the other hand, you may be better off keeping things on one line.
 
-----------------------
-Numerical Instructions
-----------------------
-Numbers in LHS are in base 5, one for each finger on your left hand.
+================
+= Instructions =
+================
+
+core:
+    requirements:
+        the core language requires only that you have the rust toolchain installed.
+        See https://www.rust-lang.org/tools/install
+    use: 
+        change to the lhs-core directory and run `cargo run`.
+        you can intergrate lhs-core into a binary, but the provide binary is a repl.  
+
+web-ui: 
+    requirements:
+        the web interface requires you add a generic 32 bit wasm target.
+        to do so, run `rustup target add wasm32-unknown-unknown`
+    use:
+        run `cargo start` and connect through a browser at http://localhost:8000.  
+        The left panel is for input, the middle section displays the vm's memory and stack,
+        and the right panel displays the output.
+
+============
+= Numerics =
+============
+
+Numbers in LHS are in base 5: one for each finger on your left hand.
 If you don't have five fingers on your left hand, then I appologize
 for all the plays on words and you may want to pick another language.
 
@@ -59,12 +85,9 @@ Map:
 4: 4
 5: 0
 
-
-----------------------
-Character Instructions
-----------------------
-
-TODO: better documentation for character instructions
+==============
+= Characters =
+==============
 
 Map:
 q: decrement the value under the memory pointer
@@ -87,3 +110,4 @@ b: brrr, loop decrementing the value under the pre iteration memory pointer unti
    setting the memory pointer to 0 before iterating
 
 <s>: Nop, functions as an expression seperator
+
