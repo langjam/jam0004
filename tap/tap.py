@@ -380,6 +380,7 @@ class Interpreter:
         self.ast = ast
         self.variables = {}
         self._if_value = None
+        self.in_loop = False
 
     def parse(self):
         for value in self.ast:
@@ -497,12 +498,19 @@ class Interpreter:
             self.print_func(value, "error")
 
         elif value[0] == "loop":
-            print("Loop is not yet implemented")
-            return None
+            self.in_loop = True
+            while self.in_loop:
+                rest = value[1:]
+                for v in rest:
+                    ret_value = self.check_todo(v)
+                    if isinstance(ret_value, Error):
+                        return ret_value
+                    elif ret_value == "break":
+                        break
 
         elif value[0] == "break":
-            print("Break is not yet implemented")
-            return None
+            self.in_loop = False
+            return "break"
 
         elif value[0] == "if":
             idx += 1
@@ -588,7 +596,7 @@ class Interpreter:
 
     def _middle(self, type_, to_print):
         for item in to_print:
-            print(f"{type_}: ", item)
+            print(f"{type_}:", item)
 
     def _if(self, part1, part2):
         if part1 == part2:
