@@ -5,10 +5,6 @@ import numpy
 import sys
 
 
-# Show the line on which the error happens and then point with arrows
-# where the arrow is
-# This won't be super accurate as it will always only point out the first
-# character of the error, but it is a good start
 class Error:
     def __init__(self, position: tuple[str, int, int], error_name, details):
         self.position: tuple[str, int, int] = position
@@ -80,8 +76,6 @@ class TokenType(Enum):
     MODIFIER = "MODIFIER"
     END = "END"
     COLON = "COLON"
-    # EOF = "EOF"
-    # INDENT = "INDENT"
 
 
 @dataclass
@@ -112,37 +106,19 @@ class Lexer:
             self.column = 0
             self.line_number += 1
             self.new_line = False
-            # print(f"CURSOR--------------{self.cursor}")
 
         if self.cursor < len(self.code):
             self.current_char = self.code[self.cursor]
             if self.current_char == "\n":
-                # print("New line detected")
                 self.new_line = True
         else:
             self.current_char = None
-
-    # def previous(self):
-    #     self.cursor -= 1
-    #     self.column -= 1
-
-    #     if self.cursor >= 0:
-    #         self.current_char = self.code[self.cursor]
-    #         if self.current_char == self.column:
-    #             if self.prev_column is None:
-    #                 print("Warn: column cannot be reset")
-    #             else:
-    #                 self.column = self.prev_column
-    #             self.previous()
 
     def tokenize(self):
         tokens = []
 
         n = 0
         while self.current_char is not None and n <= 10:
-            # if self.current_char not in " \t\n":
-            # print("WHAT IS WRONG?", repr(self.current_char))
-
             if self.cursor+1 < len(self.code) and \
                self.current_char == "/" and self.code[self.cursor+1] == "/":
                 while self.current_char != "\n" and \
@@ -169,11 +145,7 @@ class Lexer:
                     return ret_value
                 tokens.append(ret_value)
                 self.advance()
-            # elif "n" in self.current_char:
-            #     tokens.append(Token(TokenType.EOF))
-            #     self.advance()
             elif self.current_char in " \t\n":
-                # tokens.append(Token(TokenType.INDENT))
                 self.advance()
             else:
                 print(n, "Illegal character error")
@@ -208,7 +180,6 @@ class Lexer:
 
             self.advance()
 
-        # print(number_str, dot_found)
         if dot_found:
             return Token(TokenType.FLOAT, (self.filename,
                          self.line_number, self.column), float(number_str))
@@ -218,8 +189,6 @@ class Lexer:
 
     def identify(self):
         curr_str = ""
-
-        # print(f"CURR CHAR: {self.current_char}")
 
         while self.current_char is not None:
             if curr_str in Keyword.keywords and self.current_char in " \t\n":
@@ -335,10 +304,8 @@ class Parser:
                             return SyntaxError(self.current_token.Position,
                                                "missing 'END' token")
                         else:
-                            # self.advance()
                             break
                 else:
-                    print("Error about to happen", self.current_token)
                     # This goes wrong with colons as colons have a value of None
                     return UnexpectedTokenError(self.current_token.Position,
                                                 f"'{self.current_token.Type.value}'")
@@ -409,7 +376,6 @@ class Interpreter:
 
     def check_todo(self, value):
         idx = 0
-        # print(value, len(value))
         if value[0] == "create_variable":
             idx += 1
             if not idx < len(value):
@@ -423,17 +389,13 @@ class Interpreter:
                 return InvalidArgumentNumberError(self.filename,
                                                   "Invalid number of args for thumb soft")
             new_values = value[2:]
-            # to_merge = []
             set_value = None
             for v in new_values:
                 if isinstance(v, list):
-                    # to_merge.append(self.check_todo(v))
                     set_value = self.check_todo(v)
                 else:
-                    # to_merge.append(v)
                     set_value = v
 
-            # print("?????", set_value, "???")
             return self.set_variable(value[idx], set_value)
 
         elif value[0] == "get_variable":
@@ -441,7 +403,6 @@ class Interpreter:
             if not idx < len(value):
                 return InvalidArgumentNumberError(self.filename,
                                                   "Invalid number of args for thumb medium")
-            # print(self.get_variable(value[idx]))
             return self.get_variable(value[idx])
 
         elif value[0] == "print":
@@ -458,7 +419,6 @@ class Interpreter:
                                                   "Invalid number of args for index hard")
             operator = value[1]
             new_values = value[2:]
-            # print(new_values)
             nums = []
             for v in new_values:
                 if isinstance(v, list):
@@ -542,13 +502,11 @@ class Interpreter:
         new_values = value[1:]
         to_print = []
         for v in new_values:
-            # print(v)
             if isinstance(v, list):
                 to_print.append(self.check_todo(v))
             else:
                 to_print.append(v)
 
-        # print("To_print", to_print)
         match type_:
             case "print":
                 self._print(to_print)
@@ -583,26 +541,16 @@ if __name__ == "__main__":
     file_name = str(sys.argv[1])
     with open(file_name, 'r') as f:
         simple_program = f.read()
-        # print(simple_program.split("\t"))
 
-    # print(simple_program)
     lexer = Lexer(file_name, simple_program)
     tokens = lexer.tokenize()
-    # print("#######TOKENIZING##########")
     if not isinstance(tokens, Error):
-        # print(tokens)
         parser = Parser(file_name, tokens)
-        # print("#########PARSING###########")
         ast = parser.parse()
         if not isinstance(parser, Error):
-            # print(ast)
-            # print("\n\n\n")
             interpreter = Interpreter(file_name, ast)
             result = interpreter.parse()
-            if not isinstance(result, Error):
-                # print(interpreter.variables)
-                pass
-            else:
+            if isinstance(result, Error):
                 print(result.show())
         else:
             print(ast.show())
