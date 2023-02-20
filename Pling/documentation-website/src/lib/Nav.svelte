@@ -1,6 +1,10 @@
+<script>
+    import plingIcon from './../assets/pling.svg';
+</script>
+
 <nav>
     <ul>
-        <li><img alt="icon" src="/pling.svg"></li>
+        <li><img alt="icon" src={plingIcon}></li>
         <li><h3>Pling!</h3></li>
     </ul>
     <ul>
