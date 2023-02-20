@@ -501,7 +501,6 @@ class Interpreter:
                     if isinstance(v, Error):
                         return v
                     parts.append(v)
-            print("PARTS", parts[0], parts[1])
             self._if_value = self._if(parts[0], parts[1])
 
         elif value[0] == "then":
