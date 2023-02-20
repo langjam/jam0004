@@ -458,10 +458,10 @@ class Interpreter:
             if str_operator:
                 match operator:
                     case "add":
-                        answer = nums[0]
+                        answer = str(nums[0])
                         rest = nums[1:]
                         for i in rest:
-                            answer += i
+                            answer += str(i)
                         return answer
                     case other:
                         return InvalidOperatorNameError(self.filename, f"'{operator}' for type 'str'")

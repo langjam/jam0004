@@ -10,9 +10,7 @@ thumb soft:
 	"var"
 	index hard:
 		"add"
-		"Hello "
-		"World"
-		"!"
+		3
 	end
 end
 
