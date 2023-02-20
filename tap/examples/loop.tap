@@ -36,3 +36,5 @@ ring soft:
 				"n"
 			end
 		end
+	end
+end
