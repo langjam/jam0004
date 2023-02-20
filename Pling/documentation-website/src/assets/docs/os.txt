@@ -1,0 +1,53 @@
+os
+Provides access to the operating system and runtime environment
+--------
+
+
+os.runtime.exit
+#os.runtime.exit -> [result]
+Terminates the currently running Java virtual machine
+
+os.getversion
+#os.getversion -> [result]
+Returns the version of the operating system
+
+os.runtime.gc
+#os.runtime.gc -> [result]
+Runs the garbage collector
+
+os.runtime.available
+#os.runtime.available -> [result]
+Returns the maximum amount of memory that the Java virtual machine will attempt to use
+
+os.getname
+#os.getname -> [result]
+Returns the name of the operating system
+
+os.getarch
+#os.getarch -> [result]
+Returns the architecture of the operating system
+
+os.runtime.free
+#os.runtime.free -> [result]
+Returns the amount of free memory in the Java Virtual Machine
+
+os.runtime.max
+#os.runtime.max -> [result]
+Returns the maximum amount of memory that the Java virtual machine will attempt to use
+
+os.runtime.exec
+#os.runtime.exec [command] -> [result]
+Executes the specified string command in a separate process
+
+os.runtime.exec
+#os.runtime.exec [command] [envp] -> [result]
+Executes the specified string command in a separate process
+
+os.runtime.total
+#os.runtime.total -> [result]
+Returns the total amount of memory in the Java virtual machine
+
+os.getjavaversion
+#os.getjavaversion -> [result]
+Returns the version of the Java runtime environment
+

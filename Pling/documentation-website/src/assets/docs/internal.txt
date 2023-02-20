@@ -1,0 +1,49 @@
+Builtins
+These are the builtins that are available in the standard library. You can use these functions without importing them.
+--------
+
+
+print
+#print <...any>
+Prints a string to the console
+
+printnf
+#printnf <...any>
+Prints a string to the console without a newline at the end
+
+add
+#add [num1] [num2] -> [result]
+Adds two numbers
+
+sub
+#sub [num1] [num2] -> [result]
+Subtracts two numbers
+
+mul
+#mul [num1] [num2] -> [result]
+Multiplies two numbers
+
+div
+#div [num1] [num2] -> [result]
+Divides two numbers
+
+gt
+#gt [num1] [num2] -> [result]
+Returns 1 if the first argument is greater than the second, else 0
+
+lt
+#lt [num1] [num2] -> [result]
+Returns 1 if the first argument is less than the second, else 0
+
+eq
+#eq [item1] [item2] -> [result]
+Returns 1 if the first argument is equal to the second, else 0
+
+neq
+#neq [item1] [item2] -> [result]
+Returns 1 if the first argument is not equal to the second, else 0
+
+sleep
+#sleep [time]
+Sleeps for a specified amount of time (in ms)
+
