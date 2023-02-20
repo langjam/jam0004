@@ -88,4 +88,6 @@ mvn clean install</pre>
     <pre>telnet 127.0.0.1 9876</pre>
 
     <p>If you are using multiple debuggers, the debugger will tell you the port it is using.</p>
+
+    <p>Want to learn Pling? Check out the <a href="#/intro">intro</a>!</p>
 </article>
