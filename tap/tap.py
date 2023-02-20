@@ -2,6 +2,7 @@ from enum import Enum
 from dataclasses import dataclass
 from typing import Optional
 import numpy
+import sys
 
 
 # Show the line on which the error happens and then point with arrows
@@ -578,7 +579,7 @@ class Interpreter:
             return False
 
 
-file_name = "examples\guide.tap"
+file_name = str(sys.argv[1])
 with open(file_name, 'r') as f:
     simple_program = f.read()
     # print(simple_program.split("\t"))
