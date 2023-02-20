@@ -440,35 +440,52 @@ class Interpreter:
             operator = value[1]
             new_values = value[2:]
             nums = []
+            str_operator = False
             for v in new_values:
                 if isinstance(v, list):
                     ret_value = self.check_todo(v)
                     if isinstance(ret_value, Error):
                         return ret_value
+                    elif isinstance(ret_value, str) and not str_operator:
+                        str_operator = True
                     nums.append(ret_value)
                 else:
+                    # Change this so it also changes str that are actual int or float
+                    if isinstance(v, str) and not str_operator:
+                        str_operator = True
                     nums.append(v)
 
-            match operator:
-                case "add":
-                    return sum(nums)
-                case "sub":
-                    answer = nums[0]
-                    rest = nums[1:]
-                    for i in rest:
-                        answer = answer-i
-                    return answer
-                case "mul":
-                    return numpy.prod(nums)
-                case "div":
-                    answer = nums[0]
-                    rest = nums[1:]
-                    for i in rest:
-                        answer = answer/i
-                    return answer
-                case other:
-                    # print("Reporting error")
-                    return InvalidOperatorNameError(self.filename, f"'{operator}'")
+            if str_operator:
+                match operator:
+                    case "add":
+                        answer = nums[0]
+                        rest = nums[1:]
+                        for i in rest:
+                            answer += i
+                        return answer
+                    case other:
+                        return InvalidOperatorNameError(self.filename, f"'{operator}' for type 'str'")
+            else:
+                match operator:
+                    case "add":
+                        return sum(nums)
+                    case "sub":
+                        answer = nums[0]
+                        rest = nums[1:]
+                        for i in rest:
+                            answer = answer-i
+                        return answer
+                    case "mul":
+                        return numpy.prod(nums)
+                    case "div":
+                        answer = nums[0]
+                        rest = nums[1:]
+                        for i in rest:
+                            answer = answer/i
+                        return answer
+                    case other:
+                        # print("Reporting error")
+                        return InvalidOperatorNameError(self.filename, f"'{operator}'")
 
         elif value[0] == "show_info":
             self.print_func(value, "info")
@@ -499,7 +516,6 @@ class Interpreter:
                 if isinstance(v, list):
                     ret_value = self.check_todo(v)
                     if isinstance(ret_value, Error):
-                        print("Error trigger")
                         return ret_value
                     parts.append(ret_value)
                 else:
