@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Memory<const N: usize> {
     pub inner: [[u8; N]; N],
     pub capacity: usize,

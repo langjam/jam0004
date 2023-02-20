@@ -96,6 +96,8 @@ pub mod language;
 pub mod runtime;
 pub mod util;
 
+use std::io::Stdout;
+
 use language::ParseResult;
 use runtime::{Machine, Program};
 
@@ -107,7 +109,7 @@ fn main() -> ParseResult<()> {
 d22e g 22a brd";
 
     let program = Program::try_from(source)?;
-    let mut machine: Machine<4, 4> = Machine::new();
+    let mut machine: Machine<Stdout, 8, 8> = Machine::default();
     machine.run(&program);
     println!("\nmachine state: {machine:#?}");
 

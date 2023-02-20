@@ -7,10 +7,9 @@ body {
 
 body {
   font: 14px "Helvetica Neue", Helvetica, Arial, sans-serif;
-  line-height: 1.4em;
+  line-height: 1rem;
   color: #4d4d4d;
-  min-width: 230px;
-  max-width: 1000px;
+  max-width: 100%;
   min-height: 100%;
   margin: 0 auto;
   -webkit-font-smoothing: antialiased;
@@ -20,12 +19,22 @@ body {
   background-color: #000000;
 }
 
-a {
+a, a:hover, a:visited, a:active {
+  color: inherit;
   text-decoration: none;
 }
 
+textarea {
+    border-top-style: hidden;
+    border-right-style: hidden;
+    border-left-style: hidden;
+    border-bottom-style: hidden;
+    resize: none;
+}
+            
 .app-title {
-  font-size: 3em;
+  font-size: 2.7rem;
+  color: aliceblue;
   width: 100%;
   font-weight: 100;
   text-align: center;
@@ -35,7 +44,8 @@ a {
 }
 
 .app-subtitle {
-  font-size: 1.5em;
+  font-size: 1.5rem;
+  color: aliceblue;
   width: 100%;
   font-weight: 100;
   text-align: center;
@@ -45,43 +55,54 @@ a {
 }
 
 .app-header {
-  height: 50px;
+  padding: 0.5rem 0 0.5rem 0;
 }
 
-
-.memory-container {
-  background: #000000;
-  margin: 4em 0 0px 0;
+.machine-component {
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0 0rem 0 0rem;
 }
 
-.memory-header {
+.machine-component-header {
   background-color: #000;
-  height: 3em;
+  height: 2.5rem;
   color: aliceblue;
 }
 
-.memory-title {
-  font-size: 24px;
+.machine-component-title {
+  font-size: 1.5rem;
   width: 100%;
   font-weight: 100;
   text-align: center;
 }
 
-.memory-footer {
-  background-color: #000000;
-  height: 30px;
-  padding: 10px;
+.machine-data-container {
+  border: 0.15rem solid #ccc;
 }
 
-.memory-footer-text {
-  color: aliceblue;
-  padding-left: 20px;
-  font-size: 14px;
+.machine-data-component {
+  display: inline-block;
+  vertical-align: middle;
+  padding: 0 1.5rem 0 1.5rem;
+}
+
+.machine-data-footer {
+  background-color: #000000;
+  padding: 0.5rem 0 0.5rem 0;
+}
+
+.machine-data-footer-text {
+  font-size: 1rem;
+}
+
+
+.memory-container {
+  height: 100%;
 }
 
 .memory-area {
-  width: 94%;
-  margin: 0px auto;
+  margin: 0 auto;
 }
 
 .memory {
@@ -92,25 +113,67 @@ a {
 }
 
 .memory-row {
-  line-height: 0;
 }
 
 .memory-cell {
   display: inline-block;
   vertical-align: middle;
-  width: 4em;
-  height: 4em;
-  line-height: 400%;
-  border: 0.5em solid #000;
+  width: 4rem;
+  height: 4rem;
+  line-height: 4rem;
+  border: 0.5rem solid #000;
 }
 
-.app-footer {
-  clear: both;
-  position: relative;
-  height 8em;
-  margin-top: 8em;
+
+.stack-container {
+  background: #000000;
+  margin: 2rem 0 1em 0;
 }
 
-.app-footer-text {
-  display: center;
+.stack-area {
+  width: 100%;
+  margin: 0px auto;
+}
+
+.stack {
+  display: inline-block;
+  background-color: aliceblue;
+  width: max-content;
+  overflow: hidden;
+}
+
+.stack-cell {
+  display: block;
+  vertical-align: middle;
+  width: 4rem;
+  height: 4rem;
+  line-height: 4rem;
+  border: 0.5rem solid #000;
+}
+
+.console-container {
+  border: 0.15rem solid #ccc;
+  margin: 2rem;
+  padding: 1rem;
+  width: 25rem;
+}
+
+.textarea {
+  height: 100%;
+  rows="42"; 
+  cols="50"; 
+  wrap="soft"; 
+  spellcheck="false";  
+  background: #fff;
+}
+
+.console-button-container {
+  margin: 1rem 0 0 0;
+}
+
+.console-button {
+  border: none;
+  font-size: 0.8rem;
+  padding: 0.5rem;
+  margin: 0 0.5rem 0 0.5rem;
 }

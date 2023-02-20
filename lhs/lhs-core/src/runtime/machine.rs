@@ -1,19 +1,23 @@
+use std::io::{self, Stdout, Write};
+
 use super::{Memory, Stack};
 use crate::language::{self, Instruction, ParseError, ParseResult};
 
-#[derive(Debug)]
-pub struct Machine<const M: usize = 8, const S: usize = 8> {
+#[derive(Debug, PartialEq)]
+pub struct Machine<W: Write, const M: usize = 8, const S: usize = 8> {
     pub memory: Memory<M>,
     pub stack: Stack<S>,
     pub program_counter: usize,
+    pub writer: W,
 }
 
-impl<const M: usize, const S: usize> Machine<M, S> {
-    pub fn new() -> Self {
+impl<W: Write, const M: usize, const S: usize> Machine<W, M, S> {
+    pub fn new(writer: W) -> Self {
         Self {
             memory: Memory::new(),
             stack: Stack::new(),
             program_counter: 0,
+            writer,
         }
     }
 
@@ -29,9 +33,9 @@ impl<const M: usize, const S: usize> Machine<M, S> {
     }
 }
 
-impl<const N: usize> Default for Machine<N> {
+impl<const N: usize> Default for Machine<Stdout, N, N> {
     fn default() -> Self {
-        Self::new()
+        Self::new(io::stdout())
     }
 }
 
@@ -50,11 +54,22 @@ impl Program {
     }
 }
 
-impl TryFrom<&'static str> for Program {
+impl TryFrom<&str> for Program {
     type Error = ParseError;
 
-    fn try_from(source: &'static str) -> ParseResult<Self> {
+    fn try_from(source: &str) -> ParseResult<Self> {
         let token_stream = language::tokenize(source);
+        let expression = language::parse(token_stream)?;
+
+        Ok(Self::from(expression))
+    }
+}
+
+impl TryFrom<&String> for Program {
+    type Error = ParseError;
+
+    fn try_from(source: &String) -> Result<Self, Self::Error> {
+        let token_stream = language::tokenize(&source);
         let expression = language::parse(token_stream)?;
 
         Ok(Self::from(expression))

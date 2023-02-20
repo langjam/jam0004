@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Stack<const N: usize> {
     pub inner: [u8; N],
     pub capacity: usize,
