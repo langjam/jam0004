@@ -1,0 +1,14 @@
+thumb hard:
+	"number"
+end
+
+thumb soft:
+	"number"
+	index medium: end
+end
+
+index soft:
+	thumb medium:
+		"number"
+	end
+end
