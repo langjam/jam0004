@@ -1,0 +1,48 @@
+// This function accepts an array of keys and a child type/value. It will create
+// an object with all properties from the array assigned to the child type. Note
+// that this function can create both objects and object types just as well
+// (because they are literally the same thing).
+
+const buildDictionary = fn (keys: string[], childType: any) any {
+	var i = 0;
+	const ret: any = {};
+
+	// # is an operator that return the array length
+
+	while (i < #keys) {
+		ret[keys[i]] = childType;
+		i += 1;
+	}
+	return ret;
+};
+
+const a = buildDictionary(["foo", "bar"], number);
+const b = buildDictionary(["baz"], any);
+
+println("a = " + to_string(a));
+println("b = " + to_string(b));
+
+// We created two values, `a` and `b`, which we can then use as types (or not).
+
+const x: a = { foo: 1, bar: 2 };
+const y: b = { baz: number };
+
+// `x` and `y` are now constrained to a type that was created at runtime.
+
+println("x = " + to_string(x));
+println("y = " + to_string(y));
+
+b["baz"] = 1 | 2;
+println("b = " + to_string(b));
+b["baz"] = buildDictionary(["qux"], 7);
+println("b = " + to_string(b));
+
+// If we mutate a variable in a way that it is no longer assignable to its
+// declared type, we get a runtime error. `a["foo"]` is supposed to hold
+// anything assignable to `number`. We can confirm that by getting the declared
+// type of `a` using `decltype` operator and checking its "foo" property.
+
+println((decltype a)["foo"]);
+
+println("Next line should fail");
+a["foo"] = "quux";

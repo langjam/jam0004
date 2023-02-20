@@ -1,0 +1,122 @@
+#!/bin/sh
+# Copyright (C) 2023 Matthew "strager" Glazar
+# yoink is a programming language for right-handed developers.
+#
+# This file is part of yoink.
+#
+# yoink is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# yoink is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with quick-lint-js. If not, see <https://www.gnu.org/licenses/>.
+
+set -e
+set -u
+
+cat >/tmp/yuiop.h <<EOF
+#include <stdio.h>
+#include <stdlib.h>
+
+#define loop for (;;)
+#define on if
+#define noloop break
+#define yoink return
+
+typedef int I;
+typedef void Nop;
+typedef char* Yoyo;
+
+static Yoyo no_yoyo = (Yoyo)NULL;
+static I no_h = EOF;
+
+static Nop p_yoyo(Yoyo yoyo) {
+    if (yoyo == no_yoyo) {
+        // Do nothing.
+    } else {
+        printf("%s", yoyo);
+        fflush(stdout);
+    }
+}
+
+static Nop p_h(I h) {
+    putchar(h);
+    fflush(stdout);
+}
+
+static Nop p_i(I i) {
+    printf("%d", i);
+    fflush(stdout);
+}
+
+static I in_h() {
+    return getchar();
+}
+
+static int g_argc;
+static Yoyo* g_argv;
+
+static Yoyo ui(I i) {
+    if (i >= g_argc) {
+        return no_yoyo;
+    }
+    return g_argv[i];
+}
+
+static Yoyo yoyo_mmoy(I n) {
+    return calloc(n + 1, 1);
+}
+
+static Yoyo lo_yoyo(Yoyo nom) {
+    FILE* file = fopen(nom, "rb");
+    if (file == NULL) {
+        return no_yoyo;
+    }
+
+    size_t buffer_size = 1024;
+    char* yoyo = malloc(buffer_size);
+    size_t total_read = 0;
+    for (;;) {
+        size_t size = fread(yoyo + total_read, 1, buffer_size, file);
+        if (size == 0) {
+            break;
+        }
+        total_read += size;
+        yoyo = reallocf(yoyo, total_read + buffer_size);
+    }
+    yoyo[total_read] = '\0';
+
+    if (ferror(file)) {
+        free(yoyo);
+        return no_yoyo;
+    }
+    fclose(file);
+
+    return yoyo;
+}
+
+_Noreturn Nop no_mo(I ok) {
+    exit(ok);
+}
+
+// Entry point, which should be defined by the user program:
+Nop mn();
+
+int main(int argc, char** argv) {
+    g_argc = argc;
+    g_argv = argv;
+
+    mn();
+    return 0;
+}
+EOF
+
+tr -c -d \'' \n\t67890=yuiop[]hjkl;nm,./^&*()_+YUIOP{}|HJKL:"NM<>?\\-' <"${1}" \
+    | cc -include /tmp/yuiop.h -o /tmp/yuiop.exe -x c /dev/stdin
+shift
+exec /tmp/yuiop.exe "${@:+${@}}"

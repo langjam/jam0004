@@ -1,0 +1,8 @@
+// Variables are declared with the var keyword
+var a = 1;
+
+// ...and redeclared without it
+a = #add a, 2;
+
+// outputs 3
+#print a;

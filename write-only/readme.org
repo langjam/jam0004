@@ -1,0 +1,141 @@
+This is the write-only wanguage, or 'wow'.
+
+It is a language that prevents bugs by forbidding any input-output operations and side-effects.
+This includes only an interpreter, which does not read any files or command line input, and
+does not report data to the user.
+
+In order to extract VC money, it is also to note that it is made with 100% safe rust.
+This means that there is a five order of magnitude increase in safety.
+
+* Features!
+
+** Custom-built virtual machine with optimized instruction set
+
+New virtual machine to complement the write-only model of computation.
+
+** General purpose programming language!
+
+It's equally unsuited for all applications!
+
+** Probably turing complete!
+
+Wasn't a design criterion, but might still work!
+
+** Over 2048 bytes of memory!
+
+256 x 64-bit unsigned integers plus 2 registers
+
+** Integrates with gdb!
+
+* Official instructions
+
+Compile the program with =cargo build=, then open the executable.
+
+The executable had no way of reading any wanted inputs, so it will
+sit in an endless loop. This is the only endorsed mode of operation for the
+language.
+
+* Unofficial instructions
+
+The interaction with the program requires writing registers with a debugger.
+This will void the warranty.
+
+You will need rust and rust-gdb
+
+Compile the program with =cargo build=, then open the executable
+with rust-gdb.
+
+~> rust-gdb target/debug/write-only~
+
+Put a breakpoint at the start of the loop.
+
+~(gdb) b 19~
+
+Then run the program and advance to the breakpoint.
+
+#+begin_src
+(gdb) r
+(gdb) c
+#+end_src
+
+Write your instruction into INS
+#+begin_src
+  (gdb) set INS.v.value = 0xA001
+#+end_src
+and then let the code execute the loop
+#+begin_src
+ (gdb) c 
+#+end_src
+
+The language does not allow you to read the output, but you can read the variables using gdb anyway.
+
+=(gdb) print ACC.v.value=
+
+and then write them down in a book somewhere.
+
+** Running a file
+
+You can put gdb instructions into a file, and load it
+into gdb with
+
+=source example.wow=
+
+* Complaints
+
+** I followed the official instructions and it didn't produce any meaningful results
+
+We only claimed it wouldn't produce bugs, not that it would produce useful output.
+In fact, because it can't produce any output at all, producing useful output would
+constitute a violation of the standard.
+
+** I encountered a bug while using the unofficial method
+
+Because the method is unofficial, we are going to strictly assign the blame on you for any
+software defects. Despite this, feel free to file an issue so that others may laugh at your
+ineptitude. 
+
+** Atomic values use unsafe on the backend, yet you claimed to not use unsafe
+
+If you hide the unsafe beneath the carpet, it's like it never existed.
+
+** I have a concern not addressed here
+
+Please file an issue, and we will take great pleasure in telling you that you are wrong.
+
+* Instruction set
+
+All instructions are conveniently named after its hexadecimal value.
+
+| Op code | Effect                                                                                                                              |
+|---------+-------------------------------------------------------------------------------------------------------------------------------------|
+| 0x0000  | Idle, wait 10ms                                                                                                                     |
+|---------+-------------------------------------------------------------------------------------------------------------------------------------|
+| 0xA000  | Zero Acc                                                                                                                            |
+| 0xA001  | Increment ACC                                                                                                                       |
+| 0xA002  | Decrement ACC                                                                                                                       |
+| 0xA01X  | Lsh ACC by (X + 1)                                                                                                                  |
+| 0xA02X  | Rsh ACC by (X + 1)                                                                                                                  |
+| 0xA030  | Bitwise NOT Acc                                                                                                                     |
+| 0xA1XX  | Add *XX to ACC                                                                                                                      |
+| 0xA2XX  | Sub *XX from ACC                                                                                                                    |
+| 0xA3XX  | Mul *XX to ACC                                                                                                                      |
+| 0xA4XX  | Divide ACC by *XX, if the division has a remainder, write 0 to ACC.                                                                 |
+| 0xA6XX  | Bitwise AND ACC with *XX                                                                                                            |
+| 0xA7XX  | Bitwise XOR ACC with *XX                                                                                                            |
+| 0xA8XX  | Bitwise OR ACC with *XX                                                                                                             |
+| 0xAAXX  | Write ACC to memory XX                                                                                                              |
+| 0xAB00  | Write ACC to all memory                                                                                                             |
+|---------+-------------------------------------------------------------------------------------------------------------------------------------|
+| 0xBAXX  | Set INS to *XX                                                                                                                      |
+| 0xBBXX  | Set INS to *XX, Setup deferred jammer to set BA(XX+1)                                                                               |
+| 0xBCXX  | Set INS to *XX, if (*XX & 0xFF0000) > 0, then setup deferred jammer to BXYY where YY is the value from the bitwise operation above. |
+|---------+-------------------------------------------------------------------------------------------------------------------------------------|
+| 0xC0XX  | If ACC == 0 -> Set INS to *XX                                                                                                       |
+| 0xC1XX  | If ACC != 0 -> Set INS to *XX                                                                                                       |
+| 0xC2XX  | If ACC > *XX -> Set INS to *(XX+1) else *(XX+2)                                                                                     |
+| 0xC3XX  | If ACC < *XX -> Set INS to *(XX+1) else *(XX+2)                                                                                     |
+|---------+-------------------------------------------------------------------------------------------------------------------------------------|
+| 0xFFFF  | Exit                                                                                                                                |
+|         |                                                                                                                                     |
+
+The race condition jammer is a thread that sleeps for 10ms and then writes a value to INS.

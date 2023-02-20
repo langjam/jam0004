@@ -1,0 +1,65 @@
+audio
+This module provides access to the audio output system. Import it with `use audio;`
+--------
+
+
+audio.begin
+#audio.begin
+Initializes the audio system
+
+audio.initted
+#audio.initted -> [result]
+Returns 1 if the audio system is initialized
+
+audio.new
+#audio.new -> [handle]
+Creates a new sound handle (number)
+
+audio.tostring
+#audio.tostring [handle] -> [info]
+Get printable information about this handle
+
+audio.start
+#audio.start [handle]
+Plays the sound
+
+audio.stop
+#audio.stop [handle]
+Stops the sound
+
+audio.microphone.new
+#audio.microphone.new -> [handle]
+Creates a new microphone handle (number)
+
+audio.silence.new
+#audio.silence.new -> [handle]
+Creates a new silence handle (number)
+
+audio.bindsource
+#audio.bindsource [handle] [source]
+Binds a source to a sound for playback
+
+audio.xyz
+#audio.xyz [handle] [x] [y] [z]
+Sets the position of the sound
+
+audio.sine.new
+#audio.sine.new -> [handle]
+Creates a new sine wave handle (number)
+
+audio.sine.frequency
+#audio.sine.frequency [handle] [frequency]
+Sets the frequency of the sine wave
+
+audio.sine.volume
+#audio.sine.volume [handle] [volume]
+Sets the volume of the sine wave
+
+audio.efx.pitch
+#audio.efx.pitch [handle] [pitch]
+Applies a pitch effect to the sound
+
+audio.efx.reverb
+#audio.efx.reverb [handle]
+Applies a reverb effect to the sound
+
