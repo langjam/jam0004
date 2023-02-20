@@ -1,8 +1,27 @@
-You need Python v3.6+ it is tested on version 3.10 then install dependencies by running ```pip3 install -r requirements.txt```. This will install Numpy onto your system. Then you can just run ```python3 tap.py file.tap```
+# Tap
+INSERT WHAT TAP IS
 
-Hello World in Tap
+## Setup
+1. Install Python v3.6+.
+2. Run ```pip3 install -r requirements.txt``` this will install Numpy onto your system.
+3. Run your ```.tap``` files using ```python3 tap.py file.tap```
+
+## Examples
+```python3 tap.py examples\hello_world.tap```
 ```
 index soft:
   "Hello World!"
 end
+```
+Output:
+```
+Hello World!
+```
+
+```examples\.... .tap```
+
+```THE CODE GOES HERE```
+Output
+```
+OUTPUT GOES HERE
 ```
