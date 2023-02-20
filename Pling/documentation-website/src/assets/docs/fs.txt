@@ -1,0 +1,25 @@
+fs
+Filesystem utilities
+--------
+
+
+fs.mkdir
+#fs.mkdir [dir] -> [1/0]
+Creates a directory (Paths starting with ; are relative to the parsed file)
+
+fs.rmdir
+#fs.rmdir [dir] -> [1/0]
+Removes a directory (Paths starting with ; are relative to the parsed file)
+
+fs.read
+#fs.read [file] -> [contents]
+Reads a file (Paths starting with ; are relative to the parsed file)
+
+fs.write
+#fs.write [file] [contents] -> [1/0]
+Writes a file (Paths starting with ; are relative to the parsed file)
+
+fs.exists
+#fs.exists [file] -> [1/0]
+Checks if a file exists (Paths starting with ; are relative to the parsed file)
+
