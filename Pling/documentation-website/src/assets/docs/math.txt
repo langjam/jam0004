@@ -1,0 +1,37 @@
+math
+Provides math functions like sin, cos, tan, etc.
+--------
+
+
+math.sin
+#math.sin [num] -> [result]
+Returns the trigonometric sine of an angle.
+
+math.cos
+#math.cos [num] -> [result]
+Returns the trigonometric cosine of an angle.
+
+math.tan
+#math.tan [num] -> [result]
+Returns the trigonometric tangent of an angle.
+
+math.asin
+#math.asin [num] -> [result]
+Returns the trigonometric arc sine of an angle.
+
+math.acos
+#math.acos [num] -> [result]
+Returns the trigonometric arc cosine of an angle.
+
+math.atan
+#math.atan [num] -> [result]
+Returns the trigonometric arc tangent of an angle.
+
+math.atan2
+#math.atan2 [num] [num] -> [result]
+Returns the trigonometric arc tangent of an angle.
+
+math.torads
+#math.torads [num] -> [result]
+Converts an angle measured in degrees to an approximately equivalent angle measured in radians.
+

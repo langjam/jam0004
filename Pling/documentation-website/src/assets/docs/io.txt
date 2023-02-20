@@ -1,0 +1,17 @@
+io
+Provides functions and utilities for IO operations
+--------
+
+
+io.readln
+#io.readln -> [line]
+Reads a line from the console
+
+io.parsenum
+#io.parsenum [string] -> [number]
+Parses a number from a string
+
+io.printcolor
+#io.printcolor [color] [string]
+Prints a string with a color [BLACK, RED, GREEN, YELLOW, BLUE, PURPLE, CYAN, WHITE]
+

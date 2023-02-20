@@ -1,0 +1,21 @@
+http
+Some HTTP functions
+--------
+
+
+http.get
+#http.get [url] -> [result]
+Gets the contents of a URL
+
+http.put
+#http.put [url] [body] -> [result]
+Puts data to a URL
+
+http.delete
+#http.delete [url] -> [result]
+Deletes data from a URL
+
+http.post
+#http.post [url] [body] -> [result]
+Posts data to a URL
+

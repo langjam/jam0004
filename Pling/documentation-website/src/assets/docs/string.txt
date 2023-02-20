@@ -1,0 +1,65 @@
+string
+Provides functions for working with strings.
+--------
+
+
+string.length
+#string.length [string] -> [result]
+Returns the length of a string
+
+string.index
+#string.index [string] [char] -> [result]
+Returns the index of a character in a string
+
+string.charat
+#string.charat [string] [index] -> [result]
+Returns the character at a given index
+
+string.startswith
+#string.startswith [string] [char] -> [result]
+Returns whether a string starts with a character
+
+string.lastindex
+#string.lastindex [string] [char] -> [result]
+Returns the last index of a character in a string
+
+string.substring
+#string.substring [string] [start] [end] -> [result]
+Returns a substring of a string
+
+string.replace
+#string.replace [string] [start] [end] [replacement] -> [result]
+Replaces a substring of a string
+
+string.matches
+#string.matches [string] [regex] -> [result]
+Returns whether a string matches a regex
+
+string.split
+#string.split [string] [regex] [matchNum] -> [result]
+Splits a string by a regex
+
+string.trim
+#string.trim [string] -> [result]
+Trims a string
+
+string.endswith
+#string.endswith [string] [char] -> [result]
+Returns whether a string ends with a character
+
+string.concat
+#string.concat [string] [string] -> [result]
+Concatenates 2 strings
+
+string.contains
+#string.contains [string] [char] -> [result]
+Returns whether a string contains a character
+
+string.lower
+#string.lower [string] -> [result]
+Converts a string to lowercase
+
+string.upper
+#string.upper [string] -> [result]
+Converts a string to uppercase
+

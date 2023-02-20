@@ -1,0 +1,29 @@
+time
+Time builtins
+--------
+
+
+time.current
+#time.current -> [result]
+Returns the current time in milliseconds
+
+time.timezone
+#time.timezone -> [result]
+Returns the current timezone
+
+time.date
+#time.date -> [result]
+Returns the current date
+
+time.timezone.id
+#time.timezone.id -> [result]
+Returns the current timezone id
+
+time.format
+#time.format [time] -> [result]
+Formats the time to days hours minutes seconds
+
+time.format.short
+#time.format.short [time] -> [result]
+Formats the time to days hours minutes seconds
+
