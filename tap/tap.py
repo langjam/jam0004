@@ -579,31 +579,32 @@ class Interpreter:
             return False
 
 
-file_name = str(sys.argv[1])
-with open(file_name, 'r') as f:
-    simple_program = f.read()
-    # print(simple_program.split("\t"))
+if __name__ == "__main__":
+    file_name = str(sys.argv[1])
+    with open(file_name, 'r') as f:
+        simple_program = f.read()
+        # print(simple_program.split("\t"))
 
-# print(simple_program)
-lexer = Lexer(file_name, simple_program)
-tokens = lexer.tokenize()
-# print("#######TOKENIZING##########")
-if not isinstance(tokens, Error):
-    # print(tokens)
-    parser = Parser(file_name, tokens)
-    # print("#########PARSING###########")
-    ast = parser.parse()
-    if not isinstance(parser, Error):
-        # print(ast)
-        # print("\n\n\n")
-        interpreter = Interpreter(file_name, ast)
-        result = interpreter.parse()
-        if not isinstance(result, Error):
-            # print(interpreter.variables)
-            pass
+    # print(simple_program)
+    lexer = Lexer(file_name, simple_program)
+    tokens = lexer.tokenize()
+    # print("#######TOKENIZING##########")
+    if not isinstance(tokens, Error):
+        # print(tokens)
+        parser = Parser(file_name, tokens)
+        # print("#########PARSING###########")
+        ast = parser.parse()
+        if not isinstance(parser, Error):
+            # print(ast)
+            # print("\n\n\n")
+            interpreter = Interpreter(file_name, ast)
+            result = interpreter.parse()
+            if not isinstance(result, Error):
+                # print(interpreter.variables)
+                pass
+            else:
+                print(result.show())
         else:
-            print(result.show())
+            print(ast.show())
     else:
-        print(ast.show())
-else:
-    print(tokens.show())
+        print(tokens.show())
