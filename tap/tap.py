@@ -303,7 +303,10 @@ class Parser:
                                  self.current_token.Type == TokenType.FLOAT:
                                 cur_ast.append(self.current_token.Value)
                             elif self.current_token.Type == TokenType.KEYWORD:
-                                cur_ast.append(self.uncover())
+                                ret_value = self.uncover()
+                                if isinstance(ret_value, Error):
+                                    return ret_value
+                                cur_ast.append(ret_value)
                             self.advance()
                         if not end_found and self.current_token is not None:
                             return SyntaxError(self.current_token.Position,
@@ -312,7 +315,6 @@ class Parser:
                             break
                 else:
                     # This goes wrong with colons as colons have a value of None
-                    print("That cant be it right?")
                     return UnexpectedTokenError(self.current_token.Position,
                                                 f"'{self.current_token.Type.value}'")
             elif previous_token.Type == TokenType.KEYWORD and \
@@ -581,7 +583,6 @@ if __name__ == "__main__":
     if not isinstance(tokens, Error):
         parser = Parser(file_name, tokens)
         ast = parser.parse()
-        print(ast)
         if not isinstance(parser, Error):
             interpreter = Interpreter(file_name, ast)
             result = interpreter.parse()

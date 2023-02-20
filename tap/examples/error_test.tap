@@ -48,7 +48,7 @@ end
 
 pinky soft:
 	"2"
-	thumb medium
+	thumb medium:
 		"if"
 	end
 end
