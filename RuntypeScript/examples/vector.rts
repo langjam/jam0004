@@ -1,0 +1,24 @@
+const Vector = fn (dimensions: number) any {
+	var i = 0;
+	const ret: any = [];
+	while (i < dimensions) {
+		ret[i] = number;
+		i += 1;
+	}
+	return ret;
+};
+
+const u: Vector(2) = [1, 2];
+println("         u = " + to_string(u));
+println("decltype u = " + to_string(decltype u));
+
+println("");
+
+const v: Vector(3) = [3, 4, 5];
+println("         v = " + to_string(v));
+println("decltype v = " + to_string(decltype v));
+
+println("");
+
+println("Next line should fail");
+const p: Vector(4) = [1];

@@ -1,0 +1,79 @@
+// Turn your volume down!
+
+use audio;
+use note;
+
+#audio.begin;
+
+#printnf `Audio initialized: `;
+#print #audio.initted;
+
+// Time of a quarter note in ms (represented with a 4)
+var TIME4 = 300;
+
+// Time of a dotted quarter note in ms (represented with a -4)
+var TIME4DOT = 450;
+
+// Time of an eighth note in ms (represented with an 8)
+var TIME8 = 250;
+
+// Time of a dotted eighth note in ms (represented with a -8)
+var TIME8DOT = 175;
+
+// Time of a sixteenth note in ms (represented with a 16)
+var TIME16 = 125;
+
+// Time of a dotted sixteenth note in ms (represented with a -16)
+var TIME16DOT = 187;
+
+// Time of a half note in ms (represented with a 2)
+var TIME2 = 700;
+
+
+fun playnote #note #duration [
+    // #audio.sine.volume sine, 0;
+    // #sleep 2;
+    // #audio.sine.volume sine, 1;
+    // #audio.sine.frequency sine, note;
+    // #sleep duration;
+    var handle = #audio.new;
+    var sine = #audio.sine.new;
+    #audio.sine.volume sine, 1;
+    #audio.bindsource handle, sine;
+    #audio.sine.frequency sine, note;
+    #audio.start handle;
+    #sleep duration;
+    #audio.stop handle;
+    #sleep 400;
+]
+
+
+
+#playnote note.a4, TIME16;
+#playnote note.b4, TIME16;
+#playnote note.d5, TIME16;
+#playnote note.b4, TIME16;
+#playnote note.fs5, TIME8DOT;
+#playnote note.fs5, TIME8DOT;
+#playnote note.e5, TIME4DOT;
+#playnote note.a4, TIME16;
+#playnote note.b4, TIME16;
+#playnote note.d5, TIME16;
+#playnote note.b4, TIME16;
+#playnote note.e5, TIME8DOT;
+#playnote note.e5, TIME8DOT;
+#playnote note.d5, TIME8DOT;
+#playnote note.cs5, TIME16;
+#playnote note.b4, TIME8;
+#playnote note.a4, TIME16;
+#playnote note.b4, TIME16;
+#playnote note.d5, TIME16;
+#playnote note.b4, TIME16;
+#playnote note.d5, TIME4;
+#playnote note.e5, TIME8;
+#playnote note.cs5, TIME8DOT;
+#playnote note.b4, TIME16;
+#playnote note.a4, TIME4;
+#playnote note.a4, TIME8;
+#playnote note.e5, TIME4;
+#playnote note.d5, TIME2;

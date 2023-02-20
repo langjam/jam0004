@@ -1,0 +1,14 @@
+The following files are Copyright 2023 Matthew "strager" Glazar and are
+distributed under the GPL-3.0-or-later software license (see COPYING.compiler):
+
+* README
+* yuiop
+* yuiop.md
+
+The following files are Copyright 2023 Matthew "strager" Glazar and are
+distributed under the CC0-1.0 software license (see COPYING.examples):
+
+* hllo.yuiop
+* ho.yuiop
+* put.yuiop
+* yup.yuiop

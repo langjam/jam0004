@@ -1,0 +1,19 @@
+// Who doesn't love the fibonacci sequence?
+
+fun fib #n [
+    if #lt n, 2 [
+        ret n;
+    ] else [
+        var nsub1 = #sub n, 1;
+        var nsub2 = #sub n, 2;
+
+        var fib1 = #fib nsub1;
+        var fib2 = #fib nsub2;
+
+        var result = #add fib1, fib2;
+        ret result;
+    ]
+]
+
+// Let's try it out!
+#print #fib 10;

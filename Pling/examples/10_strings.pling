@@ -1,0 +1,6 @@
+use string;
+
+var concatedstring = #string.concat `hello`, `world`;
+var stringlength = #string.length concatedString;
+
+#print concatedstring, `is`, stringlength, `characters long`;

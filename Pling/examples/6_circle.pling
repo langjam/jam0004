@@ -1,0 +1,48 @@
+// Circle around the user's head
+
+use audio;
+use math;
+
+#audio.begin;
+
+#printnf `Audio initialized: `;
+#print #audio.initted;
+
+var handle = #audio.new;
+var source = #audio.microphone.new;
+
+#audio.bindsource handle, source;
+#audio.start handle;
+
+var x = 0;
+var y = 0;
+var z = 1;
+var dir = 1;
+var gvar = 0;
+
+var cutmin = #sub 0, 0.9;
+
+while 1 [
+     #audio.xyz handle, x, y, z;
+
+     if dir [
+          x = #add x, 0.01;
+
+          gvar = #gt x, 1;
+
+          if gvar [
+              dir = 0;
+          ]
+
+     ] else [
+          x = #sub x, 0.01;
+
+          gvar = #lt x, cutmin;
+
+          if gvar [
+              dir = 1;
+          ]
+     ]
+
+     #sleep 10;
+]
