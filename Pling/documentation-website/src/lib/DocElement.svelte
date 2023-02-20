@@ -1,27 +1,35 @@
-<script>
-    export let title;
-    export let doc;
+<script lang="ts">
+    import {parseDoc} from "../docParser.js";
+
+    export let doc: String
+
+    let parsedDoc
+    $: parsedDoc = parseDoc(doc)
+
+    function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
 </script>
 
-<h1>{title}</h1>
-<div class="doc" id={title}>
-    {#await fetch(doc).then((response) => response.text())}
-    <div class="loading">Loading...</div>
-    {:then response}
-        <p>
-            {response.split('\n')[1]}
-        </p>
+<!-- preamble -->
+<h1>{ capitalizeFirstLetter(parsedDoc.name) }</h1>
+<p>{ parsedDoc.description }</p>
+<em>Include with <code>use {parsedDoc.name};</code></em>
 
-        <div class="content">
-            {#each response.split('\n').slice(2) as line}
-                {#if line.startsWith('#')}
-                    <h3>{line.slice(1)}</h3>
-                {:else}
-                    <p>{line}</p>
-                {/if}
-            {/each}
-        </div>
-    {:catch error}
-        <div class="error">{error.message}</div>
-    {/await}
-</div>
+<br>
+<br>
+
+<!-- Function -->
+{#each parsedDoc.functions as fn}
+    <h3>{ fn.name }</h3>
+    Usage: <code>{ fn.usage }</code>
+    <p>{ fn.description }</p>
+    <br />
+{/each}
+
+<!-- Variable -->
+<ul>
+    {#each parsedDoc.variables as variable}
+        <li><code>{ variable.name }</code> = { variable.value }</li>
+    {/each}
+</ul>

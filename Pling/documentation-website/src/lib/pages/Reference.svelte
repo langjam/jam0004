@@ -9,7 +9,23 @@
     import osDoc from "../../assets/docs/os.txt";
     import stringDoc from "../../assets/docs/string.txt";
     import timeDoc from "../../assets/docs/time.txt";
-    import DocElement from "../DocElement.svelte";
+    import DocElementWrapper from "../DocElementWrapper.svelte";
+    import Footer from "../../Footer.svelte";
+
+    function scrollToElement(id) {
+        // scroll to element with id (but offset by 100px)
+        const element = document.getElementById(id);
+        const offset = 100;
+        const bodyRect = document.body.getBoundingClientRect().top;
+        const elementRect = element.getBoundingClientRect().top;
+        const elementPosition = elementRect - bodyRect;
+        const offsetPosition = elementPosition - offset;
+
+        window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth"
+        });
+    }
 </script>
 
 <div class="other">
@@ -20,53 +36,49 @@
 
             <ul>
                 <li>
-                    <a href="#">
-                        <b>Standard built-in modules</b>
-                    </a>
-                    <ul>
-                        <li>
-                            <a>Audio API</a>
-                        </li>
-                        <li>
-                            <a>File System API</a>
-                        </li>
-                        <li>
-                            <a>HTTP API</a>
-                        </li>
-                        <li>
-                            <a>Internal API</a>
-                        </li>
-                        <li>
-                            <a>IO API</a>
-                        </li>
-                        <li>
-                            <a>Math API</a>
-                        </li>
-                        <li>
-                            <a>Note API</a>
-                        </li>
-                        <li>
-                            <a>OS API</a>
-                        </li>
-                        <li>
-                            <a>String API</a>
-                        </li>
-                        <li>
-                            <a>Time API</a>
-                        </li>
-                    </ul>
+                    <a on:click={() => scrollToElement("audio")}>Audio API</a>
+                </li>
+                <li>
+                    <a on:click={() => scrollToElement("file")}>File System API</a>
+                </li>
+                <li>
+                    <a on:click={() => scrollToElement("http")}>HTTP API</a>
+                </li>
+                <li>
+                    <a on:click={() => scrollToElement("internal")}>Builtin API</a>
+                </li>
+                <li>
+                    <a on:click={() => scrollToElement("io")}>IO API</a>
+                </li>
+                <li>
+                    <a on:click={() => scrollToElement("math")}>Math API</a>
+                </li>
+                <li>
+                    <a on:click={() => scrollToElement("note")}>Note API</a>
+                </li>
+                <li>
+                    <a on:click={() => scrollToElement("os")}>OS API</a>
+                </li>
+                <li>
+                    <a on:click={() => scrollToElement("string")}>String API</a>
+                </li>
+                <li>
+                    <a on:click={() => scrollToElement("time")}>Time API</a>
+                </li>
             </ul>
         </fieldset>
 
-        <DocElement title="Audio API" doc={audioDoc} />
-        <DocElement title="File System API" doc={fsDoc} />
-        <DocElement title="HTTP API" doc={httpDoc} />
-        <DocElement title="Internal API" doc={internalDoc} />
-        <DocElement title="IO API" doc={ioDoc} />
-        <DocElement title="Math API" doc={mathDoc} />
-        <DocElement title="Note API" doc={noteDoc} />
-        <DocElement title="OS API" doc={osDoc} />
-        <DocElement title="String API" doc={stringDoc} />
-        <DocElement title="Time API" doc={timeDoc} />
+        <DocElementWrapper doc={audioDoc} title="audio"/>
+        <DocElementWrapper doc={fsDoc} title="file"/>
+        <DocElementWrapper doc={httpDoc} title="http"/>
+        <DocElementWrapper doc={internalDoc} title="internal"/>
+        <DocElementWrapper doc={ioDoc} title="io"/>
+        <DocElementWrapper doc={mathDoc} title="math"/>
+        <DocElementWrapper doc={noteDoc} title="note"/>
+        <DocElementWrapper doc={osDoc} title="os"/>
+        <DocElementWrapper doc={stringDoc} title="string"/>
+        <DocElementWrapper doc={timeDoc} nohr={true} title="time"/>
     </article>
+
+    <Footer/>
 </div>
