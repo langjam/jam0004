@@ -13,7 +13,7 @@ class Error:
 
     def show(self):
         error = f"{self.position[0]} {self.position[1]}:{self.position[2]}\n"
-        error += f"{self.error_name}: {self.details}\n"
+        error += f"{self.error_name}: {self.details}"
         return error
 
 
@@ -55,6 +55,11 @@ class InvalidOperatorNameError(Error):
 class UnkownVariableNameError(Error):
     def __init__(self, filename: str, details):
         super().__init__((filename, 0, 0), "UnkownVariableNameError", details)
+
+
+class InitializeVariableError(Error):
+    def __init__(self, filename: str, details):
+        super().__init__((filename, 0, 0), "InitializeVariableError", details)
 
 
 class Keyword:
@@ -543,7 +548,11 @@ class Interpreter:
                 self._middle(type_, to_print)
         
     def create_variable(self, var_name):
-        self.variables[var_name] = None
+        if var_name in self.variables:
+            return InitializeVariableError(self.filename,
+                                           f"cannot initialize variable '{var_name}' twice")
+        else:
+            self.variables[var_name] = None
 
     def set_variable(self, var_name, value):
         if var_name in self.variables:
