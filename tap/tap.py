@@ -376,7 +376,13 @@ class Interpreter:
 
     def check_todo(self, value):
         idx = 0
-        if value[0] == "create_variable":
+
+        # print("VALUE: ", value)
+        if isinstance(value, Error):
+            return value
+        elif value is None:
+            return None
+        elif value[0] == "create_variable":
             idx += 1
             if not idx < len(value):
                 return InvalidArgumentNumberError(self.filename,
@@ -393,6 +399,8 @@ class Interpreter:
             for v in new_values:
                 if isinstance(v, list):
                     set_value = self.check_todo(v)
+                    if isinstance(set_value, Error):
+                        return set_value 
                 else:
                     set_value = v
 
@@ -422,7 +430,10 @@ class Interpreter:
             nums = []
             for v in new_values:
                 if isinstance(v, list):
-                    nums.append(v)
+                    ret_value = self.check_todo(v)
+                    if isinstance(ret_value, Error):
+                        return ret_value
+                    nums.append(ret_value)
                 else:
                     nums.append(v)
 
@@ -430,7 +441,6 @@ class Interpreter:
                 case "add":
                     return sum(nums)
                 case "sub":
-                    
                     answer = nums[0]
                     rest = nums[1:]
                     for i in rest:
@@ -444,7 +454,8 @@ class Interpreter:
                     for i in rest:
                         answer = answer/i
                     return answer
-                case "other":
+                case other:
+                    # print("Reporting error")
                     return InvalidOperatorNameError(self.filename, f"'{operator}'")
 
         elif value[0] == "show_info":
@@ -474,7 +485,10 @@ class Interpreter:
             parts = []
             for v in new_values:
                 if isinstance(v, list):
-                    parts.append(self.check_todo(v))
+                    ret_value = self.check_todo(v)
+                    if isinstance(ret_value, Error):
+                        return ret_value
+                    parts.append(ret_value)
                 else:
                     parts.append(v)
             self._if_value = self._if(parts[0], parts[1])
@@ -485,7 +499,9 @@ class Interpreter:
             elif self._if_value is True:
                 new_values = value[1:]
                 for v in new_values:
-                    self.check_todo(v)
+                    ret_value = self.check_todo(v)
+                    if isinstance(ret_value, Error):
+                        return ret_value
 
         elif value[0] == "else":
             if self._if_value is None:
@@ -493,9 +509,12 @@ class Interpreter:
             elif self._if_value is False:
                 new_values = value[1:]
                 for v in new_values:
-                    self.check_todo(v)
+                    ret_value = self.check_todo(v)
+                    if isinstance(ret_value, Error):
+                        return ret_value
 
         else:
+            print("Hello")
             return None
 
     def print_func(self, value, type_):
