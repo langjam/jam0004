@@ -1,4 +1,7 @@
-use std::io::{self, Stdout, Write};
+use std::{
+    fmt::Display,
+    io::{self, Stdout, Write},
+};
 
 use super::{Memory, Stack};
 use crate::language::{self, Instruction, ParseError, ParseResult};
@@ -22,6 +25,11 @@ impl<W: Write, const M: usize, const S: usize> Machine<W, M, S> {
     }
 
     pub fn run(&mut self, program: &Program) {
+        if program.len() == 1 {
+            self.evaluate_expression(program, &program.0[0]);
+            return;
+        }
+
         loop {
             self.evaluate_expression(program, &program.0[self.program_counter]);
             if self.program_counter == program.len() - 1 {
@@ -84,5 +92,27 @@ impl From<Expression> for Program {
             .collect::<Vec<Expression>>();
 
         Self(inner)
+    }
+}
+
+impl<W: Write, const M: usize, const S: usize> Display for Machine<W, M, S> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let pointers = format!(
+            "memory: {}          stack: {}\n",
+            self.memory.pointer, self.stack.pointer
+        );
+        let cells = self.memory.iter().zip(self.stack.iter()).fold(
+            "".to_owned(),
+            |acc, (mem_row, stack_frame)| {
+                let row = mem_row
+                    .iter()
+                    .fold("".to_owned(), |acc, cell| format!("{acc} {cell}"));
+
+                format!("{acc}|{row} | {stack_frame} |\n")
+            },
+        );
+        let counter = format!("program counter: {}", self.program_counter);
+
+        write!(f, "{pointers}{cells}{counter}")
     }
 }

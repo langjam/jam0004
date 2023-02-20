@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 #[derive(Debug, PartialEq)]
 pub struct Memory<const N: usize> {
     pub inner: [[u8; N]; N],
@@ -47,3 +49,17 @@ impl<const N: usize> IntoIterator for Memory<N> {
         todo!()
     }
 }
+
+// impl<const N: usize> Display for Memory<N> {
+//     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+//         let message = self.inner.iter().fold("".to_owned(), |acc, row| {
+//             format!(
+//                 "{acc}{} |\n",
+//                 row.iter()
+//                     .fold("|".to_owned(), |acc, cell| format!("{acc} {cell}"))
+//             )
+//         });
+
+//         write!(f, "{message}")
+//     }
+// }
