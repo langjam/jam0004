@@ -36,3 +36,29 @@ index soft:
 		"var"
 	end
 end
+
+thumb hard:
+	"if"
+end
+
+thumb soft:
+	"if"
+	2
+end
+
+pinky soft:
+	"2"
+	thumb medium
+		"if"
+	end
+end
+pinky medium:
+	index soft:
+		"It works as expected"
+	end
+end
+pinky hard:
+	index soft:
+		"It does not work as expected"
+	end
+end

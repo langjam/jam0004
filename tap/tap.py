@@ -312,6 +312,7 @@ class Parser:
                             break
                 else:
                     # This goes wrong with colons as colons have a value of None
+                    print("That cant be it right?")
                     return UnexpectedTokenError(self.current_token.Position,
                                                 f"'{self.current_token.Type.value}'")
             elif previous_token.Type == TokenType.KEYWORD and \
@@ -382,7 +383,6 @@ class Interpreter:
     def check_todo(self, value):
         idx = 0
 
-        # print("VALUE: ", value)
         if isinstance(value, Error):
             return value
         elif value is None:
@@ -492,10 +492,14 @@ class Interpreter:
                 if isinstance(v, list):
                     ret_value = self.check_todo(v)
                     if isinstance(ret_value, Error):
+                        print("Error trigger")
                         return ret_value
                     parts.append(ret_value)
                 else:
+                    if isinstance(v, Error):
+                        return v
                     parts.append(v)
+            print("PARTS", parts[0], parts[1])
             self._if_value = self._if(parts[0], parts[1])
 
         elif value[0] == "then":
@@ -519,8 +523,8 @@ class Interpreter:
                         return ret_value
 
         else:
-            print("Hello")
             return None
+            # return UnexpectedTokenError((self.filename, 0, 0), f"'{value}'")
 
     def print_func(self, value, type_):
         new_values = value[1:]
@@ -577,6 +581,7 @@ if __name__ == "__main__":
     if not isinstance(tokens, Error):
         parser = Parser(file_name, tokens)
         ast = parser.parse()
+        print(ast)
         if not isinstance(parser, Error):
             interpreter = Interpreter(file_name, ast)
             result = interpreter.parse()
