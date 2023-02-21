@@ -1,4 +1,4 @@
-# yuiop
+# [yuiop](http://yuiop.ink/)
 
 **yuiop** is a programming language for right-handed
 developers. With just one hand and a QWERTY keyboard, you
@@ -6,9 +6,13 @@ can program just about anything!
 
 ```c
 Nop mn() {
-    p_yoyo("hllo, you\n");
+    p_yoyo("Oi, you\n");
 }
 ```
+
+Check out this video explaining yuiop:
+
+[![yuiop video overview](./video-preview.png)](https://www.youtube.com/watch?v=9nDoe99DYTA)
 
 See [COPYING](./COPYING) for copyright and licensing information.
 
