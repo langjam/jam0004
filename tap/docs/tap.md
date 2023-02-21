@@ -8,7 +8,7 @@ Tap consists of 5 basic keywords each of which corresponds to a finger on your h
 5. pinky
 ```
 
-Then there are 3 modifiers which corresponds to how hard you tap your finger.
+Then there are 3 modifiers which correspond to how hard you tap your finger.
 ```
 1. soft
 2. medium
