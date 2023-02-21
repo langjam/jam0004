@@ -6,6 +6,8 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.check.json",
     "build": "yarn typecheck && parcel build --target cmd --no-cache",
+    "build-demo": "yarn typecheck && parcel build --target demo --no-cache",
+    "serve": "parcel serve --target demo --dist-dir dist-live",
     "callcenter": "node dist/index.js"
   },
   "targets": {
@@ -16,9 +18,17 @@
       ],
       "outputFormat": "commonjs",
       "sourceMap": false
+    },
+    "demo": {
+      "context": "browser",
+      "source": "web-demo/index.html",
+      "outputFormat": "commonjs",
+      "sourceMap": false,
+      "distDir": "dist-demo"
     }
   },
   "devDependencies": {
+    "@parcel/transformer-sass": "2.8.3",
     "@types/node": "^18.14.0",
     "parcel": "^2.8.3",
     "typescript": "^4.9.5"

@@ -19,4 +19,6 @@ See [documentation](docs.md).
 
 Online Demo
 ----
-TBA
+Click [here](https://faizilham.github.io/lab/call-center/) to try it online!
+
+You can also build the demo by running `yarn build-demo`. The build will then be available in `dist-demo`
