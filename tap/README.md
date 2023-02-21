@@ -1,5 +1,5 @@
 # Tap
-INSERT WHAT TAP IS
+Tap is a simple languaged in which you program using taps, by tapping with a different finger or by tapping softer or harder you can do things. You can also combine taps to do things like loops and variable setting.
 
 ## Setup
 1. Install Python v3.6+.
@@ -17,11 +17,4 @@ Output:
 ```
 Hello World!
 ```
-
-```examples\.... .tap```
-
-```THE CODE GOES HERE```
-Output
-```
-OUTPUT GOES HERE
-```
+For more info check out the [docs](docs/docs.md)
