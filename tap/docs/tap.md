@@ -20,26 +20,26 @@ Then there the ```end``` keyword which you must use to indicate that you have li
 ## Thumb
 You use you're thumb to control variables.
 ```
-soft - set variable
+soft   - set variable
 medium - get variable
-hard - initialize variable
+hard   - initialize variable
 ```
 
 ## Index
 You're index finger is used for -----.
 ```
-soft - print
+soft   - print
 medium - get user input
-hard - mathemetical operator
+hard   - mathemetical operator
 ```
 More on the mathematical operations later
 
 ## Middle
 You're middle finger is used for logging and the harder you tap the higher the severity level is.
 ```
-soft - logging level info
+soft   - logging level info
 medium - logging level warning
-hard - logging level error
+hard   - logging level error
 ```
 
 ## Ring
@@ -47,15 +47,15 @@ hard - logging level error
 
 You're ring finger is used for loops.
 ```
-soft - start loop
+soft   - start loop
 middle - break out of loop
-hard - not implemented
+hard   - not implemented
 ```
 
 ## Pinky
 You're pinky finger is used for if and else statements.
 ```
-soft - if
+soft   - if
 medium - then
-hard - else
+hard   - else
 ```
