@@ -15,7 +15,7 @@ Then there are 3 modifiers which correspond to how hard you tap your finger.
 3. hard
 ```
 
-Then there the ```end``` keyword which you must use to indicate that you have lifted your finger of the table.
+Then there the ```end``` keyword which you must use to indicate that you have lifted your finger.
 
 ## Thumb
 You use you're thumb to control variables.
