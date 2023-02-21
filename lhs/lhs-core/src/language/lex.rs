@@ -1,15 +1,24 @@
 use super::error::{self, Error, Result};
 
-pub fn tokenize(source: &'static str) -> TokenStream {
-    Box::new(
-        source
-            .chars()
-            .filter(|char| *char != '\n' && *char != '\t' && *char != '\r')
-            .map(Token::try_from),
-    )
+// pub fn tokenize(source: &'static str) -> TokenStream {
+//     Box::new(
+//         source
+//             .chars()
+//             .filter(|char| *char != '\n' && *char != '\t' && *char != '\r')
+//             .map(Token::try_from),
+//     )
+// }
+
+// pub fn tokenize(source: &'static str) -> Vec<Result<Token>> {
+pub fn tokenize(source: &str) -> Vec<Result<Token>> {
+    source
+        .chars()
+        .filter(|char| *char != '\n' && *char != '\t' && *char != '\r')
+        .map(Token::try_from)
+        .collect()
 }
 
-pub type TokenStream = Box<dyn Iterator<Item = Result<Token>>>;
+pub type TokenStream = Box<std::vec::IntoIter<Result<Token>>>;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Token {

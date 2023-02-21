@@ -28,8 +28,13 @@ pub enum Move {
     Right,
 }
 
-pub fn parse(token_stream: TokenStream) -> Result<Vec<Instruction>> {
-    parse_internal(token_stream.peekable(), vec![])
+// pub fn parse(token_stream: TokenStream) -> Result<Vec<Instruction>> {
+//     parse_internal(token_stream.peekable(), vec![])
+// }
+
+pub fn parse(tokens: Vec<Result<Token>>) -> Result<Vec<Instruction>> {
+    let token_stream = Box::new(tokens.into_iter()).peekable();
+    parse_internal(token_stream, vec![])
 }
 
 fn parse_internal(

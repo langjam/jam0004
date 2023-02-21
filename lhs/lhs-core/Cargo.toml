@@ -1,7 +1,6 @@
 [package]
 name = "lhs-core"
 version = "0.1.0"
-authors = ["xiuxiu62 <jacremer@live.com>"]
 edition = "2021"
 
 [lib]

@@ -48,7 +48,7 @@ core:
         See https://www.rust-lang.org/tools/install
     use: 
         change to the lhs-core directory and run `cargo run`.
-        you can intergrate lhs-core into  
+        you can intergrate lhs-core into a binary, but the provide binary is a repl.  
 
 web-ui: 
     requirements:
@@ -110,3 +110,4 @@ b: brrr, loop decrementing the value under the pre iteration memory pointer unti
    setting the memory pointer to 0 before iterating
 
 <s>: Nop, functions as an expression seperator
+

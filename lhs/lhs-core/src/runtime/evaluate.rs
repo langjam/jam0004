@@ -12,9 +12,9 @@ x: not equals, stack pointer deref != memory pointer deref
 
 use super::{Machine, Program};
 use crate::language::{Instruction, Move};
-use std::mem;
+use std::{io::Write, mem};
 
-impl<const M: usize, const S: usize> Machine<M, S> {
+impl<W: Write, const M: usize, const S: usize> Machine<W, M, S> {
     pub fn evaluate_expression(&mut self, program: &Program, expression: &[Instruction]) {
         if let Some(instruction) = expression.first() {
             match *instruction {

@@ -1,16 +1,16 @@
-use crate::{cell::Cell, machine::MachineRef};
+use crate::{cell::Cell, machine::MachineRef, output::ConsoleWriter};
 use lhs_core::runtime;
 use yew::{function_component, html, use_context, Component, Html};
 
-// pub struct Memory<const N: usize>(runtime::Memory<N>);
+// pub struct Stack<const N: usize>(runtime::Stack<N>);
 
-// impl<const N: usize> Memory<N> {
+// impl<const N: usize> Stack<N> {
 //     pub fn new() -> Self {
-//         Self(runtime::Memory::default())
+//         Self(runtime::Stack::default())
 //     }
 // }
 
-// impl<const N: usize> Component for Memory<N> {
+// impl<const N: usize> Component for Stack<N> {
 //     type Message = ();
 //     type Properties = ();
 
@@ -19,31 +19,23 @@ use yew::{function_component, html, use_context, Component, Html};
 //     }
 
 //     fn view(&self, _ctx: &yew::Context<Self>) -> yew::Html {
-//         let rows = self.0.iter().enumerate().map(|(y, row)| {
-//             let cells = row.iter().enumerate().map(|(x, cell)| {
-//                 html! {
-//                     <div class="memory-cell">
-//                         <Cell ident={ x } value={ *cell } />
-//                     </div>
-//                 }
-//             });
-
+//         let cells = self.0.iter().enumerate().map(|(x, cell)| {
 //             html! {
-//                 <div key={y} class="memory-row">
-//                     { for cells }
+//                 <div class="stack-cell">
+//                     <Cell ident={ x } value={ *cell } />
 //                 </div>
 //             }
 //         });
 
 //         html! {
 //             <div class="machine-data-component">
-//                 <div class="memory-container">
+//                 <div class="stack-container">
 //                     <header class="machine-component-header">
-//                         <h1 class="machine-component-title">{ "Memory" }</h1>
+//                         <h1 class="machine-component-title">{ "Stack" }</h1>
 //                     </header>
-//                     <section class="memory-area">
-//                         <div class="memory">
-//                             { for rows }
+//                     <section class="stack-area">
+//                         <div class="stack">
+//                             { for cells }
 //                         </div>
 //                     </section>
 //                     <footer class="machine-data-footer">
@@ -57,43 +49,35 @@ use yew::{function_component, html, use_context, Component, Html};
 //     }
 // }
 
-#[function_component(Memory)]
-pub fn memory() -> Html {
+#[function_component(Stack)]
+pub fn stack() -> Html {
     // TODO: handle uninitialized machine
     // NOTE: machine may always be initialized, given it is done so in a parent node,
     //     but we need to ensure this is the case
     let machine = use_context::<MachineRef>().unwrap();
     let machine_ref = machine.borrow();
-    let rows = machine_ref.memory.iter().enumerate().map(|(y, row)| {
-        let cells = row.into_iter().enumerate().map(|(x, cell)| {
-            html! {
-                <div class="memory-cell">
-                    <Cell ident={ x } value={ *cell } />
-                </div>
-            }
-        });
-
+    let cells = machine_ref.stack.iter().enumerate().map(|(x, cell)| {
         html! {
-            <div key={y} class="memory-row">
-                { for cells }
+            <div class="stack-cell">
+                <Cell ident={ x } value={ *cell } />
             </div>
         }
     });
 
     html! {
         <div class="machine-data-component">
-            <div class="memory-container">
+            <div class="stack-container">
                 <header class="machine-component-header">
-                    <h1 class="machine-component-title">{ "Memory" }</h1>
+                    <h1 class="machine-component-title">{ "Stack" }</h1>
                 </header>
-                <section class="memory-area">
-                    <div class="memory">
-                        { for rows }
+                <section class="stack-area">
+                    <div class="stack">
+                        { for cells }
                     </div>
                 </section>
                 <footer class="machine-data-footer">
                     <strong class="machine-data-footer-text">
-                      { format!(" pointer: {}", machine_ref.memory.pointer).as_str() }
+                      { format!(" pointer: {}", machine_ref.stack.pointer).as_str() }
                     </strong>
                 </footer>
             </div>
