@@ -26,7 +26,7 @@ hard   - initialize variable
 ```
 
 ## Index
-You're index finger is used for -----.
+You're index finger is used for interactions with the user.
 ```
 soft   - print
 medium - get user input
