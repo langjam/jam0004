@@ -32,7 +32,7 @@ soft   - print
 medium - get user input
 hard   - mathemetical operator
 ```
-More on the mathematical operations later
+More on the [mathematical operations](##mathematical-operator) later
 
 ## Middle
 You're middle finger is used for logging and the harder you tap the higher the severity level is.
@@ -58,4 +58,56 @@ You're pinky finger is used for if and else statements.
 soft   - if
 medium - then
 hard   - else
+```
+
+## Mathematical operator
+The mathematical operator is special in the way that you can do multiple things with it.
+What can you do with it?
+- Add
+- Subtract
+- Divide
+- Multiply
+- Concatenate strings
+
+The mathematical operator does not follow the correct mathematical order and instead calculates from the inside out. You have to pass atleast 3 arguments to the index hard these are the ```operator```, the ```value1``` and ```value2```.
+There is no limit to how many arguments you can pass to ```index hard```.
+
+Example:
+```
+index hard:
+  // This gets calculated last
+  "mul"
+  6
+  index hard:
+    "add"
+    index hard:
+      "div"
+      19
+      2
+    end
+    index hard:
+      "sub"
+      64
+      14
+    end
+  end
+end
+```
+Output:
+```
+OUTPUT HERE
+```
+
+Example string concatenation:
+```
+index hard:
+  "add"
+  "Hello "
+  "World"
+  "!"
+end
+```
+Output:
+```
+OUTPUT HERE
 ```
