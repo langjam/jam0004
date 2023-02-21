@@ -13,6 +13,10 @@ Build
     You can also pass `-q` or `--quiet` in the CLI argument to only show evaluation results.
 4. Run the CLI as REPL: `yarn callcenter`
 
+Documentation
+-------------
+See [documentation](docs.md).
+
 Online Demo
 ----
 TBA
