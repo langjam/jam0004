@@ -1,0 +1,14 @@
+oscillator square(): sample {
+    return choose(phase() < PI, -1, 1)
+}
+
+sound play(note: hz, duration: secs) {
+    let ATTACK_TIME = 0.1
+    let RELEASE_TIME = 0.1
+    do t = 0s ; t < duration + RELEASE_TIME * 1s ; t + SAMPLE_PERIOD {
+        let attack = min(t / ATTACK_TIME, 1)
+        let release = 1 - (max(t - duration, 0.0) / RELEASE_TIME)
+        mix((attack * release * square() at time_phase(t, note)) - 6dB)
+        next()
+    }
+}
