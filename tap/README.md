@@ -17,4 +17,4 @@ Output:
 ```
 Hello World!
 ```
-For more info check out the [docs](docs/docs.md)
+For more info check out the [docs](docs/tap.md)
