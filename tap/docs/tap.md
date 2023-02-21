@@ -12,7 +12,7 @@ Then there are 3 modifiers which correspond to how hard you tap your finger.
 ```
 1. soft
 2. medium
-3. loud
+3. hard
 ```
 
 Then there the ```end``` keyword which you must use to indicate that you have lifted your finger of the table.
