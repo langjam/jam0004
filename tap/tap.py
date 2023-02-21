@@ -2,12 +2,9 @@ from enum import Enum
 from dataclasses import dataclass
 from typing import Optional
 import numpy
+import sys
 
 
-# Show the line on which the error happens and then point with arrows
-# where the arrow is
-# This won't be super accurate as it will always only point out the first
-# character of the error, but it is a good start
 class Error:
     def __init__(self, position: tuple[str, int, int], error_name, details):
         self.position: tuple[str, int, int] = position
@@ -16,7 +13,7 @@ class Error:
 
     def show(self):
         error = f"{self.position[0]} {self.position[1]}:{self.position[2]}\n"
-        error += f"{self.error_name}: {self.details}\n"
+        error += f"{self.error_name}: {self.details}"
         return error
 
 
@@ -55,6 +52,16 @@ class InvalidOperatorNameError(Error):
         super().__init__((filename, 0, 0), "InvalidOperatorNameError", details)
 
 
+class UnkownVariableNameError(Error):
+    def __init__(self, filename: str, details):
+        super().__init__((filename, 0, 0), "UnkownVariableNameError", details)
+
+
+class InitializeVariableError(Error):
+    def __init__(self, filename: str, details):
+        super().__init__((filename, 0, 0), "InitializeVariableError", details)
+
+
 class Keyword:
     keywords = ["thumb",
                 "index",
@@ -79,8 +86,6 @@ class TokenType(Enum):
     MODIFIER = "MODIFIER"
     END = "END"
     COLON = "COLON"
-    # EOF = "EOF"
-    # INDENT = "INDENT"
 
 
 @dataclass
@@ -111,37 +116,19 @@ class Lexer:
             self.column = 0
             self.line_number += 1
             self.new_line = False
-            # print(f"CURSOR--------------{self.cursor}")
 
         if self.cursor < len(self.code):
             self.current_char = self.code[self.cursor]
             if self.current_char == "\n":
-                # print("New line detected")
                 self.new_line = True
         else:
             self.current_char = None
-
-    # def previous(self):
-    #     self.cursor -= 1
-    #     self.column -= 1
-
-    #     if self.cursor >= 0:
-    #         self.current_char = self.code[self.cursor]
-    #         if self.current_char == self.column:
-    #             if self.prev_column is None:
-    #                 print("Warn: column cannot be reset")
-    #             else:
-    #                 self.column = self.prev_column
-    #             self.previous()
 
     def tokenize(self):
         tokens = []
 
         n = 0
         while self.current_char is not None and n <= 10:
-            # if self.current_char not in " \t\n":
-            # print("WHAT IS WRONG?", repr(self.current_char))
-
             if self.cursor+1 < len(self.code) and \
                self.current_char == "/" and self.code[self.cursor+1] == "/":
                 while self.current_char != "\n" and \
@@ -168,11 +155,7 @@ class Lexer:
                     return ret_value
                 tokens.append(ret_value)
                 self.advance()
-            # elif "n" in self.current_char:
-            #     tokens.append(Token(TokenType.EOF))
-            #     self.advance()
             elif self.current_char in " \t\n":
-                # tokens.append(Token(TokenType.INDENT))
                 self.advance()
             else:
                 print(n, "Illegal character error")
@@ -207,7 +190,6 @@ class Lexer:
 
             self.advance()
 
-        # print(number_str, dot_found)
         if dot_found:
             return Token(TokenType.FLOAT, (self.filename,
                          self.line_number, self.column), float(number_str))
@@ -217,8 +199,6 @@ class Lexer:
 
     def identify(self):
         curr_str = ""
-
-        # print(f"CURR CHAR: {self.current_char}")
 
         while self.current_char is not None:
             if curr_str in Keyword.keywords and self.current_char in " \t\n":
@@ -328,16 +308,17 @@ class Parser:
                                  self.current_token.Type == TokenType.FLOAT:
                                 cur_ast.append(self.current_token.Value)
                             elif self.current_token.Type == TokenType.KEYWORD:
-                                cur_ast.append(self.uncover())
+                                ret_value = self.uncover()
+                                if isinstance(ret_value, Error):
+                                    return ret_value
+                                cur_ast.append(ret_value)
                             self.advance()
                         if not end_found and self.current_token is not None:
                             return SyntaxError(self.current_token.Position,
                                                "missing 'END' token")
                         else:
-                            # self.advance()
                             break
                 else:
-                    print("Error about to happen", self.current_token)
                     # This goes wrong with colons as colons have a value of None
                     return UnexpectedTokenError(self.current_token.Position,
                                                 f"'{self.current_token.Type.value}'")
@@ -399,6 +380,7 @@ class Interpreter:
         self.ast = ast
         self.variables = {}
         self._if_value = None
+        self.in_loop = False
 
     def parse(self):
         for value in self.ast:
@@ -408,8 +390,12 @@ class Interpreter:
 
     def check_todo(self, value):
         idx = 0
-        # print(value, len(value))
-        if value[0] == "create_variable":
+
+        if isinstance(value, Error):
+            return value
+        elif value is None:
+            return None
+        elif value[0] == "create_variable":
             idx += 1
             if not idx < len(value):
                 return InvalidArgumentNumberError(self.filename,
@@ -422,17 +408,15 @@ class Interpreter:
                 return InvalidArgumentNumberError(self.filename,
                                                   "Invalid number of args for thumb soft")
             new_values = value[2:]
-            # to_merge = []
             set_value = None
             for v in new_values:
                 if isinstance(v, list):
-                    # to_merge.append(self.check_todo(v))
                     set_value = self.check_todo(v)
+                    if isinstance(set_value, Error):
+                        return set_value 
                 else:
-                    # to_merge.append(v)
                     set_value = v
 
-            # print("?????", set_value, "???")
             return self.set_variable(value[idx], set_value)
 
         elif value[0] == "get_variable":
@@ -440,7 +424,6 @@ class Interpreter:
             if not idx < len(value):
                 return InvalidArgumentNumberError(self.filename,
                                                   "Invalid number of args for thumb medium")
-            # print(self.get_variable(value[idx]))
             return self.get_variable(value[idx])
 
         elif value[0] == "print":
@@ -457,34 +440,53 @@ class Interpreter:
                                                   "Invalid number of args for index hard")
             operator = value[1]
             new_values = value[2:]
-            # print(new_values)
             nums = []
+            str_operator = False
             for v in new_values:
                 if isinstance(v, list):
-                    nums.append(v)
+                    ret_value = self.check_todo(v)
+                    if isinstance(ret_value, Error):
+                        return ret_value
+                    elif isinstance(ret_value, str) and not str_operator:
+                        str_operator = True
+                    nums.append(ret_value)
                 else:
+                    # Change this so it also changes str that are actual int or float
+                    if isinstance(v, str) and not str_operator:
+                        str_operator = True
                     nums.append(v)
 
-            match operator:
-                case "add":
-                    return sum(nums)
-                case "sub":
-                    
-                    answer = nums[0]
-                    rest = nums[1:]
-                    for i in rest:
-                        answer = answer-i
-                    return answer
-                case "mul":
-                    return numpy.prod(nums)
-                case "div":
-                    answer = nums[0]
-                    rest = nums[1:]
-                    for i in rest:
-                        answer = answer/i
-                    return answer
-                case "other":
-                    return InvalidOperatorNameError(self.filename, f"'{operator}'")
+            if str_operator:
+                match operator:
+                    case "add":
+                        answer = str(nums[0])
+                        rest = nums[1:]
+                        for i in rest:
+                            answer += str(i)
+                        return answer
+                    case other:
+                        return InvalidOperatorNameError(self.filename, f"'{operator}' for type 'str'")
+            else:
+                match operator:
+                    case "add":
+                        return sum(nums)
+                    case "sub":
+                        answer = nums[0]
+                        rest = nums[1:]
+                        for i in rest:
+                            answer = answer-i
+                        return answer
+                    case "mul":
+                        return numpy.prod(nums)
+                    case "div":
+                        answer = nums[0]
+                        rest = nums[1:]
+                        for i in rest:
+                            answer = answer/i
+                        return answer
+                    case other:
+                        # print("Reporting error")
+                        return InvalidOperatorNameError(self.filename, f"'{operator}'")
 
         elif value[0] == "show_info":
             self.print_func(value, "info")
@@ -496,12 +498,19 @@ class Interpreter:
             self.print_func(value, "error")
 
         elif value[0] == "loop":
-            print("Loop is not yet implemented")
-            return None
+            self.in_loop = True
+            while self.in_loop:
+                rest = value[1:]
+                for v in rest:
+                    ret_value = self.check_todo(v)
+                    if isinstance(ret_value, Error):
+                        return ret_value
+                    elif ret_value == "break":
+                        break
 
         elif value[0] == "break":
-            print("Break is not yet implemented")
-            return None
+            self.in_loop = False
+            return "break"
 
         elif value[0] == "if":
             idx += 1
@@ -513,8 +522,13 @@ class Interpreter:
             parts = []
             for v in new_values:
                 if isinstance(v, list):
-                    parts.append(self.check_todo(v))
+                    ret_value = self.check_todo(v)
+                    if isinstance(ret_value, Error):
+                        return ret_value
+                    parts.append(ret_value)
                 else:
+                    if isinstance(v, Error):
+                        return v
                     parts.append(v)
             self._if_value = self._if(parts[0], parts[1])
 
@@ -524,7 +538,9 @@ class Interpreter:
             elif self._if_value is True:
                 new_values = value[1:]
                 for v in new_values:
-                    self.check_todo(v)
+                    ret_value = self.check_todo(v)
+                    if isinstance(ret_value, Error):
+                        return ret_value
 
         elif value[0] == "else":
             if self._if_value is None:
@@ -532,22 +548,23 @@ class Interpreter:
             elif self._if_value is False:
                 new_values = value[1:]
                 for v in new_values:
-                    self.check_todo(v)
+                    ret_value = self.check_todo(v)
+                    if isinstance(ret_value, Error):
+                        return ret_value
 
         else:
             return None
+            # return UnexpectedTokenError((self.filename, 0, 0), f"'{value}'")
 
     def print_func(self, value, type_):
         new_values = value[1:]
         to_print = []
         for v in new_values:
-            # print(v)
             if isinstance(v, list):
                 to_print.append(self.check_todo(v))
             else:
                 to_print.append(v)
 
-        # print("To_print", to_print)
         match type_:
             case "print":
                 self._print(to_print)
@@ -555,13 +572,23 @@ class Interpreter:
                 self._middle(type_, to_print)
         
     def create_variable(self, var_name):
-        self.variables[var_name] = None
+        if var_name in self.variables:
+            return InitializeVariableError(self.filename,
+                                           f"cannot initialize variable '{var_name}' twice")
+        else:
+            self.variables[var_name] = None
 
     def set_variable(self, var_name, value):
-        self.variables[var_name] = value
+        if var_name in self.variables:
+            self.variables[var_name] = value
+        else:
+            return UnkownVariableNameError(self.filename, f"'{var_name}'")
 
     def get_variable(self, var_name):
-        return self.variables[var_name]
+        if var_name in self.variables:
+            return self.variables[var_name]
+        else:
+            return UnkownVariableNameError(self.filename, f"'{var_name}'")
 
     def _print(self, to_print):
         for item in to_print:
@@ -569,7 +596,7 @@ class Interpreter:
 
     def _middle(self, type_, to_print):
         for item in to_print:
-            print(f"{type_}: ", item)
+            print(f"{type_}:", item)
 
     def _if(self, part1, part2):
         if part1 == part2:
@@ -578,31 +605,22 @@ class Interpreter:
             return False
 
 
-file_name = "examples/variable.tap"
-with open(file_name, 'r') as f:
-    simple_program = f.read()
-    # print(simple_program.split("\t"))
+if __name__ == "__main__":
+    file_name = str(sys.argv[1])
+    with open(file_name, 'r') as f:
+        simple_program = f.read()
 
-# print(simple_program)
-lexer = Lexer(file_name, simple_program)
-tokens = lexer.tokenize()
-# print("#######TOKENIZING##########")
-if not isinstance(tokens, Error):
-    # print(tokens)
-    parser = Parser(file_name, tokens)
-    # print("#########PARSING###########")
-    ast = parser.parse()
-    if not isinstance(parser, Error):
-        # print(ast)
-        # print("\n\n\n")
-        interpreter = Interpreter(file_name, ast)
-        result = interpreter.parse()
-        if not isinstance(result, Error):
-            # print(interpreter.variables)
-            pass
+    lexer = Lexer(file_name, simple_program)
+    tokens = lexer.tokenize()
+    if not isinstance(tokens, Error):
+        parser = Parser(file_name, tokens)
+        ast = parser.parse()
+        if not isinstance(parser, Error):
+            interpreter = Interpreter(file_name, ast)
+            result = interpreter.parse()
+            if isinstance(result, Error):
+                print(result.show())
         else:
-            print(result.show())
+            print(ast.show())
     else:
-        print(ast.show())
-else:
-    print(tokens.show())
+        print(tokens.show())

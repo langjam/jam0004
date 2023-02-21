@@ -1,0 +1,41 @@
+thumb hard:
+	"variable"
+end
+
+thumb soft:
+	"variable"
+	index medium:
+		"Hallo? "
+	end
+end
+
+index soft:
+	"Hello World"
+	thumb medium:
+		"variable"
+	end
+end
+
+// index soft:
+// 	index hard:
+// 		"min"
+// 		3
+// 		4
+// 		5
+// 	end
+// end
+
+pinky soft:
+	"5"
+	thumb medium:
+		"variable"
+	end
+end
+pinky medium:
+	index medium: end
+end
+pinky hard:
+	index soft:
+		"No input needed"
+	end
+end

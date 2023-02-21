@@ -1,5 +1,3 @@
-// This is a comment
-
-index soft: // So is this
+index soft:
 	"Hello World!"
 end
