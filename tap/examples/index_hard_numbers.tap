@@ -1,0 +1,21 @@
+// index soft is so we can see the result
+index soft:
+  index hard:
+    // This gets calculated last
+    "mul"
+    6
+    index hard:
+      "add"
+      index hard:
+        "div"
+        19
+        2
+      end
+      index hard:
+        "sub"
+        64
+        14
+      end
+    end
+  end
+end

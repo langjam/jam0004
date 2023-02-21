@@ -73,42 +73,50 @@ What can you do with it? You can
 The mathematical operator does not follow the correct mathematical order and instead calculates from the inside out. You have to pass atleast 3 arguments to the index hard these are the ```operator```, ```value1``` and ```value2```.
 There is no limit to how many arguments you can pass to ```index hard```.
 
-Example:
+[Example](examples/index_hard_numbers.tap):
 ```
-index hard:
-  // This gets calculated last
-  "mul"
-  6
+// index soft is so we can see the result
+index soft:
   index hard:
-    "add"
+    // This gets calculated last
+    "mul"
+    6
     index hard:
-      "div"
-      19
-      2
-    end
-    index hard:
-      "sub"
-      64
-      14
+      "add"
+      index hard:
+        "div"
+        19
+        2
+      end
+      index hard:
+        "sub"
+        64
+        14
+      end
     end
   end
 end
 ```
 Output:
 ```
-OUTPUT HERE
+357.0
 ```
 
-Example string concatenation:
+[Example string concatenation](examples/index_hard_string_concatenation.tap):
 ```
-index hard:
-  "add"
-  "Hello "
-  "World"
-  "!"
+// index soft is so we can see the result
+index soft:
+  index hard:
+    "add"
+    "Hello "
+    "World"
+    "!"
+  end
 end
 ```
 Output:
 ```
-OUTPUT HERE
+Hello World!
 ```
+
+See the [examples]() folder for all the examples.
