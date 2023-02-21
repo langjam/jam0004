@@ -1,6 +1,6 @@
-type driverError = 
-    | EvalError(Eval.evalError)
-    | InvalidNote(Syntax.value)
+type driverError =
+  | EvalError(Eval.evalError)
+  | InvalidNote(Syntax.value)
 
 exception DriverError(driverError)
 
@@ -10,4 +10,4 @@ exception DriverError(driverError)
 //
 // The implementation of `playNote` should play the note in the background and return immediately.
 // Once the note has stopped playing, it should call `onComplete`.
-let playExpr : (~playNote : ((Syntax.note, ~onComplete:(unit => unit)) => unit), string) => unit
+let playExpr: (~playNote: (int, Syntax.note, int) => unit, string) => unit

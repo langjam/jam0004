@@ -5,7 +5,7 @@ open Syntax
 %token <string>          IDENT
 %token <int>             INT
 %token <Syntax.note>     NOTE
-%token <Syntax.duration> DURATION
+// %token <Syntax.duration> DURATION
 %token LET
 %token CONST
 %token IN
@@ -67,8 +67,10 @@ expr_leaf:
     | "[" sep_by_trailing(",", expr) "]"    { List.fold_right (fun x rest -> Cons(x, rest)) $2 EmptyList }
     | LIST expr2                            { Sequentialize($2) }
     | FAIL                                  { Fail }
-    | NOTE                                  { Note($1) }
-
+    | NOTE                                  { Note(8,  $1,  4) } // default to "middle"
+    | NOTE "/" INT                          { Note(8,  $1, $3) } // defaults to "1/8"
+    | INT "/" NOTE                          { Note($1, $3,  4) } // defaults to "1/8"
+    | INT "/" NOTE "/" INT                  { Note($1, $3, $5) }
 
 // 1/2(A | B) : (C | D)
 

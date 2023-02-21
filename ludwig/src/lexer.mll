@@ -23,6 +23,7 @@ rule token = parse
 | "G"  { NOTE(G) }
 | "G#" { NOTE(GSharp) }
 | "Ab" { NOTE(AFlat) }
+| "_"  { NOTE(Pause) }
 | [' ' '\t' '\n']       { token lexbuf }
 | ['0'-'9']+ as literal { INT(int_of_string literal) }
 | "let"                 { LET }

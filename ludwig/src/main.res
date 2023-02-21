@@ -2,15 +2,19 @@
 @module("./editor") external registerRunClick: (unit => unit) => unit = "registerRunClick"
 @module("./editor") external displayNote: string => unit = "displayNote"
 
-@module("./player") external playNoteRaw: (string, string, unit => unit) => unit = "playNote"
+@module("./player") external playNoteRaw: (string, string) => unit = "playNote"
 
 let editorText = ref("")
 
 registerInterpreter(text => editorText := text)
 
-let playNote = (note, ~onComplete) => {
-  playNoteRaw(Syntax.noteToString(note), "4n", onComplete)
-  Js.log(note)
+let playNote = (duration, pitch, octave) => {
+  let pitch = Syntax.noteToString(pitch)
+  if pitch !== "_" {
+    playNoteRaw(pitch ++ Belt.Int.toString(octave), Belt.Int.toString(duration) ++ "n")
+    displayNote(pitch)
+  }
+  Js.log3(duration, pitch, octave)
 }
 
 registerRunClick(() => {
@@ -18,8 +22,6 @@ registerRunClick(() => {
 
   try {
     Driver.playExpr(~playNote, text)
-
-    displayNote("Should be playing?")
   } catch {
   | Driver.DriverError(error) =>
     switch error {
@@ -39,6 +41,7 @@ registerRunClick(() => {
     displayNote(
       "JS error: " ++ Belt.Option.getWithDefault(Js.Exn.message(error), "<No exception message>"),
     )
+  | Parser.Error => displayNote("Parse error")
   | error =>
     displayNote(
       "ERROR: " ++
