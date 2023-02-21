@@ -1,0 +1,30 @@
+pinky soft:
+	2.0
+	2
+end
+pinky medium:
+	index soft:
+		"2.0 equals 2"
+	end
+end
+pinky hard:
+	index soft:
+		"2.0 is not equals 2"
+	end
+end
+
+
+pinky soft:
+	"Hello"
+	"hello"
+end
+pinky medium:
+	index soft:
+		"Hello equals hello"
+	end
+end
+pinky hard:
+	index soft:
+		"Hello is not equals hello"
+	end
+end

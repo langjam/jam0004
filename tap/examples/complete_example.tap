@@ -1,39 +1,39 @@
+// initialize variable
 thumb hard:
-	"n"
+	"counter"
 end
 
+// set variable value
 thumb soft:
-	"n"
+	"counter"
 	0
 end
 
+// Enter loop
 ring soft:
 	pinky soft:
 		thumb medium:
-			"n"
+			"counter"
 		end
 		10
 	end
 	pinky medium:
-		middle soft:
-			"Exiting loop"
-		end
 		ring medium: end
 	end
 	pinky hard:
 		thumb soft:
-			"n"
+			"counter"
 			index hard:
 				"add"
-				thumb medium:
-					"n"
-				end
 				1
+				thumb medium:
+					"counter"
+				end
 			end
 		end
 		index soft:
 			thumb medium:
-				"n"
+				"counter"
 			end
 		end
 	end

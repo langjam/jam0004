@@ -1,0 +1,9 @@
+index soft:
+	"Hello World"
+end
+
+index soft:
+	// Get user input
+	index medium: end
+	index medium: ">>" end
+end

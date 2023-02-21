@@ -1,0 +1,9 @@
+// index soft is so we can see the result
+index soft:
+  index hard:
+    "add"
+    "Hello "
+    "World"
+    "!"
+  end
+end
