@@ -1,0 +1,12 @@
+sound main() {
+    let len: seconds = 1/4
+    for note in [C4, D4, E4, F4, G4, A4, B4, C5] {
+        play(note, len)
+        skip(len * SAMPLE_RATE)
+    }
+    skip(SAMPLE_RATE)
+    for note in [C4, D4, Ef4, F4, G4, Af4, B4, C5] {
+        play(note, len)
+        skip(len * SAMPLE_RATE)
+    }
+}

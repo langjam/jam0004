@@ -1,0 +1,30 @@
+sound main() {
+    play(C4, 2/16); skip(3/16 * SAMPLE_RATE)
+    play(C4, 1/16); skip(1/16 * SAMPLE_RATE)
+    play(D4, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(C4, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(F4, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(E4, 1/2); skip(1/2 * SAMPLE_RATE)
+
+    play(C4, 2/16); skip(3/16 * SAMPLE_RATE)
+    play(C4, 1/16); skip(1/16 * SAMPLE_RATE)
+    play(D4, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(C4, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(G4, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(F4, 1/2); skip(1/2 * SAMPLE_RATE)
+
+    play(C4, 2/16); skip(3/16 * SAMPLE_RATE)
+    play(C4, 1/16); skip(1/16 * SAMPLE_RATE)
+    play(C5, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(A4, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(F4, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(E4, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(D4, 1/4); skip(1/4 * SAMPLE_RATE)
+
+    play(Bf4, 2/16); skip(3/16 * SAMPLE_RATE)
+    play(Bf4, 1/16); skip(1/16 * SAMPLE_RATE)
+    play(A4, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(F4, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(G4, 1/4); skip(1/4 * SAMPLE_RATE)
+    play(F4, 1/2); skip(1/2 * SAMPLE_RATE)
+}
