@@ -62,14 +62,15 @@ hard   - else
 
 ## Mathematical operator
 The mathematical operator is special in the way that you can do multiple things with it.
-What can you do with it?
+
+What can you do with it? You can
 - Add
 - Subtract
 - Divide
 - Multiply
 - Concatenate strings
 
-The mathematical operator does not follow the correct mathematical order and instead calculates from the inside out. You have to pass atleast 3 arguments to the index hard these are the ```operator```, the ```value1``` and ```value2```.
+The mathematical operator does not follow the correct mathematical order and instead calculates from the inside out. You have to pass atleast 3 arguments to the index hard these are the ```operator```, ```value1``` and ```value2```.
 There is no limit to how many arguments you can pass to ```index hard```.
 
 Example:
