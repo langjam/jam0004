@@ -32,7 +32,7 @@ soft   - print
 medium - get user input
 hard   - mathemetical operator
 ```
-More on the [mathematical operations](##mathematical-operator) later
+More on the [mathematical operations](#Mathematical-operator) later
 
 ## Middle
 You're middle finger is used for logging and the harder you tap the higher the severity level is.
