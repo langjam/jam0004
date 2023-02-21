@@ -1,0 +1,18 @@
+// Initialize the variable
+thumb hard:
+	"my variable"
+end
+
+// Set variable
+thumb soft:
+	"my variable"
+	2
+end
+
+// Print variable
+index soft:
+	// Get variable
+	thumb medium:
+		"my variable"
+	end
+end

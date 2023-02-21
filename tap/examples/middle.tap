@@ -1,0 +1,11 @@
+middle soft:
+	"information logging"
+end
+
+middle medium:
+	"warning logging"
+end
+
+middle hard:
+	"error logging"
+end
